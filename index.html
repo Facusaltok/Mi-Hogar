@@ -133,7 +133,7 @@ CREATE POLICY "g_all" ON goals FOR ALL USING (true) WITH CHECK (true);</pre>
             <h3 class="font-display font-semibold text-sm mb-3 flex items-center gap-2"><i class="fa-solid fa-users text-accent"></i> Paso 2: Nombres</h3>
             <div class="grid grid-cols-2 gap-3">
                 <div><label class="text-xs text-muted block mb-1">Persona 1</label><input id="setup-u1" type="text" value="Facu" class="w-full bg-bg border border-brd rounded-xl px-3 py-2.5 text-sm focus:border-accent focus:outline-none"></div>
-                <div><label class="text-xs text-muted block mb-1">Persona 2</label><input id="setup-u2" type="text" value="Mel" class="w-full bg-bg border border-brd rounded-xl px-3 py-2.5 text-sm focus:border-accent focus:outline-none"></div>
+                <div><label class="text-xs text-muted block mb-1">Persona 2</label><input id="setup-u2" type="text" value="Marie" class="w-full bg-bg border border-brd rounded-xl px-3 py-2.5 text-sm focus:border-accent focus:outline-none"></div>
             </div>
         </div>
         <button onclick="finishSetup()" class="w-full bg-accent hover:bg-accenthover text-white font-bold py-3.5 rounded-xl transition text-sm flex items-center justify-center gap-2"><i class="fa-solid fa-rocket"></i> Comenzar</button>
@@ -152,7 +152,7 @@ CREATE POLICY "g_all" ON goals FOR ALL USING (true) WITH CHECK (true);</pre>
             <div class="flex items-center justify-between mb-5">
                 <div>
                     <p class="text-sm text-muted">Hola,</p>
-                    <h1 class="text-xl font-display font-bold" id="home-greeting">Facu & Mel</h1>
+                    <h1 class="text-xl font-display font-bold" id="home-greeting">Facu & Marie</h1>
                 </div>
                 <div class="flex items-center gap-2">
                     <span id="home-sync" class="w-2 h-2 rounded-full bg-income"></span>
@@ -408,7 +408,7 @@ const ACCT_ICONS={bank:'fa-building-columns',cash:'fa-money-bill-wave',card:'fa-
 const ACCT_COLORS={bank:'#4A90D9',cash:'#00B894',card:'#E74C3C',investment:'#E8A838',other:'#94A3B8'};
 
 // ===== ESTADO =====
-const S={sb:null,online:false,u1:'Facu',u2:'Mel',curr:'USD',tx:[],accts:[],goals:[],budgets:{},mType:'expense',mCat:'alimentacion',mUser:'',mAcct:'none'};
+const S={sb:null,online:false,u1:'Facu',u2:'Marie',curr:'USD',tx:[],accts:[],goals:[],budgets:{},mType:'expense',mCat:'alimentacion',mUser:'',mAcct:'none'};
 
 const CURR_MAP={USD:'$',EUR:'€',ARS:'$',MXN:'$',COP:'$',UYU:'U$',BRL:'R$'};
 
@@ -604,7 +604,7 @@ function renderSettings(){
     document.getElementById('s-u1').value=S.u1;document.getElementById('s-u2').value=S.u2;document.getElementById('s-curr').value=S.curr;
     document.getElementById('s-sb').innerHTML=S.sb?`<p class="text-xs text-income flex items-center gap-2"><i class="fa-solid fa-circle-check"></i>Conectado</p><p class="text-[10px] text-muted mt-1">${SB_URL}</p>`:`<p class="text-xs text-expense flex items-center gap-2"><i class="fa-solid fa-circle-xmark"></i>Desconectado</p>`;
 }
-function saveNames(){S.u1=document.getElementById('s-u1').value||'Facu';S.u2=document.getElementById('s-u2').value||'Mel';localStorage.setItem('hf_users',JSON.stringify({u1:S.u1,u2:S.u2}));updFilters();renderAll();toast('Nombres actualizados','success')}
+function saveNames(){S.u1=document.getElementById('s-u1').value||'Facu';S.u2=document.getElementById('s-u2').value||'Marie';localStorage.setItem('hf_users',JSON.stringify({u1:S.u1,u2:S.u2}));updFilters();renderAll();toast('Nombres actualizados','success')}
 function saveCurr(){S.curr=document.getElementById('s-curr').value;localStorage.setItem('hf_curr',S.curr);renderAll()}
 function exportData(){const b=new Blob([JSON.stringify({transactions:S.tx,accounts:S.accts,goals:S.goals},null,2)],{type:'application/json'});const a=document.createElement('a');a.href=URL.createObjectURL(b);a.download=`hogarfin-${today()}.json`;a.click();toast('Exportado','success')}
 function clearAll(){const el=document.createElement('div');el.className='toast pointer-events-auto bg-expense/90 px-4 py-3 rounded-xl text-sm shadow-lg flex items-center gap-3 text-white';el.innerHTML=`<span>¿Borrar TODO?</span><button onclick="doClear(this)" class="bg-white text-expense text-xs px-3 py-1 rounded-lg font-bold">Sí</button><button onclick="this.closest('.toast').remove()" class="bg-white/20 text-xs px-3 py-1 rounded-lg">No</button>`;document.getElementById('toasts').appendChild(el)}
@@ -656,7 +656,7 @@ function updFilters(){document.getElementById('f-user').innerHTML=`<option value
 function copySQL(){navigator.clipboard.writeText(document.getElementById('sql-code').textContent).then(()=>toast('SQL copiado','success'))}
 
 async function finishSetup(){
-    S.u1=document.getElementById('setup-u1').value.trim()||'Facu';S.u2=document.getElementById('setup-u2').value.trim()||'Mel';
+    S.u1=document.getElementById('setup-u1').value.trim()||'Facu';S.u2=document.getElementById('setup-u2').value.trim()||'Marie';
     localStorage.setItem('hf_users',JSON.stringify({u1:S.u1,u2:S.u2}));
     try{S.sb=supabase.createClient(SB_URL,SB_KEY);const{error}=await S.sb.from('transactions').select('id').limit(1);if(error)throw error;S.online=true;subRT();toast('Conectado a Supabase','success')}catch{S.sb=null;S.online=false;toast('No se pudo conectar. ¿Creaste las tablas?','error')}
     localStorage.setItem('hf_setup_done','1');document.getElementById('setup-overlay').style.display='none';document.getElementById('app').classList.remove('hidden');updFilters();updSync();await loadAll();renderHome();
