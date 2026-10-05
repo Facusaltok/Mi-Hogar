@@ -2,28 +2,32 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>HogarFin — Finanzas del Hogar</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>HogarFin</title>
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="mobile-web-app-capable" content="yes">
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.39.0/dist/umd/supabase.min.js"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,600;9..40,700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <script>
     tailwind.config = {
         theme: {
             extend: {
                 colors: {
-                    bg: '#0F0F0F',
-                    surface: '#1A1A1A',
-                    card: '#252525',
-                    cardhover: '#2E2E2E',
-                    brd: '#353535',
-                    muted: '#888888',
-                    income: '#00D68F',
-                    expense: '#FF6B6B',
-                    accent: '#FFB800',
-                    accenthover: '#E5A600',
+                    bg: '#F5F5F0',
+                    surface: '#FFFFFF',
+                    card: '#FFFFFF',
+                    brd: '#E8E8E3',
+                    txt: '#1A1A1A',
+                    muted: '#9E9E93',
+                    income: '#00B894',
+                    expense: '#E74C3C',
+                    accent: '#E8A838',
+                    accenthover: '#D4952E',
+                    blue: '#4A90D9',
+                    pink: '#E84393',
                 },
                 fontFamily: {
                     display: ['Space Grotesk', 'sans-serif'],
@@ -34,75 +38,56 @@
     }
     </script>
     <style>
-        * { box-sizing: border-box; }
-        body { font-family: 'DM Sans', sans-serif; background: #0F0F0F; color: #F0F0F0; }
-        h1, h2, h3, h4 { font-family: 'Space Grotesk', sans-serif; }
-        ::-webkit-scrollbar { width: 6px; }
-        ::-webkit-scrollbar-track { background: #1A1A1A; }
-        ::-webkit-scrollbar-thumb { background: #353535; border-radius: 3px; }
-        ::-webkit-scrollbar-thumb:hover { background: #555; }
-        .view { display: none; }
-        .view.active { display: block; }
-        @keyframes slideUp { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
-        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
-        @keyframes toastIn { from { transform: translateX(100%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
-        @keyframes toastOut { from { transform: translateX(0); opacity: 1; } to { transform: translateX(100%); opacity: 0; } }
-        .animate-slide-up { animation: slideUp 0.4s ease-out; }
-        .animate-fade-in { animation: fadeIn 0.3s ease-out; }
-        .card-hover { transition: all 0.2s ease; }
-        .card-hover:hover { transform: translateY(-2px); box-shadow: 0 8px 25px rgba(0,0,0,0.3); }
-        .nav-item { transition: all 0.2s ease; position: relative; }
-        .nav-item.active { color: #FFB800; }
-        .nav-item.active::before { content: ''; position: absolute; left: 0; top: 50%; transform: translateY(-50%); width: 3px; height: 60%; background: #FFB800; border-radius: 0 3px 3px 0; }
-        .fab { transition: all 0.3s ease; }
-        .fab:hover { transform: scale(1.1) rotate(90deg); }
-        .cat-btn { transition: all 0.15s ease; }
-        .cat-btn:hover { transform: scale(1.08); }
-        .modal-overlay { backdrop-filter: blur(8px); }
-        .toast { animation: toastIn 0.3s ease-out forwards; }
-        .toast.removing { animation: toastOut 0.3s ease-in forwards; }
-        .stat-card { position: relative; overflow: hidden; }
-        .stat-card::after { content: ''; position: absolute; top: -50%; right: -50%; width: 100%; height: 100%; background: radial-gradient(circle, rgba(255,255,255,0.03) 0%, transparent 70%); pointer-events: none; }
-        .glow-income { box-shadow: 0 0 30px rgba(0, 214, 143, 0.08); }
-        .glow-expense { box-shadow: 0 0 30px rgba(255, 107, 107, 0.08); }
-        .glow-accent { box-shadow: 0 0 30px rgba(255, 184, 0, 0.08); }
-        input[type="number"]::-webkit-inner-spin-button,
-        input[type="number"]::-webkit-outer-spin-button { -webkit-appearance: none; }
-        input[type="number"] { -moz-appearance: textfield; }
-        .bg-pattern {
-            background-image: radial-gradient(circle at 25% 25%, rgba(255,184,0,0.03) 0%, transparent 50%),
-                              radial-gradient(circle at 75% 75%, rgba(0,214,143,0.03) 0%, transparent 50%);
-        }
-        @media (max-width: 768px) {
-            .sidebar { transform: translateX(-100%); position: fixed; z-index: 50; }
-            .sidebar.open { transform: translateX(0); }
-        }
+        *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+        body{font-family:'DM Sans',sans-serif;background:#F5F5F0;color:#1A1A1A;overscroll-behavior:none}
+        h1,h2,h3,h4{font-family:'Space Grotesk',sans-serif}
+        ::-webkit-scrollbar{width:4px}
+        ::-webkit-scrollbar-thumb{background:#ccc;border-radius:2px}
+        .view{display:none}.view.active{display:block}
+        @keyframes slideUp{from{transform:translateY(30px);opacity:0}to{transform:translateY(0);opacity:1}}
+        @keyframes fadeIn{from{opacity:0}to{opacity:1}}
+        @keyframes toastIn{from{transform:translateY(-20px);opacity:0}to{transform:translateY(0);opacity:1}}
+        @keyframes toastOut{from{opacity:1}to{opacity:0}}
+        .anim-up{animation:slideUp .35s ease-out}
+        .anim-fade{animation:fadeIn .25s ease-out}
+        .toast{animation:toastIn .3s ease-out forwards}
+        .toast.out{animation:toastOut .25s ease-in forwards}
+        .card{background:#fff;border-radius:16px;box-shadow:0 1px 3px rgba(0,0,0,.06);border:1px solid #E8E8E3}
+        .card:active{transform:scale(.98);transition:transform .1s}
+        .tab-item{transition:all .15s ease}
+        .tab-item.active{color:#E8A838}
+        .fab-center{width:56px;height:56px;border-radius:50%;background:linear-gradient(135deg,#E8A838,#D4952E);box-shadow:0 4px 15px rgba(232,168,56,.35);margin-top:-28px}
+        .fab-center:active{transform:scale(.9)}
+        .modal-bg{backdrop-filter:blur(6px);background:rgba(0,0,0,.4)}
+        .cat-btn{transition:all .1s ease}.cat-btn:active{transform:scale(.93)}
+        input,select,textarea{font-family:'DM Sans',sans-serif}
+        input[type=number]::-webkit-inner-spin-button,input[type=number]::-webkit-outer-spin-button{-webkit-appearance:none}
+        input[type=number]{-moz-appearance:textfield}
+        .progress-bar{height:6px;border-radius:3px;overflow:hidden;background:#E8E8E3}
+        .progress-fill{height:100%;border-radius:3px;transition:width .5s ease}
+        .bottom-safe{padding-bottom:env(safe-area-inset-bottom,0px)}
+        .scroll-x{overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none}
+        .scroll-x::-webkit-scrollbar{display:none}
+        @media(min-width:768px){.mobile-only{display:none!important}}
     </style>
 </head>
 <body class="bg-bg min-h-screen">
 
-    <!-- ============ OVERLAY DE CONFIGURACIÓN INICIAL ============ -->
-    <div id="setup-overlay" class="fixed inset-0 z-[100] bg-bg flex items-center justify-center p-4">
-        <div class="max-w-lg w-full animate-slide-up">
-            <div class="text-center mb-8">
-                <div class="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-accent/10 mb-4">
-                    <i class="fa-solid fa-wallet text-accent text-2xl"></i>
-                </div>
-                <h1 class="text-3xl font-display font-bold mb-2">HogarFin</h1>
-                <p class="text-muted">Finanzas compartidas, metas en común</p>
+<!-- ==================== SETUP ==================== -->
+<div id="setup-overlay" class="fixed inset-0 z-[100] bg-bg flex items-center justify-center p-5">
+    <div class="max-w-md w-full anim-up">
+        <div class="text-center mb-6">
+            <div class="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-accent/10 mb-3">
+                <i class="fa-solid fa-wallet text-accent text-2xl"></i>
             </div>
-
-            <div class="bg-surface rounded-2xl p-6 border border-brd mb-4">
-                <h3 class="font-display font-semibold mb-4 flex items-center gap-2">
-                    <i class="fa-solid fa-database text-accent"></i> Configurar Supabase
-                </h3>
-
-                <!-- Paso 1: SQL -->
-                <div class="bg-accent/5 border border-accent/20 rounded-xl p-4 mb-5">
-                    <p class="text-sm font-medium mb-2 flex items-center gap-2"><i class="fa-solid fa-1 text-accent"></i> Ejecuta este SQL en tu Supabase</p>
-                    <p class="text-xs text-muted mb-3">Ve a <strong>SQL Editor</strong> en tu proyecto y pega esto:</p>
-                    <div class="bg-bg rounded-lg p-3 text-xs font-mono text-muted overflow-x-auto border border-brd relative">
-                        <pre id="sql-code">CREATE TABLE transactions (
+            <h1 class="text-2xl font-display font-bold">HogarFin</h1>
+            <p class="text-muted text-sm mt-1">Finanzas compartidas para tu hogar</p>
+        </div>
+        <div class="card p-5 mb-4">
+            <h3 class="font-display font-semibold text-sm mb-3 flex items-center gap-2"><i class="fa-solid fa-database text-accent"></i> Paso 1: Crear tablas en Supabase</h3>
+            <p class="text-xs text-muted mb-2">Ve a <b>SQL Editor</b> en Supabase y ejecuta:</p>
+            <div class="bg-bg rounded-xl p-3 text-[10px] font-mono text-muted overflow-x-auto border border-brd max-h-48 overflow-y-auto">
+                <pre id="sql-code">CREATE TABLE transactions (
   id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
   user_name TEXT NOT NULL,
   type TEXT NOT NULL CHECK (type IN ('income','expense')),
@@ -110,931 +95,589 @@
   amount NUMERIC(12,2) NOT NULL,
   description TEXT DEFAULT '',
   date DATE NOT NULL DEFAULT now(),
+  account_id UUID,
+  created_at TIMESTAMPTZ DEFAULT now()
+);
+
+CREATE TABLE accounts (
+  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+  name TEXT NOT NULL,
+  type TEXT NOT NULL DEFAULT 'bank',
+  balance NUMERIC(12,2) NOT NULL DEFAULT 0,
+  color TEXT DEFAULT '#E8A838',
+  icon TEXT DEFAULT 'fa-building-columns',
+  created_at TIMESTAMPTZ DEFAULT now()
+);
+
+CREATE TABLE goals (
+  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+  name TEXT NOT NULL,
+  target NUMERIC(12,2) NOT NULL,
+  current NUMERIC(12,2) NOT NULL DEFAULT 0,
+  icon TEXT DEFAULT 'fa-bullseye',
+  color TEXT DEFAULT '#E8A838',
+  deadline DATE,
   created_at TIMESTAMPTZ DEFAULT now()
 );
 
 ALTER TABLE transactions ENABLE ROW LEVEL SECURITY;
-CREATE POLICY "Acceso total" ON transactions
-  FOR ALL USING (true) WITH CHECK (true);</pre>
-                    </div>
-                    <button onclick="copySQL()" class="mt-2 text-xs text-accent hover:text-accenthover transition flex items-center gap-1">
-                        <i class="fa-regular fa-copy"></i> Copiar SQL
-                    </button>
-                </div>
+CREATE POLICY "t_all" ON transactions FOR ALL USING (true) WITH CHECK (true);
+ALTER TABLE accounts ENABLE ROW LEVEL SECURITY;
+CREATE POLICY "a_all" ON accounts FOR ALL USING (true) WITH CHECK (true);
+ALTER TABLE goals ENABLE ROW LEVEL SECURITY;
+CREATE POLICY "g_all" ON goals FOR ALL USING (true) WITH CHECK (true);</pre>
+            </div>
+            <button onclick="copySQL()" class="mt-2 text-xs text-accent font-medium flex items-center gap-1"><i class="fa-regular fa-copy"></i> Copiar SQL</button>
+        </div>
+        <div class="card p-5 mb-4">
+            <h3 class="font-display font-semibold text-sm mb-3 flex items-center gap-2"><i class="fa-solid fa-users text-accent"></i> Paso 2: Nombres</h3>
+            <div class="grid grid-cols-2 gap-3">
+                <div><label class="text-xs text-muted block mb-1">Persona 1</label><input id="setup-u1" type="text" value="Facu" class="w-full bg-bg border border-brd rounded-xl px-3 py-2.5 text-sm focus:border-accent focus:outline-none"></div>
+                <div><label class="text-xs text-muted block mb-1">Persona 2</label><input id="setup-u2" type="text" value="Mel" class="w-full bg-bg border border-brd rounded-xl px-3 py-2.5 text-sm focus:border-accent focus:outline-none"></div>
+            </div>
+        </div>
+        <button onclick="finishSetup()" class="w-full bg-accent hover:bg-accenthover text-white font-bold py-3.5 rounded-xl transition text-sm flex items-center justify-center gap-2"><i class="fa-solid fa-rocket"></i> Comenzar</button>
+    </div>
+</div>
 
-                <!-- Paso 2: Nombres -->
-                <div class="bg-income/5 border border-income/20 rounded-xl p-4 mb-5">
-                    <p class="text-sm font-medium mb-3 flex items-center gap-2"><i class="fa-solid fa-2 text-income"></i> Nombres de ustedes</p>
-                    <div class="grid grid-cols-2 gap-3">
-                        <div>
-                            <label class="text-xs text-muted block mb-1">Persona 1</label>
-                            <input id="setup-user1" type="text" value="Él" class="w-full bg-bg border border-brd rounded-lg px-4 py-2.5 text-sm focus:border-accent focus:outline-none transition">
-                        </div>
-                        <div>
-                            <label class="text-xs text-muted block mb-1">Persona 2</label>
-                            <input id="setup-user2" type="text" value="Ella" class="w-full bg-bg border border-brd rounded-lg px-4 py-2.5 text-sm focus:border-accent focus:outline-none transition">
-                        </div>
-                    </div>
-                </div>
+<!-- ==================== APP ==================== -->
+<div id="app" class="hidden">
 
-                <!-- Info de conexión (ya embebida) -->
-                <div class="bg-bg/50 rounded-xl p-3 flex items-center gap-3">
-                    <i class="fa-solid fa-circle-check text-income text-sm"></i>
-                    <div>
-                        <p class="text-xs text-income font-medium">Supabase preconfigurado</p>
-                        <p class="text-[10px] text-muted">mzdmpurmudvysnjylrik.supabase.co</p>
-                    </div>
+    <!-- Content area -->
+    <div id="content-area" class="pb-24 min-h-screen">
+
+        <!-- ===== INICIO ===== -->
+        <div id="view-home" class="view active p-4 max-w-2xl mx-auto">
+            <!-- Header -->
+            <div class="flex items-center justify-between mb-5">
+                <div>
+                    <p class="text-sm text-muted">Hola,</p>
+                    <h1 class="text-xl font-display font-bold" id="home-greeting">Facu & Mel</h1>
+                </div>
+                <div class="flex items-center gap-2">
+                    <span id="home-sync" class="w-2 h-2 rounded-full bg-income"></span>
+                    <span class="text-xs text-muted">Sincronizado</span>
                 </div>
             </div>
 
-            <button onclick="connectAndStart()" class="w-full bg-accent hover:bg-accenthover text-bg font-bold py-3.5 rounded-xl transition mb-3 flex items-center justify-center gap-2 text-sm">
-                <i class="fa-solid fa-rocket"></i> Comenzar
+            <!-- Patrimonio total -->
+            <div class="card p-5 mb-4 bg-gradient-to-br from-accent/5 to-accent/0">
+                <p class="text-xs text-muted mb-1 flex items-center gap-1"><i class="fa-solid fa-landmark"></i> Patrimonio total</p>
+                <p id="home-patrimonio" class="text-3xl font-display font-bold">$0</p>
+                <p id="home-patrimonio-change" class="text-xs text-income mt-1">Este mes</p>
+            </div>
+
+            <!-- 3 stat cards -->
+            <div class="grid grid-cols-3 gap-3 mb-5">
+                <div class="card p-3 text-center">
+                    <p class="text-[10px] text-muted mb-1">Ingresos</p>
+                    <p id="home-income" class="text-sm font-display font-bold text-income">$0</p>
+                </div>
+                <div class="card p-3 text-center">
+                    <p class="text-[10px] text-muted mb-1">Gastos</p>
+                    <p id="home-expense" class="text-sm font-display font-bold text-expense">$0</p>
+                </div>
+                <div class="card p-3 text-center">
+                    <p class="text-[10px] text-muted mb-1">Ahorro</p>
+                    <p id="home-savings" class="text-sm font-display font-bold text-accent">$0</p>
+                </div>
+            </div>
+
+            <!-- Cuentas -->
+            <div class="mb-5">
+                <div class="flex items-center justify-between mb-3">
+                    <h3 class="font-display font-semibold text-sm">Mis Cuentas</h3>
+                    <button onclick="openAccountModal()" class="text-xs text-accent font-medium"><i class="fa-solid fa-plus mr-1"></i>Agregar</button>
+                </div>
+                <div id="home-accounts" class="scroll-x flex gap-3 pb-1"></div>
+            </div>
+
+            <!-- Gráfico categorías -->
+            <div class="card p-4 mb-5">
+                <h3 class="font-display font-semibold text-sm mb-3">Gastos del mes por categoría</h3>
+                <div class="flex items-center gap-4">
+                    <canvas id="chart-cat-home" width="120" height="120" class="shrink-0"></canvas>
+                    <div id="cat-legend" class="flex-1 space-y-1.5 text-xs"></div>
+                </div>
+            </div>
+
+            <!-- Presupuestos -->
+            <div class="mb-5">
+                <div class="flex items-center justify-between mb-3">
+                    <h3 class="font-display font-semibold text-sm">Presupuestos</h3>
+                    <button onclick="openBudgetModal()" class="text-xs text-accent font-medium"><i class="fa-solid fa-sliders mr-1"></i>Configurar</button>
+                </div>
+                <div id="home-budgets" class="space-y-3"></div>
+            </div>
+
+            <!-- Metas -->
+            <div class="mb-5">
+                <div class="flex items-center justify-between mb-3">
+                    <h3 class="font-display font-semibold text-sm">Metas de ahorro</h3>
+                    <button onclick="openGoalModal()" class="text-xs text-accent font-medium"><i class="fa-solid fa-plus mr-1"></i>Nueva meta</button>
+                </div>
+                <div id="home-goals" class="space-y-3"></div>
+            </div>
+
+            <!-- Últimos movimientos -->
+            <div class="mb-4">
+                <div class="flex items-center justify-between mb-3">
+                    <h3 class="font-display font-semibold text-sm">Últimos movimientos</h3>
+                    <button onclick="switchTab('transactions')" class="text-xs text-accent font-medium">Ver todos <i class="fa-solid fa-chevron-right ml-0.5"></i></button>
+                </div>
+                <div id="home-recent" class="space-y-2"></div>
+            </div>
+        </div>
+
+        <!-- ===== TRANSACCIONES ===== -->
+        <div id="view-transactions" class="view p-4 max-w-2xl mx-auto">
+            <h1 class="text-xl font-display font-bold mb-4">Movimientos</h1>
+            <div class="flex gap-2 mb-4 scroll-x pb-1">
+                <select id="f-type" onchange="renderTransactions()" class="bg-white border border-brd rounded-xl px-3 py-2 text-xs"><option value="all">Todos</option><option value="income">Ingresos</option><option value="expense">Gastos</option></select>
+                <select id="f-user" onchange="renderTransactions()" class="bg-white border border-brd rounded-xl px-3 py-2 text-xs"><option value="all">Ambos</option></select>
+                <select id="f-cat" onchange="renderTransactions()" class="bg-white border border-brd rounded-xl px-3 py-2 text-xs"><option value="all">Categorías</option></select>
+            </div>
+            <div id="tx-list" class="space-y-2"></div>
+            <div id="tx-empty" class="hidden text-center py-12 text-muted"><i class="fa-solid fa-receipt text-3xl mb-2 opacity-20"></i><p class="text-sm">Sin movimientos</p></div>
+        </div>
+
+        <!-- ===== ANALÍTICAS ===== -->
+        <div id="view-analytics" class="view p-4 max-w-2xl mx-auto">
+            <h1 class="text-xl font-display font-bold mb-4">Analíticas</h1>
+            <div class="card p-4 mb-4">
+                <h3 class="font-display font-semibold text-sm mb-3">Tendencia 6 meses</h3>
+                <canvas id="chart-trend" height="180"></canvas>
+            </div>
+            <div class="card p-4 mb-4">
+                <h3 class="font-display font-semibold text-sm mb-3">Comparativa por persona</h3>
+                <canvas id="chart-users" height="180"></canvas>
+            </div>
+            <div class="card p-4 mb-4">
+                <h3 class="font-display font-semibold text-sm mb-3">Top gastos</h3>
+                <div id="analytics-top" class="space-y-3"></div>
+            </div>
+        </div>
+
+        <!-- ===== CONFIG ===== -->
+        <div id="view-settings" class="view p-4 max-w-2xl mx-auto">
+            <h1 class="text-xl font-display font-bold mb-4">Configuración</h1>
+            <div class="card p-4 mb-3">
+                <h3 class="font-display font-semibold text-sm mb-3">Nombres</h3>
+                <div class="grid grid-cols-2 gap-3">
+                    <input id="s-u1" type="text" class="bg-bg border border-brd rounded-xl px-3 py-2 text-sm focus:border-accent focus:outline-none">
+                    <input id="s-u2" type="text" class="bg-bg border border-brd rounded-xl px-3 py-2 text-sm focus:border-accent focus:outline-none">
+                </div>
+                <button onclick="saveNames()" class="mt-3 bg-accent text-white text-xs font-semibold py-2 px-4 rounded-xl">Guardar</button>
+            </div>
+            <div class="card p-4 mb-3">
+                <h3 class="font-display font-semibold text-sm mb-3">Moneda</h3>
+                <select id="s-curr" onchange="saveCurr()" class="bg-bg border border-brd rounded-xl px-3 py-2 text-sm w-40 focus:border-accent focus:outline-none">
+                    <option value="USD">USD ($)</option><option value="EUR">EUR (€)</option><option value="ARS">ARS ($)</option><option value="MXN">MXN ($)</option><option value="COP">COP ($)</option><option value="UYU">UYU (U$)</option><option value="BRL">BRL (R$)</option>
+                </select>
+            </div>
+            <div class="card p-4 mb-3">
+                <h3 class="font-display font-semibold text-sm mb-3">Supabase</h3>
+                <div id="s-sb"></div>
+            </div>
+            <div class="card p-4">
+                <button onclick="exportData()" class="text-sm py-2 px-4 rounded-xl bg-bg border border-brd mr-2 mb-2"><i class="fa-solid fa-download mr-1"></i>Exportar</button>
+                <button onclick="clearAll()" class="text-sm py-2 px-4 rounded-xl bg-expense/10 text-expense mb-2"><i class="fa-solid fa-trash mr-1"></i>Borrar todo</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bottom Tab Bar -->
+    <nav class="fixed bottom-0 left-0 right-0 bg-white border-t border-brd z-40 bottom-safe">
+        <div class="max-w-2xl mx-auto flex items-end justify-around px-2 pt-2 pb-2">
+            <button onclick="switchTab('home')" class="tab-item active flex flex-col items-center gap-0.5 py-1 px-3" data-tab="home">
+                <i class="fa-solid fa-house text-lg"></i><span class="text-[10px]">Inicio</span>
+            </button>
+            <button onclick="switchTab('transactions')" class="tab-item flex flex-col items-center gap-0.5 py-1 px-3 text-muted" data-tab="transactions">
+                <i class="fa-solid fa-list text-lg"></i><span class="text-[10px]">Movimientos</span>
+            </button>
+            <button onclick="openAddModal()" class="fab-center flex items-center justify-center text-white shadow-lg">
+                <i class="fa-solid fa-plus text-xl"></i>
+            </button>
+            <button onclick="switchTab('analytics')" class="tab-item flex flex-col items-center gap-0.5 py-1 px-3 text-muted" data-tab="analytics">
+                <i class="fa-solid fa-chart-line text-lg"></i><span class="text-[10px]">Analíticas</span>
+            </button>
+            <button onclick="switchTab('settings')" class="tab-item flex flex-col items-center gap-0.5 py-1 px-3 text-muted" data-tab="settings">
+                <i class="fa-solid fa-gear text-lg"></i><span class="text-[10px]">Config</span>
             </button>
         </div>
-    </div>
+    </nav>
+</div>
 
-    <!-- ============ APP PRINCIPAL ============ -->
-    <div id="app" class="hidden">
-        <!-- Sidebar -->
-        <aside id="sidebar" class="sidebar fixed left-0 top-0 h-full w-64 bg-surface border-r border-brd flex flex-col z-40 transition-transform duration-300">
-            <div class="p-5 border-b border-brd">
-                <div class="flex items-center gap-3">
-                    <div class="w-9 h-9 rounded-xl bg-accent/10 flex items-center justify-center">
-                        <i class="fa-solid fa-wallet text-accent text-sm"></i>
-                    </div>
-                    <h2 class="font-display font-bold text-lg">HogarFin</h2>
-                </div>
+<!-- ==================== MODAL: AGREGAR TRANSACCIÓN ==================== -->
+<div id="modal-add" class="fixed inset-0 z-50 hidden">
+    <div class="modal-bg absolute inset-0" onclick="closeAddModal()"></div>
+    <div class="absolute bottom-0 w-full bg-white rounded-t-3xl border-t border-brd anim-up max-h-[92vh] overflow-y-auto">
+        <div class="w-10 h-1 bg-brd rounded-full mx-auto mt-3 mb-2"></div>
+        <div class="p-5">
+            <div class="flex items-center justify-between mb-4">
+                <h2 class="font-display font-bold text-lg">Nueva transacción</h2>
+                <button onclick="closeAddModal()" class="w-8 h-8 rounded-full bg-bg flex items-center justify-center"><i class="fa-solid fa-xmark text-sm text-muted"></i></button>
             </div>
-            <nav class="flex-1 p-3 space-y-1">
-                <button onclick="navigate('dashboard')" class="nav-item active w-full flex items-center gap-3 px-4 py-3 rounded-lg text-sm" data-nav="dashboard">
-                    <i class="fa-solid fa-chart-pie w-5 text-center"></i> Panel
-                </button>
-                <button onclick="navigate('transactions')" class="nav-item w-full flex items-center gap-3 px-4 py-3 rounded-lg text-sm text-muted hover:text-white" data-nav="transactions">
-                    <i class="fa-solid fa-list w-5 text-center"></i> Transacciones
-                </button>
-                <button onclick="navigate('analytics')" class="nav-item w-full flex items-center gap-3 px-4 py-3 rounded-lg text-sm text-muted hover:text-white" data-nav="analytics">
-                    <i class="fa-solid fa-chart-line w-5 text-center"></i> Analíticas
-                </button>
-                <button onclick="navigate('settings')" class="nav-item w-full flex items-center gap-3 px-4 py-3 rounded-lg text-sm text-muted hover:text-white" data-nav="settings">
-                    <i class="fa-solid fa-gear w-5 text-center"></i> Ajustes
-                </button>
-            </nav>
-            <div class="p-4 border-t border-brd">
-                <div id="sidebar-users" class="flex items-center gap-2 mb-3"></div>
-                <div id="sync-status" class="text-xs text-muted flex items-center gap-1.5">
-                    <span class="w-2 h-2 rounded-full bg-muted"></span> Conectando...
-                </div>
+            <div class="flex gap-2 mb-5">
+                <button onclick="setMType('expense')" id="mt-exp" class="flex-1 py-2.5 rounded-xl text-sm font-semibold bg-expense/10 text-expense border-2 border-expense"><i class="fa-solid fa-minus mr-1"></i>Gasto</button>
+                <button onclick="setMType('income')" id="mt-inc" class="flex-1 py-2.5 rounded-xl text-sm font-semibold bg-bg text-muted border-2 border-transparent"><i class="fa-solid fa-plus mr-1"></i>Ingreso</button>
             </div>
-        </aside>
-
-        <!-- Main -->
-        <main class="md:ml-64 min-h-screen bg-pattern">
-            <!-- Header mobile -->
-            <header class="md:hidden sticky top-0 z-30 bg-surface/90 backdrop-blur-lg border-b border-brd px-4 py-3 flex items-center justify-between">
-                <button onclick="toggleSidebar()" class="w-10 h-10 rounded-lg bg-card flex items-center justify-center">
-                    <i class="fa-solid fa-bars text-sm"></i>
-                </button>
-                <h2 class="font-display font-bold">HogarFin</h2>
-                <button onclick="openAddModal()" class="w-10 h-10 rounded-lg bg-accent/10 flex items-center justify-center">
-                    <i class="fa-solid fa-plus text-accent text-sm"></i>
-                </button>
-            </header>
-
-            <!-- ===== DASHBOARD ===== -->
-            <div id="view-dashboard" class="view active p-4 md:p-6 max-w-6xl mx-auto">
-                <div class="flex items-center justify-between mb-6">
-                    <div>
-                        <h1 class="text-2xl font-display font-bold">Panel</h1>
-                        <p class="text-muted text-sm" id="dash-subtitle"></p>
-                    </div>
-                    <div class="flex items-center gap-2">
-                        <button onclick="changeMonth(-1)" class="w-9 h-9 rounded-lg bg-card hover:bg-cardhover border border-brd flex items-center justify-center transition">
-                            <i class="fa-solid fa-chevron-left text-xs"></i>
-                        </button>
-                        <span id="month-label" class="text-sm font-medium min-w-[140px] text-center"></span>
-                        <button onclick="changeMonth(1)" class="w-9 h-9 rounded-lg bg-card hover:bg-cardhover border border-brd flex items-center justify-center transition">
-                            <i class="fa-solid fa-chevron-right text-xs"></i>
-                        </button>
-                    </div>
-                </div>
-                <div class="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4 mb-6">
-                    <div class="stat-card bg-card rounded-xl p-4 border border-brd glow-accent">
-                        <p class="text-xs text-muted mb-1 flex items-center gap-1"><i class="fa-solid fa-scale-balanced"></i> Balance</p>
-                        <p id="stat-balance" class="text-xl md:text-2xl font-display font-bold text-accent">$0</p>
-                    </div>
-                    <div class="stat-card bg-card rounded-xl p-4 border border-brd glow-income">
-                        <p class="text-xs text-muted mb-1 flex items-center gap-1"><i class="fa-solid fa-arrow-trend-up"></i> Ingresos</p>
-                        <p id="stat-income" class="text-xl md:text-2xl font-display font-bold text-income">$0</p>
-                    </div>
-                    <div class="stat-card bg-card rounded-xl p-4 border border-brd glow-expense">
-                        <p class="text-xs text-muted mb-1 flex items-center gap-1"><i class="fa-solid fa-arrow-trend-down"></i> Gastos</p>
-                        <p id="stat-expense" class="text-xl md:text-2xl font-display font-bold text-expense">$0</p>
-                    </div>
-                    <div class="stat-card bg-card rounded-xl p-4 border border-brd">
-                        <p class="text-xs text-muted mb-1 flex items-center gap-1"><i class="fa-solid fa-piggy-bank"></i> Ahorro</p>
-                        <p id="stat-savings" class="text-xl md:text-2xl font-display font-bold">$0</p>
-                        <p id="stat-savings-pct" class="text-xs text-muted mt-0.5">0% del ingreso</p>
-                    </div>
-                </div>
-                <div class="grid lg:grid-cols-5 gap-4 md:gap-6 mb-6">
-                    <div class="lg:col-span-3 bg-card rounded-xl p-4 md:p-5 border border-brd">
-                        <h3 class="font-display font-semibold mb-4 text-sm">Ingreso vs Gasto</h3>
-                        <canvas id="chart-trend" height="200"></canvas>
-                    </div>
-                    <div class="lg:col-span-2 bg-card rounded-xl p-4 md:p-5 border border-brd">
-                        <h3 class="font-display font-semibold mb-4 text-sm">Gastos por categoría</h3>
-                        <canvas id="chart-categories" height="200"></canvas>
-                    </div>
-                </div>
-                <div class="grid lg:grid-cols-2 gap-4 md:gap-6">
-                    <div class="bg-card rounded-xl p-4 md:p-5 border border-brd">
-                        <h3 class="font-display font-semibold mb-4 text-sm">Contribución por persona</h3>
-                        <div id="user-breakdown" class="space-y-3"></div>
-                    </div>
-                    <div class="bg-card rounded-xl p-4 md:p-5 border border-brd">
-                        <div class="flex items-center justify-between mb-4">
-                            <h3 class="font-display font-semibold text-sm">Últimos movimientos</h3>
-                            <button onclick="navigate('transactions')" class="text-xs text-accent hover:text-accenthover transition">Ver todos <i class="fa-solid fa-arrow-right ml-1"></i></button>
-                        </div>
-                        <div id="recent-transactions" class="space-y-2"></div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- ===== TRANSACCIONES ===== -->
-            <div id="view-transactions" class="view p-4 md:p-6 max-w-6xl mx-auto">
-                <div class="flex items-center justify-between mb-6">
-                    <h1 class="text-2xl font-display font-bold">Transacciones</h1>
-                    <button onclick="openAddModal()" class="hidden md:flex items-center gap-2 bg-accent hover:bg-accenthover text-bg font-semibold py-2.5 px-5 rounded-xl transition text-sm">
-                        <i class="fa-solid fa-plus"></i> Nueva
-                    </button>
-                </div>
-                <div class="flex flex-wrap gap-2 mb-4">
-                    <select id="filter-type" onchange="renderTransactions()" class="bg-card border border-brd rounded-lg px-3 py-2 text-sm focus:border-accent focus:outline-none">
-                        <option value="all">Todos</option>
-                        <option value="income">Ingresos</option>
-                        <option value="expense">Gastos</option>
-                    </select>
-                    <select id="filter-user" onchange="renderTransactions()" class="bg-card border border-brd rounded-lg px-3 py-2 text-sm focus:border-accent focus:outline-none">
-                        <option value="all">Ambos</option>
-                    </select>
-                    <select id="filter-category" onchange="renderTransactions()" class="bg-card border border-brd rounded-lg px-3 py-2 text-sm focus:border-accent focus:outline-none">
-                        <option value="all">Categorías</option>
-                    </select>
-                    <input id="filter-search" oninput="renderTransactions()" type="text" placeholder="Buscar..." class="bg-card border border-brd rounded-lg px-3 py-2 text-sm focus:border-accent focus:outline-none w-40">
-                </div>
-                <div id="transactions-list" class="space-y-2"></div>
-                <div id="transactions-empty" class="hidden text-center py-16 text-muted">
-                    <i class="fa-solid fa-receipt text-4xl mb-3 opacity-30"></i>
-                    <p>No hay transacciones</p>
-                </div>
-            </div>
-
-            <!-- ===== ANALÍTICAS ===== -->
-            <div id="view-analytics" class="view p-4 md:p-6 max-w-6xl mx-auto">
-                <h1 class="text-2xl font-display font-bold mb-6">Analíticas</h1>
-                <div class="grid md:grid-cols-2 gap-4 md:gap-6 mb-6">
-                    <div class="bg-card rounded-xl p-4 md:p-5 border border-brd">
-                        <h3 class="font-display font-semibold mb-4 text-sm">Tendencia mensual (6 meses)</h3>
-                        <canvas id="chart-monthly" height="220"></canvas>
-                    </div>
-                    <div class="bg-card rounded-xl p-4 md:p-5 border border-brd">
-                        <h3 class="font-display font-semibold mb-4 text-sm">Distribución de gastos</h3>
-                        <canvas id="chart-donut" height="220"></canvas>
-                    </div>
-                </div>
-                <div class="grid md:grid-cols-2 gap-4 md:gap-6">
-                    <div class="bg-card rounded-xl p-4 md:p-5 border border-brd">
-                        <h3 class="font-display font-semibold mb-4 text-sm">Comparativa por persona</h3>
-                        <canvas id="chart-users" height="220"></canvas>
-                    </div>
-                    <div class="bg-card rounded-xl p-4 md:p-5 border border-brd">
-                        <h3 class="font-display font-semibold mb-4 text-sm">Top categorías de gasto</h3>
-                        <div id="top-categories" class="space-y-3"></div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- ===== AJUSTES ===== -->
-            <div id="view-settings" class="view p-4 md:p-6 max-w-2xl mx-auto">
-                <h1 class="text-2xl font-display font-bold mb-6">Ajustes</h1>
-                <div class="space-y-4">
-                    <div class="bg-card rounded-xl p-5 border border-brd">
-                        <h3 class="font-display font-semibold mb-4">Supabase</h3>
-                        <div id="settings-supabase" class="space-y-3"></div>
-                    </div>
-                    <div class="bg-card rounded-xl p-5 border border-brd">
-                        <h3 class="font-display font-semibold mb-4">Nombres</h3>
-                        <div class="grid grid-cols-2 gap-3">
-                            <div>
-                                <label class="text-sm text-muted block mb-1">Persona 1</label>
-                                <input id="settings-user1" type="text" class="w-full bg-bg border border-brd rounded-lg px-3 py-2 text-sm focus:border-accent focus:outline-none">
-                            </div>
-                            <div>
-                                <label class="text-sm text-muted block mb-1">Persona 2</label>
-                                <input id="settings-user2" type="text" class="w-full bg-bg border border-brd rounded-lg px-3 py-2 text-sm focus:border-accent focus:outline-none">
-                            </div>
-                        </div>
-                        <button onclick="saveUserNames()" class="mt-3 bg-accent hover:bg-accenthover text-bg text-sm font-semibold py-2 px-4 rounded-lg transition">Guardar</button>
-                    </div>
-                    <div class="bg-card rounded-xl p-5 border border-brd">
-                        <h3 class="font-display font-semibold mb-4">Moneda</h3>
-                        <select id="settings-currency" onchange="saveCurrency()" class="bg-bg border border-brd rounded-lg px-3 py-2 text-sm focus:border-accent focus:outline-none w-48">
-                            <option value="USD">USD ($)</option>
-                            <option value="EUR">EUR (€)</option>
-                            <option value="MXN">MXN ($)</option>
-                            <option value="ARS">ARS ($)</option>
-                            <option value="COP">COP ($)</option>
-                            <option value="CLP">CLP ($)</option>
-                            <option value="PEN">PEN (S/)</option>
-                            <option value="UYU">UYU (U$)</option>
-                            <option value="BRL">BRL (R$)</option>
-                        </select>
-                    </div>
-                    <div class="bg-card rounded-xl p-5 border border-brd">
-                        <h3 class="font-display font-semibold mb-4 text-expense">Zona peligrosa</h3>
-                        <button onclick="exportData()" class="bg-surface hover:bg-cardhover border border-brd text-sm py-2 px-4 rounded-lg transition mr-2 mb-2">
-                            <i class="fa-solid fa-download mr-1"></i> Exportar JSON
-                        </button>
-                        <button onclick="clearAllData()" class="bg-expense/10 hover:bg-expense/20 text-expense text-sm py-2 px-4 rounded-lg transition mb-2">
-                            <i class="fa-solid fa-trash mr-1"></i> Borrar todo
-                        </button>
-                    </div>
-                </div>
-            </div>
-        </main>
-
-        <!-- FAB mobile -->
-        <button onclick="openAddModal()" class="fab md:hidden fixed bottom-6 right-6 z-30 w-14 h-14 rounded-full bg-accent shadow-lg shadow-accent/20 flex items-center justify-center">
-            <i class="fa-solid fa-plus text-bg text-lg"></i>
-        </button>
-    </div>
-
-    <!-- ============ MODAL AGREGAR ============ -->
-    <div id="modal-add" class="fixed inset-0 z-50 hidden">
-        <div class="modal-overlay absolute inset-0 bg-black/60" onclick="closeAddModal()"></div>
-        <div class="absolute bottom-0 md:bottom-auto md:top-1/2 md:left-1/2 md:-translate-x-1/2 md:-translate-y-1/2 w-full md:max-w-md bg-surface rounded-t-2xl md:rounded-2xl border border-brd animate-slide-up overflow-y-auto max-h-[90vh]">
-            <div class="p-5">
-                <div class="flex items-center justify-between mb-5">
-                    <h2 class="font-display font-bold text-lg">Nueva transacción</h2>
-                    <button onclick="closeAddModal()" class="w-8 h-8 rounded-lg bg-card hover:bg-cardhover flex items-center justify-center transition">
-                        <i class="fa-solid fa-xmark text-sm"></i>
-                    </button>
-                </div>
-                <div class="flex gap-2 mb-5">
-                    <button onclick="setModalType('expense')" id="btn-type-expense" class="flex-1 py-2.5 rounded-lg text-sm font-semibold transition bg-expense/10 text-expense border-2 border-expense">
-                        <i class="fa-solid fa-minus mr-1"></i> Gasto
-                    </button>
-                    <button onclick="setModalType('income')" id="btn-type-income" class="flex-1 py-2.5 rounded-lg text-sm font-semibold transition bg-card text-muted border-2 border-transparent">
-                        <i class="fa-solid fa-plus mr-1"></i> Ingreso
-                    </button>
-                </div>
-                <div class="mb-4">
-                    <label class="text-sm text-muted block mb-1">Monto</label>
-                    <input id="modal-amount" type="number" min="0" step="0.01" placeholder="0.00" class="w-full bg-bg border border-brd rounded-lg px-4 py-3 text-2xl font-display font-bold focus:border-accent focus:outline-none transition text-center">
-                </div>
-                <div class="mb-4">
-                    <label class="text-sm text-muted block mb-2">Categoría</label>
-                    <div id="modal-categories" class="grid grid-cols-4 gap-2"></div>
-                </div>
-                <div class="mb-4">
-                    <label class="text-sm text-muted block mb-2">Persona</label>
-                    <div id="modal-users" class="grid grid-cols-2 gap-2"></div>
-                </div>
-                <div class="mb-4">
-                    <label class="text-sm text-muted block mb-1">Descripción</label>
-                    <input id="modal-desc" type="text" placeholder="Ej: Supermercado semanal" class="w-full bg-bg border border-brd rounded-lg px-4 py-2.5 text-sm focus:border-accent focus:outline-none transition">
-                </div>
-                <div class="mb-5">
-                    <label class="text-sm text-muted block mb-1">Fecha</label>
-                    <input id="modal-date" type="date" class="w-full bg-bg border border-brd rounded-lg px-4 py-2.5 text-sm focus:border-accent focus:outline-none transition">
-                </div>
-                <button onclick="addTransaction()" class="w-full bg-accent hover:bg-accenthover text-bg font-bold py-3 rounded-xl transition text-sm">
-                    Guardar transacción
-                </button>
-            </div>
+            <div class="mb-4"><label class="text-xs text-muted block mb-1">Monto</label><input id="m-amt" type="number" min="0" step="0.01" placeholder="0.00" class="w-full bg-bg border border-brd rounded-xl px-4 py-3 text-2xl font-display font-bold focus:border-accent focus:outline-none text-center"></div>
+            <div class="mb-4"><label class="text-xs text-muted block mb-2">Categoría</label><div id="m-cats" class="grid grid-cols-4 gap-2"></div></div>
+            <div class="mb-4"><label class="text-xs text-muted block mb-2">Persona</label><div id="m-users" class="grid grid-cols-2 gap-2"></div></div>
+            <div class="mb-4"><label class="text-xs text-muted block mb-1">Descripción</label><input id="m-desc" type="text" placeholder="Ej: Supermercado" class="w-full bg-bg border border-brd rounded-xl px-4 py-2.5 text-sm focus:border-accent focus:outline-none"></div>
+            <div class="mb-4"><label class="text-xs text-muted block mb-1">Cuenta</label><select id="m-account" class="w-full bg-bg border border-brd rounded-xl px-3 py-2.5 text-sm focus:border-accent focus:outline-none"></select></div>
+            <div class="mb-5"><label class="text-xs text-muted block mb-1">Fecha</label><input id="m-date" type="date" class="w-full bg-bg border border-brd rounded-xl px-4 py-2.5 text-sm focus:border-accent focus:outline-none"></div>
+            <button onclick="addTx()" class="w-full bg-accent hover:bg-accenthover text-white font-bold py-3.5 rounded-xl transition text-sm">Guardar</button>
         </div>
     </div>
+</div>
 
-    <!-- Toasts -->
-    <div id="toast-container" class="fixed top-4 right-4 z-[200] space-y-2 pointer-events-none"></div>
+<!-- ==================== MODAL: CUENTA ==================== -->
+<div id="modal-account" class="fixed inset-0 z-50 hidden">
+    <div class="modal-bg absolute inset-0" onclick="closeAccountModal()"></div>
+    <div class="absolute bottom-0 w-full bg-white rounded-t-3xl border-t border-brd anim-up">
+        <div class="w-10 h-1 bg-brd rounded-full mx-auto mt-3 mb-2"></div>
+        <div class="p-5">
+            <h2 class="font-display font-bold text-lg mb-4">Nueva cuenta</h2>
+            <div class="mb-3"><input id="ac-name" type="text" placeholder="Nombre (ej: Banco Nación)" class="w-full bg-bg border border-brd rounded-xl px-4 py-2.5 text-sm focus:border-accent focus:outline-none"></div>
+            <div class="mb-3"><label class="text-xs text-muted block mb-1">Tipo</label>
+                <select id="ac-type" class="w-full bg-bg border border-brd rounded-xl px-3 py-2.5 text-sm focus:border-accent focus:outline-none">
+                    <option value="bank">Banco</option><option value="cash">Efectivo</option><option value="card">Tarjeta</option><option value="investment">Inversión</option><option value="other">Otro</option>
+                </select>
+            </div>
+            <div class="mb-4"><input id="ac-bal" type="number" step="0.01" placeholder="Saldo actual" class="w-full bg-bg border border-brd rounded-xl px-4 py-2.5 text-sm focus:border-accent focus:outline-none"></div>
+            <button onclick="addAccount()" class="w-full bg-accent text-white font-bold py-3 rounded-xl text-sm">Crear cuenta</button>
+        </div>
+    </div>
+</div>
 
-    <script>
-    // ==================== CREDENCIALES SUPABASE ====================
-    const SB_URL = 'https://mzdmpurmudvysnjylrik.supabase.co';
-    const SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im16ZG1wdXJtdWR2eXNuanlscmlrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTEyMTA4OTksImV4cCI6MjEwNjc4Njg5OX0.toFiyG9uoXlGgpvkq21of5S304RTZLr92N-4Skkp_gE';
+<!-- ==================== MODAL: META ==================== -->
+<div id="modal-goal" class="fixed inset-0 z-50 hidden">
+    <div class="modal-bg absolute inset-0" onclick="closeGoalModal()"></div>
+    <div class="absolute bottom-0 w-full bg-white rounded-t-3xl border-t border-brd anim-up">
+        <div class="w-10 h-1 bg-brd rounded-full mx-auto mt-3 mb-2"></div>
+        <div class="p-5">
+            <h2 class="font-display font-bold text-lg mb-4">Nueva meta de ahorro</h2>
+            <div class="mb-3"><input id="gl-name" type="text" placeholder="Nombre (ej: Viaje)" class="w-full bg-bg border border-brd rounded-xl px-4 py-2.5 text-sm focus:border-accent focus:outline-none"></div>
+            <div class="mb-3"><input id="gl-target" type="number" step="0.01" placeholder="Objetivo ($)" class="w-full bg-bg border border-brd rounded-xl px-4 py-2.5 text-sm focus:border-accent focus:outline-none"></div>
+            <div class="mb-3"><input id="gl-current" type="number" step="0.01" placeholder="Ahorrado hasta ahora" class="w-full bg-bg border border-brd rounded-xl px-4 py-2.5 text-sm focus:border-accent focus:outline-none"></div>
+            <div class="mb-4"><input id="gl-deadline" type="date" class="w-full bg-bg border border-brd rounded-xl px-4 py-2.5 text-sm focus:border-accent focus:outline-none"></div>
+            <button onclick="addGoal()" class="w-full bg-accent text-white font-bold py-3 rounded-xl text-sm">Crear meta</button>
+        </div>
+    </div>
+</div>
 
-    // ==================== CATEGORÍAS ====================
-    const CATEGORIES = [
-        { id: 'vivienda', name: 'Vivienda', icon: 'fa-house', color: '#FF6B6B' },
-        { id: 'alimentacion', name: 'Alimentación', icon: 'fa-utensils', color: '#FFB800' },
-        { id: 'transporte', name: 'Transporte', icon: 'fa-car', color: '#00D68F' },
-        { id: 'servicios', name: 'Servicios', icon: 'fa-bolt', color: '#4ECDC4' },
-        { id: 'entretenimiento', name: 'Ocio', icon: 'fa-film', color: '#A78BFA' },
-        { id: 'salud', name: 'Salud', icon: 'fa-heart-pulse', color: '#F472B6' },
-        { id: 'ropa', name: 'Ropa', icon: 'fa-shirt', color: '#FB923C' },
-        { id: 'educacion', name: 'Educación', icon: 'fa-book', color: '#60A5FA' },
-        { id: 'regalos', name: 'Regalos', icon: 'fa-gift', color: '#E879F9' },
-        { id: 'trabajo', name: 'Salario', icon: 'fa-briefcase', color: '#34D399' },
-        { id: 'freelance', name: 'Freelance', icon: 'fa-laptop', color: '#6EE7B7' },
-        { id: 'otros', name: 'Otros', icon: 'fa-ellipsis', color: '#94A3B8' }
-    ];
+<!-- ==================== MODAL: PRESUPUESTO ==================== -->
+<div id="modal-budget" class="fixed inset-0 z-50 hidden">
+    <div class="modal-bg absolute inset-0" onclick="closeBudgetModal()"></div>
+    <div class="absolute bottom-0 w-full bg-white rounded-t-3xl border-t border-brd anim-up max-h-[80vh] overflow-y-auto">
+        <div class="w-10 h-1 bg-brd rounded-full mx-auto mt-3 mb-2"></div>
+        <div class="p-5">
+            <h2 class="font-display font-bold text-lg mb-4">Presupuestos mensuales</h2>
+            <div id="budget-list" class="space-y-3 mb-4"></div>
+            <button onclick="saveBudgets()" class="w-full bg-accent text-white font-bold py-3 rounded-xl text-sm">Guardar</button>
+        </div>
+    </div>
+</div>
 
-    // ==================== ESTADO ====================
-    const state = {
-        sbClient: null,
-        isOnline: false,
-        users: { user1: 'Él', user2: 'Ella' },
-        currency: 'USD',
-        transactions: [],
-        currentView: 'dashboard',
-        monthOffset: 0,
-        modalType: 'expense',
-        modalCategory: 'alimentacion',
-        modalUser: '',
-    };
+<!-- Toast -->
+<div id="toasts" class="fixed top-4 left-4 right-4 z-[200] space-y-2 pointer-events-none"></div>
 
-    const CURRENCY_MAP = { USD: '$', EUR: '€', MXN: '$', ARS: '$', COP: '$', CLP: '$', PEN: 'S/', UYU: 'U$', BRL: 'R$' };
+<script>
+// ===== CREDENCIALES =====
+const SB_URL='https://mzdmpurmudvysnjylrik.supabase.co';
+const SB_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im16ZG1wdXJtdWR2eXNuanlscmlrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTEyMTA4OTksImV4cCI6MjEwNjc4Njg5OX0.toFiyG9uoXlGgpvkq21of5S304RTZLr92N-4Skkp_gE';
 
-    // ==================== UTILIDADES ====================
-    function fmt(n) {
-        const sym = CURRENCY_MAP[state.currency] || '$';
-        const abs = Math.abs(n);
-        const formatted = abs >= 1000 ? abs.toLocaleString('es', { minimumFractionDigits: 0, maximumFractionDigits: 0 }) : abs.toFixed(abs % 1 === 0 ? 0 : 2);
-        return (n < 0 ? '-' : '') + sym + formatted;
+// ===== CATEGORÍAS =====
+const CATS=[
+    {id:'vivienda',name:'Vivienda',icon:'fa-house',color:'#E74C3C'},
+    {id:'alimentacion',name:'Alimentación',icon:'fa-utensils',color:'#E8A838'},
+    {id:'transporte',name:'Transporte',icon:'fa-car',color:'#00B894'},
+    {id:'servicios',name:'Servicios',icon:'fa-bolt',color:'#4A90D9'},
+    {id:'ocio',name:'Ocio',icon:'fa-film',color:'#A78BFA'},
+    {id:'salud',name:'Salud',icon:'fa-heart-pulse',color:'#E84393'},
+    {id:'ropa',name:'Ropa',icon:'fa-shirt',color:'#FB923C'},
+    {id:'educacion',name:'Educación',icon:'fa-book',color:'#60A5FA'},
+    {id:'regalos',name:'Regalos',icon:'fa-gift',color:'#D946EF'},
+    {id:'salario',name:'Salario',icon:'fa-briefcase',color:'#00B894'},
+    {id:'freelance',name:'Freelance',icon:'fa-laptop',color:'#6EE7B7'},
+    {id:'otros',name:'Otros',icon:'fa-ellipsis',color:'#94A3B8'}
+];
+const ACCT_ICONS={bank:'fa-building-columns',cash:'fa-money-bill-wave',card:'fa-credit-card',investment:'fa-chart-line',other:'fa-wallet'};
+const ACCT_COLORS={bank:'#4A90D9',cash:'#00B894',card:'#E74C3C',investment:'#E8A838',other:'#94A3B8'};
+
+// ===== ESTADO =====
+const S={sb:null,online:false,u1:'Facu',u2:'Mel',curr:'USD',tx:[],accts:[],goals:[],budgets:{},mType:'expense',mCat:'alimentacion',mUser:'',mAcct:'none'};
+
+const CURR_MAP={USD:'$',EUR:'€',ARS:'$',MXN:'$',COP:'$',UYU:'U$',BRL:'R$'};
+
+// ===== UTILS =====
+function fmt(n){const s=CURR_MAP[S.curr]||'$';const a=Math.abs(n);const f=a>=1000?a.toLocaleString('es',{maximumFractionDigits:0}):a.toFixed(a%1===0?0:2);return(n<0?'-':'')+s+f}
+function fmtD(d){return new Date(d+'T12:00:00').toLocaleDateString('es',{day:'numeric',month:'short'})}
+function today(){return new Date().toISOString().slice(0,10)}
+function cat(id){return CATS.find(c=>c.id===id)||CATS[CATS.length-1]}
+function mRange(){const d=new Date();const s=new Date(d.getFullYear(),d.getMonth(),1);const e=new Date(d.getFullYear(),d.getMonth()+1,0);return{s:s.toISOString().slice(0,10),e:e.toISOString().slice(0,10)}}
+
+function toast(m,t='info'){
+    const cs={info:'bg-accent text-white',success:'bg-income text-white',error:'bg-expense text-white'};
+    const ic={info:'fa-info',success:'fa-check',error:'fa-exclamation'};
+    const el=document.createElement('div');el.className=`toast pointer-events-auto ${cs[t]} px-4 py-2.5 rounded-xl text-sm font-medium shadow-lg flex items-center gap-2`;
+    el.innerHTML=`<i class="fa-solid ${ic[t]}"></i>${m}`;document.getElementById('toasts').appendChild(el);
+    setTimeout(()=>{el.classList.add('out');setTimeout(()=>el.remove(),250)},2500);
+}
+
+// ===== DATA LAYER =====
+function lLoad(k){try{return JSON.parse(localStorage.getItem(k)||'[]')}catch{return[]}}
+function lSave(k,d){localStorage.setItem(k,JSON.stringify(d))}
+
+async function loadAll(){
+    if(S.sb){
+        try{
+            const[tr,ac,gl]=await Promise.all([S.sb.from('transactions').select('*').order('date',{ascending:false}),S.sb.from('accounts').select('*').order('created_at'),S.sb.from('goals').select('*').order('created_at')]);
+            if(tr.error)throw tr.error;S.tx=tr.data||[];
+            if(!ac.error)S.accts=ac.data||[];
+            if(!gl.error)S.goals=gl.data||[];
+            S.online=true;updSync();return;
+        }catch(e){console.error(e);S.online=false;updSync()}
     }
-    function fmtDate(d) {
-        return new Date(d + 'T12:00:00').toLocaleDateString('es', { day: 'numeric', month: 'short' });
+    S.tx=lLoad('hf_tx');S.accts=lLoad('hf_accts');S.goals=lLoad('hf_goals');
+}
+function loadBudgets(){S.budgets=JSON.parse(localStorage.getItem('hf_budgets')||'{}')}
+
+async function saveTx(t){
+    if(S.sb){try{const{data,error}=await S.sb.from('transactions').insert(t).select();if(error)throw error;S.online=true;updSync();return data[0]}catch{S.online=false;updSync();toast('Error Supabase, guardando local','error')}}
+    const l=lLoad('hf_tx');t.id=crypto.randomUUID();t.created_at=new Date().toISOString();l.unshift(t);lSave('hf_tx',l);return t;
+}
+async function delTx(id){
+    if(S.sb){try{const{error}=await S.sb.from('transactions').delete().eq('id',id);if(error)throw error;S.online=true;updSync();return}catch{S.online=false;updSync()}}
+    lSave('hf_tx',lLoad('hf_tx').filter(t=>t.id!==id));
+}
+async function saveAcct(a){
+    if(S.sb){try{const{data,error}=await S.sb.from('accounts').insert(a).select();if(error)throw error;S.online=true;updSync();return data[0]}catch{S.online=false;updSync()}}
+    const l=lLoad('hf_accts');a.id=crypto.randomUUID();a.created_at=new Date().toISOString();l.push(a);lSave('hf_accts',l);return a;
+}
+async function saveGoal(g){
+    if(S.sb){try{const{data,error}=await S.sb.from('goals').insert(g).select();if(error)throw error;return data[0]}catch{}}
+    const l=lLoad('hf_goals');g.id=crypto.randomUUID();g.created_at=new Date().toISOString();l.push(g);lSave('hf_goals',l);return g;
+}
+async function updGoal(id,cur){
+    if(S.sb){try{await S.sb.from('goals').update({current:cur}).eq('id',id);return}catch{}}
+    const l=lLoad('hf_goals');const g=l.find(g=>g.id===id);if(g)g.current=cur;lSave('hf_goals',l);
+}
+async function delAcct(id){
+    if(S.sb){try{await S.sb.from('accounts').delete().eq('id',id);return}catch{}}
+    lSave('hf_accts',lLoad('hf_accts').filter(a=>a.id!==id));
+}
+
+function updSync(){const el=document.getElementById('home-sync');if(!el)return;el.className=S.online?'w-2 h-2 rounded-full bg-income animate-pulse':'w-2 h-2 rounded-full bg-expense'}
+
+// ===== REALTIME =====
+function subRT(){if(!S.sb)return;try{S.sb.channel('hf').on('postgres_changes',{event:'*',schema:'public'},async()=>{await loadAll();renderAll()}).subscribe()}catch{}}
+
+// ===== NAV =====
+function switchTab(t){
+    document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));
+    document.getElementById(`view-${t}`).classList.add('active');
+    document.querySelectorAll('.tab-item').forEach(n=>{n.classList.toggle('active',n.dataset.tab===t);n.classList.toggle('text-muted',n.dataset.tab!==t)});
+    renderAll();
+}
+
+function renderAll(){
+    const v=document.querySelector('.view.active')?.id.replace('view-','');
+    if(v==='home')renderHome();else if(v==='transactions')renderTransactions();else if(v==='analytics')renderAnalytics();else if(v==='settings')renderSettings();
+}
+
+// ===== HOME =====
+let chCat=null;
+function renderHome(){
+    const r=mRange(),mTx=S.tx.filter(t=>t.date>=r.s&&t.date<=r.e);
+    const inc=mTx.filter(t=>t.type==='income').reduce((s,t)=>s+Number(t.amount),0);
+    const exp=mTx.filter(t=>t.type==='expense').reduce((s,t)=>s+Number(t.amount),0);
+    const sav=inc-exp;
+    const pat=S.accts.reduce((s,a)=>s+Number(a.balance),0);
+
+    document.getElementById('home-greeting').textContent=`${S.u1} & ${S.u2}`;
+    document.getElementById('home-patrimonio').textContent=fmt(pat);
+    document.getElementById('home-income').textContent=fmt(inc);
+    document.getElementById('home-expense').textContent=fmt(exp);
+    document.getElementById('home-savings').textContent=fmt(sav);
+    document.getElementById('home-savings').className=`text-sm font-display font-bold ${sav>=0?'text-income':'text-expense'}`;
+
+    // Cuentas
+    const acEl=document.getElementById('home-accounts');
+    if(!S.accts.length)acEl.innerHTML='<div class="card p-4 text-center text-muted text-xs min-w-[140px]"><i class="fa-solid fa-plus mb-1 text-accent"></i>Agregá una cuenta</div>';
+    else acEl.innerHTML=S.accts.map(a=>`<div class="card p-3 min-w-[130px] shrink-0 cursor-pointer" onclick="confirmDelAcct('${a.id}','${a.name}')"><div class="flex items-center gap-2 mb-2"><i class="fa-solid ${a.icon||ACCT_ICONS[a.type]||'fa-wallet'} text-xs" style="color:${a.color||ACCT_COLORS[a.type]||'#E8A838'}"></i><span class="text-xs font-medium truncate">${a.name}</span></div><p class="text-sm font-display font-bold">${fmt(Number(a.balance))}</p></div>`).join('');
+
+    // Categorías donut
+    renderCatChart(mTx);
+
+    // Presupuestos
+    renderBudgets(mTx);
+
+    // Metas
+    renderGoals();
+
+    // Recientes
+    const rec=S.tx.slice(0,5);
+    const rEl=document.getElementById('home-recent');
+    if(!rec.length)rEl.innerHTML='<p class="text-muted text-xs text-center py-4">Sin movimientos</p>';
+    else rEl.innerHTML=rec.map(t=>{const c=cat(t.category);const ii=t.type==='income';return`<div class="card p-3 flex items-center gap-3"><div class="w-9 h-9 rounded-xl flex items-center justify-center text-xs" style="background:${c.color}12;color:${c.color}"><i class="fa-solid ${c.icon}"></i></div><div class="flex-1 min-w-0"><p class="text-xs font-medium truncate">${t.description||c.name}</p><p class="text-[10px] text-muted">${fmtD(t.date)} · ${t.user_name}</p></div><span class="text-xs font-bold ${ii?'text-income':'text-expense'}">${ii?'+':'-'}${fmt(Number(t.amount))}</span></div>`}).join('');
+}
+
+function renderCatChart(mTx){
+    const ctx=document.getElementById('chart-cat-home');if(!ctx)return;
+    const exp=mTx.filter(t=>t.type==='expense');const by={};exp.forEach(t=>{by[t.category]=(by[t.category]||0)+Number(t.amount)});
+    const sorted=Object.entries(by).sort((a,b)=>b[1]-a[1]);const total=sorted.reduce((s,[,v])=>s+v,0);
+    if(chCat)chCat.destroy();
+    chCat=new Chart(ctx,{type:'doughnut',data:{labels:sorted.map(([k])=>cat(k).name),datasets:[{data:sorted.map(([,v])=>v),backgroundColor:sorted.map(([k])=>cat(k).color),borderWidth:0,hoverOffset:6}]},options:{responsive:false,maintainAspectRatio:false,cutout:'68%',plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>{const p=total>0?Math.round((c.raw/total)*100):0;return`${c.label}: ${fmt(c.raw)} (${p}%)`}}}}}});
+    document.getElementById('cat-legend').innerHTML=sorted.slice(0,5).map(([k,v])=>{const c=cat(k);const p=total>0?Math.round((v/total)*100):0;return`<div class="flex items-center gap-2"><span class="w-2.5 h-2.5 rounded-full shrink-0" style="background:${c.color}"></span><span class="truncate flex-1">${c.name}</span><span class="font-medium">${p}%</span></div>`}).join('');
+}
+
+function renderBudgets(mTx){
+    const el=document.getElementById('home-budgets');
+    const entries=Object.entries(S.budgets).filter(([,v])=>v>0);
+    if(!entries.length){el.innerHTML='<p class="text-xs text-muted text-center py-3">Configurá tus presupuestos</p>';return}
+    el.innerHTML=entries.map(([cid,limit])=>{
+        const c=cat(cid);const spent=mTx.filter(t=>t.type==='expense'&&t.category===cid).reduce((s,t)=>s+Number(t.amount),0);
+        const pct=Math.min(Math.round((spent/limit)*100),100);const over=spent>limit;
+        return`<div class="card p-3"><div class="flex items-center justify-between mb-2"><span class="text-xs flex items-center gap-2"><i class="fa-solid ${c.icon}" style="color:${c.color}"></i>${c.name}</span><span class="text-xs ${over?'text-expense font-bold':'text-muted'}">${fmt(spent)} / ${fmt(limit)}</span></div><div class="progress-bar"><div class="progress-fill" style="width:${pct}%;background:${over?'#E74C3C':c.color}"></div></div></div>`;
+    }).join('');
+}
+
+function renderGoals(){
+    const el=document.getElementById('home-goals');
+    if(!S.goals.length){el.innerHTML='<p class="text-xs text-muted text-center py-3">Sin metas de ahorro</p>';return}
+    el.innerHTML=S.goals.map(g=>{
+        const pct=Math.min(Math.round((Number(g.current)/Number(g.target))*100),100);
+        const dl=g.deadline?` · ${fmtD(g.deadline)}`:'';
+        return`<div class="card p-3"><div class="flex items-center justify-between mb-1"><span class="text-xs font-medium">${g.name}${dl}</span><span class="text-xs text-muted">${pct}%</span></div><div class="progress-bar mb-1"><div class="progress-fill" style="width:${pct}%;background:${g.color||'#E8A838'}"></div></div><div class="flex items-center justify-between"><span class="text-[10px] text-muted">${fmt(Number(g.current))}</span><span class="text-[10px] text-muted">${fmt(Number(g.target))}</span></div></div>`;
+    }).join('');
+}
+
+// ===== TRANSACCIONES =====
+function renderTransactions(){
+    const tp=document.getElementById('f-type').value;
+    const us=document.getElementById('f-user').value;
+    const ct=document.getElementById('f-cat').value;
+    let f=[...S.tx];
+    if(tp!=='all')f=f.filter(t=>t.type===tp);
+    if(us!=='all')f=f.filter(t=>t.user_name===us);
+    if(ct!=='all')f=f.filter(t=>t.category===ct);
+    const el=document.getElementById('tx-list'),em=document.getElementById('tx-empty');
+    if(!f.length){el.innerHTML='';em.classList.remove('hidden');return}
+    em.classList.add('hidden');
+    const gr={};f.forEach(t=>{(gr[t.date]=gr[t.date]||[]).push(t)});
+    el.innerHTML=Object.entries(gr).map(([d,txs])=>{
+        const dl=new Date(d+'T12:00:00').toLocaleDateString('es',{weekday:'short',day:'numeric',month:'short'});
+        return`<p class="text-[10px] text-muted mt-3 mb-1 capitalize px-1">${dl}</p>`+txs.map(t=>{const c=cat(t.category);const ii=t.type==='income';return`<div class="card p-3 flex items-center gap-3 group"><div class="w-10 h-10 rounded-xl flex items-center justify-center text-sm" style="background:${c.color}12;color:${c.color}"><i class="fa-solid ${c.icon}"></i></div><div class="flex-1 min-w-0"><p class="text-sm font-medium truncate">${t.description||c.name}</p><p class="text-[10px] text-muted">${c.name} · ${t.user_name}</p></div><span class="text-sm font-bold ${ii?'text-income':'text-expense'}">${ii?'+':'-'}${fmt(Number(t.amount))}</span><button onclick="confirmDel('${t.id}','${(t.description||c.name).replace(/'/g,'')}')" class="w-8 h-8 rounded-lg flex items-center justify-center opacity-0 group-hover:opacity-100 md:opacity-0 transition"><i class="fa-solid fa-trash text-expense text-xs"></i></button></div>`}).join('');
+    }).join('');
+}
+
+async function confirmDel(id,n){toast(`¿Eliminar "${n}"?`,'info');const el=document.createElement('div');el.className='toast pointer-events-auto bg-white border border-brd px-4 py-3 rounded-xl text-sm shadow-lg flex items-center gap-3';el.innerHTML=`<span>¿Eliminar <b>${n}</b>?</span><button onclick="doDel('${id}',this)" class="bg-expense text-white text-xs px-3 py-1 rounded-lg font-medium">Sí</button><button onclick="this.closest('.toast').remove()" class="bg-bg text-xs px-3 py-1 rounded-lg font-medium border border-brd">No</button>`;document.getElementById('toasts').appendChild(el);setTimeout(()=>{if(el.parentNode)el.remove()},6000)}
+async function doDel(id,btn){btn.closest('.toast').remove();await delTx(id);await loadAll();renderAll();toast('Eliminado','success')}
+
+async function confirmDelAcct(id,n){const el=document.createElement('div');el.className='toast pointer-events-auto bg-white border border-brd px-4 py-3 rounded-xl text-sm shadow-lg flex items-center gap-3';el.innerHTML=`<span>¿Eliminar cuenta <b>${n}</b>?</span><button onclick="doDelAcct('${id}',this)" class="bg-expense text-white text-xs px-3 py-1 rounded-lg font-medium">Sí</button><button onclick="this.closest('.toast').remove()" class="bg-bg text-xs px-3 py-1 rounded-lg font-medium border border-brd">No</button>`;document.getElementById('toasts').appendChild(el);setTimeout(()=>{if(el.parentNode)el.remove()},6000)}
+async function doDelAcct(id,btn){btn.closest('.toast').remove();await delAcct(id);await loadAll();renderAll();toast('Cuenta eliminada','success')}
+
+// ===== ANALÍTICAS =====
+let chTrend=null,chUsers=null;
+function renderAnalytics(){
+    // Trend
+    const ctx1=document.getElementById('chart-trend');if(ctx1){
+        const lb=[],id=[],ed=[];for(let i=-5;i<=0;i++){const d=new Date();d.setMonth(d.getMonth()+i,1);const s=new Date(d.getFullYear(),d.getMonth(),1).toISOString().slice(0,10);const e=new Date(d.getFullYear(),d.getMonth()+1,0).toISOString().slice(0,10);lb.push(d.toLocaleDateString('es',{month:'short'}));const m=S.tx.filter(t=>t.date>=s&&t.date<=e);id.push(m.filter(t=>t.type==='income').reduce((s,t)=>s+Number(t.amount),0));ed.push(m.filter(t=>t.type==='expense').reduce((s,t)=>s+Number(t.amount),0))}
+        if(chTrend)chTrend.destroy();chTrend=new Chart(ctx1,{type:'line',data:{labels:lb,datasets:[{label:'Ingresos',data:id,borderColor:'#00B894',backgroundColor:'rgba(0,184,148,.08)',fill:true,tension:.4,pointRadius:3},{label:'Gastos',data:ed,borderColor:'#E74C3C',backgroundColor:'rgba(231,76,60,.08)',fill:true,tension:.4,pointRadius:3}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{labels:{color:'#9E9E93',font:{size:10},boxWidth:10}}},scales:{x:{grid:{display:false},ticks:{color:'#9E9E93',font:{size:10}}},y:{grid:{color:'rgba(0,0,0,.04)'},ticks:{color:'#9E9E93',font:{size:10},callback:v=>v>=1000?(v/1000)+'k':v}}}}});
     }
-    function monthName(offset) {
-        const d = new Date(); d.setMonth(d.getMonth() + offset, 1);
-        return d.toLocaleDateString('es', { month: 'long', year: 'numeric' });
+    // Users
+    const ctx2=document.getElementById('chart-users');if(ctx2){
+        const u1i=S.tx.filter(t=>t.user_name===S.u1&&t.type==='income').reduce((s,t)=>s+Number(t.amount),0),u2i=S.tx.filter(t=>t.user_name===S.u2&&t.type==='income').reduce((s,t)=>s+Number(t.amount),0);
+        const u1e=S.tx.filter(t=>t.user_name===S.u1&&t.type==='expense').reduce((s,t)=>s+Number(t.amount),0),u2e=S.tx.filter(t=>t.user_name===S.u2&&t.type==='expense').reduce((s,t)=>s+Number(t.amount),0);
+        if(chUsers)chUsers.destroy();chUsers=new Chart(ctx2,{type:'bar',data:{labels:['Ingresos','Gastos','Ahorro'],datasets:[{label:S.u1,data:[u1i,u1e,u1i-u1e],backgroundColor:'rgba(74,144,217,.65)',borderRadius:6},{label:S.u2,data:[u2i,u2e,u2i-u2e],backgroundColor:'rgba(232,67,147,.65)',borderRadius:6}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{labels:{color:'#9E9E93',font:{size:10},boxWidth:10}}},scales:{x:{grid:{display:false},ticks:{color:'#9E9E93'}},y:{grid:{color:'rgba(0,0,0,.04)'},ticks:{color:'#9E9E93',callback:v=>v>=1000?(v/1000)+'k':v}}}}});
     }
-    function currentMonthRange() {
-        const d = new Date(); d.setMonth(d.getMonth() + state.monthOffset, 1);
-        const start = new Date(d.getFullYear(), d.getMonth(), 1);
-        const end = new Date(d.getFullYear(), d.getMonth() + 1, 0);
-        return { start: start.toISOString().slice(0, 10), end: end.toISOString().slice(0, 10), month: d.getMonth(), year: d.getFullYear() };
+    // Top
+    const exps=S.tx.filter(t=>t.type==='expense');const by={};exps.forEach(t=>{by[t.category]=(by[t.category]||0)+Number(t.amount)});const sorted=Object.entries(by).sort((a,b)=>b[1]-a[1]).slice(0,5);const mx=sorted[0]?.[1]||1;
+    document.getElementById('analytics-top').innerHTML=sorted.map(([id,amt])=>{const c=cat(id);const p=Math.round((amt/mx)*100);return`<div><div class="flex items-center justify-between mb-1"><span class="text-xs flex items-center gap-2"><i class="fa-solid ${c.icon}" style="color:${c.color}"></i>${c.name}</span><span class="text-xs font-medium">${fmt(amt)}</span></div><div class="progress-bar"><div class="progress-fill" style="width:${p}%;background:${c.color}"></div></div></div>`}).join('')||'<p class="text-xs text-muted text-center py-3">Sin datos</p>';
+}
+
+// ===== SETTINGS =====
+function renderSettings(){
+    document.getElementById('s-u1').value=S.u1;document.getElementById('s-u2').value=S.u2;document.getElementById('s-curr').value=S.curr;
+    document.getElementById('s-sb').innerHTML=S.sb?`<p class="text-xs text-income flex items-center gap-2"><i class="fa-solid fa-circle-check"></i>Conectado</p><p class="text-[10px] text-muted mt-1">${SB_URL}</p>`:`<p class="text-xs text-expense flex items-center gap-2"><i class="fa-solid fa-circle-xmark"></i>Desconectado</p>`;
+}
+function saveNames(){S.u1=document.getElementById('s-u1').value||'Facu';S.u2=document.getElementById('s-u2').value||'Mel';localStorage.setItem('hf_users',JSON.stringify({u1:S.u1,u2:S.u2}));updFilters();renderAll();toast('Nombres actualizados','success')}
+function saveCurr(){S.curr=document.getElementById('s-curr').value;localStorage.setItem('hf_curr',S.curr);renderAll()}
+function exportData(){const b=new Blob([JSON.stringify({transactions:S.tx,accounts:S.accts,goals:S.goals},null,2)],{type:'application/json'});const a=document.createElement('a');a.href=URL.createObjectURL(b);a.download=`hogarfin-${today()}.json`;a.click();toast('Exportado','success')}
+function clearAll(){const el=document.createElement('div');el.className='toast pointer-events-auto bg-expense/90 px-4 py-3 rounded-xl text-sm shadow-lg flex items-center gap-3 text-white';el.innerHTML=`<span>¿Borrar TODO?</span><button onclick="doClear(this)" class="bg-white text-expense text-xs px-3 py-1 rounded-lg font-bold">Sí</button><button onclick="this.closest('.toast').remove()" class="bg-white/20 text-xs px-3 py-1 rounded-lg">No</button>`;document.getElementById('toasts').appendChild(el)}
+async function doClear(btn){btn.closest('.toast').remove();if(S.sb){try{await S.sb.from('transactions').delete().neq('id','00000000-0000-0000-0000-000000000000');await S.sb.from('accounts').delete().neq('id','00000000-0000-0000-0000-000000000000');await S.sb.from('goals').delete().neq('id','00000000-0000-0000-0000-000000000000')}catch{}}lSave('hf_tx',[]);lSave('hf_accts',[]);lSave('hf_goals',[]);S.tx=[];S.accts=[];S.goals=[];renderAll();toast('Datos eliminados','success')}
+
+// ===== MODAL: TRANSACCIÓN =====
+function openAddModal(){document.getElementById('modal-add').classList.remove('hidden');document.getElementById('m-amt').value='';document.getElementById('m-desc').value='';document.getElementById('m-date').value=today();S.mType='expense';S.mCat='alimentacion';S.mUser=S.u1;S.mAcct='none';updMType();renderMCats();renderMUsers();renderMAccts();setTimeout(()=>document.getElementById('m-amt').focus(),150)}
+function closeAddModal(){document.getElementById('modal-add').classList.add('hidden')}
+function setMType(t){S.mType=t;S.mCat=t==='income'?'salario':'alimentacion';updMType();renderMCats()}
+function updMType(){const e=document.getElementById('mt-exp'),i=document.getElementById('mt-inc');if(S.mType==='expense'){e.className='flex-1 py-2.5 rounded-xl text-sm font-semibold bg-expense/10 text-expense border-2 border-expense';i.className='flex-1 py-2.5 rounded-xl text-sm font-semibold bg-bg text-muted border-2 border-transparent'}else{i.className='flex-1 py-2.5 rounded-xl text-sm font-semibold bg-income/10 text-income border-2 border-income';e.className='flex-1 py-2.5 rounded-xl text-sm font-semibold bg-bg text-muted border-2 border-transparent'}}
+function renderMCats(){const cs=S.mType==='income'?CATS.filter(c=>['salario','freelance','regalos','otros'].includes(c.id)):CATS.filter(c=>!['salario','freelance'].includes(c.id));document.getElementById('m-cats').innerHTML=cs.map(c=>`<button onclick="selCat('${c.id}')" class="cat-btn flex flex-col items-center gap-1 p-2 rounded-xl border-2 transition ${S.mCat===c.id?'border-accent bg-accent/5':'border-transparent bg-bg'}"><i class="fa-solid ${c.icon} text-sm" style="color:${c.color}"></i><span class="text-[9px] ${S.mCat===c.id?'text-txt font-medium':'text-muted'}">${c.name}</span></button>`).join('')}
+function selCat(id){S.mCat=id;renderMCats()}
+function renderMUsers(){document.getElementById('m-users').innerHTML=[S.u1,S.u2].map((n,i)=>`<button onclick="selUser('${n}')" class="cat-btn flex items-center justify-center gap-2 py-2.5 rounded-xl border-2 transition ${S.mUser===n?'border-accent bg-accent/5':'border-transparent bg-bg'}"><i class="fa-solid ${i===0?'fa-mars':'fa-venus'} ${i===0?'text-blue':'text-pink'} text-sm"></i><span class="text-sm ${S.mUser===n?'font-medium':'text-muted'}">${n}</span></button>`).join('')}
+function selUser(n){S.mUser=n;renderMUsers()}
+function renderMAccts(){const el=document.getElementById('m-account');el.innerHTML=`<option value="none">Sin cuenta</option>`+S.accts.map(a=>`<option value="${a.id}">${a.name}</option>`).join('')}
+
+async function addTx(){
+    const amt=parseFloat(document.getElementById('m-amt').value);if(!amt||amt<=0){toast('Ingresá un monto','error');return}
+    const t={user_name:S.mUser,type:S.mType,category:S.mCat,amount:amt,description:document.getElementById('m-desc').value.trim(),date:document.getElementById('m-date').value||today(),account_id:document.getElementById('m-account').value==='none'?null:document.getElementById('m-account').value};
+    await saveTx(t);
+    // Actualizar cuenta si se seleccionó
+    if(t.account_id){const ac=S.accts.find(a=>a.id===t.account_id);if(ac){const newBal=Number(ac.balance)+(t.type==='income'?amt:-amt);if(S.sb){try{await S.sb.from('accounts').update({balance:newBal}).eq('id',ac.id)}catch{}}const l=lLoad('hf_accts');const a2=l.find(a=>a.id===ac.id);if(a2)a2.balance=newBal;lSave('hf_accts',l)}}
+    await loadAll();closeAddModal();renderAll();toast(`${t.type==='income'?'Ingreso':'Gasto'} registrado`,'success');
+}
+
+// ===== MODAL: CUENTA =====
+function openAccountModal(){document.getElementById('modal-account').classList.remove('hidden');document.getElementById('ac-name').value='';document.getElementById('ac-bal').value=''}
+function closeAccountModal(){document.getElementById('modal-account').classList.add('hidden')}
+async function addAccount(){const n=document.getElementById('ac-name').value.trim();const tp=document.getElementById('ac-type').value;const b=parseFloat(document.getElementById('ac-bal').value)||0;if(!n){toast('Ingresá un nombre','error');return}const a={name:n,type:tp,balance:b,color:ACCT_COLORS[tp]||'#E8A838',icon:ACCT_ICONS[tp]||'fa-wallet'};await saveAcct(a);await loadAll();closeAccountModal();renderAll();toast('Cuenta creada','success')}
+
+// ===== MODAL: META =====
+function openGoalModal(){document.getElementById('modal-goal').classList.remove('hidden');document.getElementById('gl-name').value='';document.getElementById('gl-target').value='';document.getElementById('gl-current').value='';document.getElementById('gl-deadline').value=''}
+function closeGoalModal(){document.getElementById('modal-goal').classList.add('hidden')}
+async function addGoal(){const n=document.getElementById('gl-name').value.trim();const tg=parseFloat(document.getElementById('gl-target').value);const cu=parseFloat(document.getElementById('gl-current').value)||0;const dl=document.getElementById('gl-deadline').value;if(!n||!tg){toast('Completá nombre y objetivo','error');return}const g={name:n,target:tg,current:cu,color:'#E8A838',icon:'fa-bullseye',deadline:dl||null};await saveGoal(g);await loadAll();closeGoalModal();renderAll();toast('Meta creada','success')}
+
+// ===== MODAL: PRESUPUESTO =====
+function openBudgetModal(){
+    document.getElementById('modal-budget').classList.remove('hidden');
+    const expCats=CATS.filter(c=>!['salario','freelance'].includes(c.id));
+    document.getElementById('budget-list').innerHTML=expCats.map(c=>`<div class="flex items-center gap-3"><div class="w-8 h-8 rounded-lg flex items-center justify-center" style="background:${c.color}12;color:${c.color}"><i class="fa-solid ${c.icon} text-xs"></i></div><span class="text-sm flex-1">${c.name}</span><input type="number" data-cat="${c.id}" value="${S.budgets[c.id]||0}" class="bg-bg border border-brd rounded-xl px-3 py-1.5 text-sm w-28 text-right focus:border-accent focus:outline-none" placeholder="0"></div>`).join('');
+}
+function closeBudgetModal(){document.getElementById('modal-budget').classList.add('hidden')}
+function saveBudgets(){document.querySelectorAll('#budget-list input').forEach(el=>{S.budgets[el.dataset.cat]=parseFloat(el.value)||0});localStorage.setItem('hf_budgets',JSON.stringify(S.budgets));closeBudgetModal();renderAll();toast('Presupuestos guardados','success')}
+
+// ===== FILTERS =====
+function updFilters(){document.getElementById('f-user').innerHTML=`<option value="all">Ambos</option><option value="${S.u1}">${S.u1}</option><option value="${S.u2}">${S.u2}</option>`;document.getElementById('f-cat').innerHTML=`<option value="all">Categorías</option>`+CATS.map(c=>`<option value="${c.id}">${c.name}</option>`).join('')}
+
+// ===== SETUP =====
+function copySQL(){navigator.clipboard.writeText(document.getElementById('sql-code').textContent).then(()=>toast('SQL copiado','success'))}
+
+async function finishSetup(){
+    S.u1=document.getElementById('setup-u1').value.trim()||'Facu';S.u2=document.getElementById('setup-u2').value.trim()||'Mel';
+    localStorage.setItem('hf_users',JSON.stringify({u1:S.u1,u2:S.u2}));
+    try{S.sb=supabase.createClient(SB_URL,SB_KEY);const{error}=await S.sb.from('transactions').select('id').limit(1);if(error)throw error;S.online=true;subRT();toast('Conectado a Supabase','success')}catch{S.sb=null;S.online=false;toast('No se pudo conectar. ¿Creaste las tablas?','error')}
+    localStorage.setItem('hf_setup_done','1');document.getElementById('setup-overlay').style.display='none';document.getElementById('app').classList.remove('hidden');updFilters();updSync();await loadAll();renderHome();
+}
+
+// ===== INIT =====
+(function(){
+    const u=localStorage.getItem('hf_users');if(u)try{const p=JSON.parse(u);S.u1=p.u1;S.u2=p.u2}catch{}
+    const c=localStorage.getItem('hf_curr');if(c)S.curr=c;
+    loadBudgets();
+    if(localStorage.getItem('hf_setup_done')){
+        (async()=>{try{S.sb=supabase.createClient(SB_URL,SB_KEY);const{error}=await S.sb.from('transactions').select('id').limit(1);if(error)throw error;S.online=true;subRT()}catch{S.sb=null;S.online=false}document.getElementById('setup-overlay').style.display='none';document.getElementById('app').classList.remove('hidden');updFilters();updSync();await loadAll();renderHome()})();
     }
-    function getCat(id) { return CATEGORIES.find(c => c.id === id) || CATEGORIES[CATEGORIES.length - 1]; }
-    function today() { return new Date().toISOString().slice(0, 10); }
+    document.getElementById('setup-u1').value=S.u1;document.getElementById('setup-u2').value=S.u2;
+})();
 
-    // ==================== TOAST ====================
-    function toast(msg, type = 'info') {
-        const colors = { info: 'bg-accent text-bg', success: 'bg-income text-bg', error: 'bg-expense text-white' };
-        const icons = { info: 'fa-info', success: 'fa-check', error: 'fa-exclamation' };
-        const el = document.createElement('div');
-        el.className = `toast pointer-events-auto ${colors[type]} px-4 py-2.5 rounded-lg text-sm font-medium shadow-lg flex items-center gap-2`;
-        el.innerHTML = `<i class="fa-solid ${icons[type]}"></i> ${msg}`;
-        document.getElementById('toast-container').appendChild(el);
-        setTimeout(() => { el.classList.add('removing'); setTimeout(() => el.remove(), 300); }, 3000);
-    }
-
-    // ==================== CAPA DE DATOS ====================
-    function localLoad() { try { return JSON.parse(localStorage.getItem('hf_transactions') || '[]'); } catch { return []; } }
-    function localSave(data) { localStorage.setItem('hf_transactions', JSON.stringify(data)); }
-
-    async function loadTransactions() {
-        if (state.sbClient) {
-            try {
-                const { data, error } = await state.sbClient.from('transactions').select('*').order('date', { ascending: false });
-                if (error) throw error;
-                state.transactions = data || [];
-                state.isOnline = true;
-                updateSyncStatus();
-                return;
-            } catch (e) {
-                console.error('Supabase load error:', e);
-                state.isOnline = false;
-                updateSyncStatus();
-            }
-        }
-        state.transactions = localLoad();
-    }
-
-    async function saveTransaction(t) {
-        if (state.sbClient) {
-            try {
-                const { data, error } = await state.sbClient.from('transactions').insert(t).select();
-                if (error) throw error;
-                state.isOnline = true;
-                updateSyncStatus();
-                return data[0];
-            } catch (e) {
-                console.error('Supabase save error:', e);
-                state.isOnline = false;
-                updateSyncStatus();
-                toast('Error Supabase, guardando local', 'error');
-            }
-        }
-        const local = localLoad();
-        t.id = crypto.randomUUID();
-        t.created_at = new Date().toISOString();
-        local.unshift(t);
-        localSave(local);
-        return t;
-    }
-
-    async function deleteTransaction(id) {
-        if (state.sbClient) {
-            try {
-                const { error } = await state.sbClient.from('transactions').delete().eq('id', id);
-                if (error) throw error;
-                state.isOnline = true; updateSyncStatus(); return;
-            } catch (e) { state.isOnline = false; updateSyncStatus(); }
-        }
-        localSave(localLoad().filter(t => t.id !== id));
-    }
-
-    // ==================== REALTIME ====================
-    function subscribeRealtime() {
-        if (!state.sbClient) return;
-        try {
-            state.sbClient.channel('hf-changes')
-                .on('postgres_changes', { event: '*', schema: 'public', table: 'transactions' }, async () => {
-                    await loadTransactions();
-                    renderCurrentView();
-                })
-                .subscribe();
-        } catch (e) { console.error('Realtime error:', e); }
-    }
-
-    function updateSyncStatus() {
-        const el = document.getElementById('sync-status');
-        if (!el) return;
-        if (state.sbClient) {
-            el.innerHTML = state.isOnline
-                ? '<span class="w-2 h-2 rounded-full bg-income animate-pulse"></span> Sincronizado con Supabase'
-                : '<span class="w-2 h-2 rounded-full bg-expense"></span> Desconectado';
-        } else {
-            el.innerHTML = '<span class="w-2 h-2 rounded-full bg-accent"></span> Datos locales';
-        }
-    }
-
-    // ==================== NAVEGACIÓN ====================
-    function navigate(view) {
-        state.currentView = view;
-        document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
-        document.getElementById(`view-${view}`).classList.add('active');
-        document.querySelectorAll('.nav-item').forEach(n => {
-            n.classList.toggle('active', n.dataset.nav === view);
-            n.classList.toggle('text-muted', n.dataset.nav !== view);
-        });
-        renderCurrentView();
-        closeSidebar();
-    }
-
-    function renderCurrentView() {
-        switch (state.currentView) {
-            case 'dashboard': renderDashboard(); break;
-            case 'transactions': renderTransactions(); break;
-            case 'analytics': renderAnalytics(); break;
-            case 'settings': renderSettings(); break;
-        }
-    }
-
-    function toggleSidebar() { document.getElementById('sidebar').classList.toggle('open'); }
-    function closeSidebar() { document.getElementById('sidebar').classList.remove('open'); }
-    function changeMonth(dir) { state.monthOffset += dir; renderDashboard(); }
-
-    // ==================== DASHBOARD ====================
-    let chartTrend = null, chartCats = null;
-
-    function renderDashboard() {
-        const range = currentMonthRange();
-        document.getElementById('month-label').textContent = monthName(state.monthOffset);
-        const mn = monthName(state.monthOffset);
-        document.getElementById('dash-subtitle').textContent = mn.charAt(0).toUpperCase() + mn.slice(1);
-
-        const monthTx = state.transactions.filter(t => t.date >= range.start && t.date <= range.end);
-        const income = monthTx.filter(t => t.type === 'income').reduce((s, t) => s + Number(t.amount), 0);
-        const expense = monthTx.filter(t => t.type === 'expense').reduce((s, t) => s + Number(t.amount), 0);
-        const balance = income - expense;
-        const savings = income - expense;
-        const savingsPct = income > 0 ? Math.round((savings / income) * 100) : 0;
-
-        document.getElementById('stat-balance').textContent = fmt(balance);
-        document.getElementById('stat-balance').className = `text-xl md:text-2xl font-display font-bold ${balance >= 0 ? 'text-income' : 'text-expense'}`;
-        document.getElementById('stat-income').textContent = fmt(income);
-        document.getElementById('stat-expense').textContent = fmt(expense);
-        document.getElementById('stat-savings').textContent = fmt(savings);
-        document.getElementById('stat-savings').className = `text-xl md:text-2xl font-display font-bold ${savings >= 0 ? 'text-income' : 'text-expense'}`;
-        document.getElementById('stat-savings-pct').textContent = `${savingsPct}% del ingreso`;
-
-        renderTrendChart();
-        renderCategoryChart(monthTx);
-        renderUserBreakdown(monthTx, income, expense);
-        renderRecentTransactions();
-    }
-
-    function renderTrendChart() {
-        const ctx = document.getElementById('chart-trend'); if (!ctx) return;
-        const labels = [], incomeData = [], expenseData = [];
-        for (let i = -5; i <= 0; i++) {
-            const d = new Date(); d.setMonth(d.getMonth() + state.monthOffset + i, 1);
-            const start = new Date(d.getFullYear(), d.getMonth(), 1).toISOString().slice(0, 10);
-            const end = new Date(d.getFullYear(), d.getMonth() + 1, 0).toISOString().slice(0, 10);
-            labels.push(d.toLocaleDateString('es', { month: 'short' }));
-            const mTx = state.transactions.filter(t => t.date >= start && t.date <= end);
-            incomeData.push(mTx.filter(t => t.type === 'income').reduce((s, t) => s + Number(t.amount), 0));
-            expenseData.push(mTx.filter(t => t.type === 'expense').reduce((s, t) => s + Number(t.amount), 0));
-        }
-        if (chartTrend) chartTrend.destroy();
-        chartTrend = new Chart(ctx, {
-            type: 'bar',
-            data: { labels, datasets: [
-                { label: 'Ingresos', data: incomeData, backgroundColor: 'rgba(0,214,143,0.7)', borderRadius: 6, barPercentage: 0.6 },
-                { label: 'Gastos', data: expenseData, backgroundColor: 'rgba(255,107,107,0.7)', borderRadius: 6, barPercentage: 0.6 }
-            ]},
-            options: {
-                responsive: true, maintainAspectRatio: false,
-                plugins: { legend: { display: true, position: 'top', labels: { color: '#888', font: { size: 11 }, boxWidth: 12, padding: 15 } } },
-                scales: {
-                    x: { grid: { display: false }, ticks: { color: '#888', font: { size: 11 } } },
-                    y: { grid: { color: 'rgba(255,255,255,0.04)' }, ticks: { color: '#888', font: { size: 11 }, callback: v => v >= 1000 ? (v/1000)+'k' : v } }
-                }
-            }
-        });
-    }
-
-    function renderCategoryChart(monthTx) {
-        const ctx = document.getElementById('chart-categories'); if (!ctx) return;
-        const expenses = monthTx.filter(t => t.type === 'expense');
-        const byCat = {};
-        expenses.forEach(t => { byCat[t.category] = (byCat[t.category] || 0) + Number(t.amount); });
-        const sorted = Object.entries(byCat).sort((a, b) => b[1] - a[1]);
-        if (chartCats) chartCats.destroy();
-        chartCats = new Chart(ctx, {
-            type: 'doughnut',
-            data: { labels: sorted.map(([k]) => getCat(k).name), datasets: [{ data: sorted.map(([,v]) => v), backgroundColor: sorted.map(([k]) => getCat(k).color), borderWidth: 0, hoverOffset: 8 }] },
-            options: { responsive: true, maintainAspectRatio: false, cutout: '65%', plugins: { legend: { position: 'right', labels: { color: '#888', font: { size: 10 }, boxWidth: 10, padding: 8 } } } }
-        });
-    }
-
-    function renderUserBreakdown(monthTx, totalIncome, totalExpense) {
-        const el = document.getElementById('user-breakdown');
-        const u1 = state.users.user1, u2 = state.users.user2;
-        const u1Inc = monthTx.filter(t => t.user_name === u1 && t.type === 'income').reduce((s, t) => s + Number(t.amount), 0);
-        const u2Inc = monthTx.filter(t => t.user_name === u2 && t.type === 'income').reduce((s, t) => s + Number(t.amount), 0);
-        const u1Exp = monthTx.filter(t => t.user_name === u1 && t.type === 'expense').reduce((s, t) => s + Number(t.amount), 0);
-        const u2Exp = monthTx.filter(t => t.user_name === u2 && t.type === 'expense').reduce((s, t) => s + Number(t.amount), 0);
-
-        el.innerHTML = [u1, u2].map((name, i) => {
-            const inc = i === 0 ? u1Inc : u2Inc;
-            const exp = i === 0 ? u1Exp : u2Exp;
-            const incPct = totalIncome > 0 ? Math.round((inc / totalIncome) * 100) : 0;
-            const expPct = totalExpense > 0 ? Math.round((exp / totalExpense) * 100) : 0;
-            const avatar = i === 0 ? 'fa-mars' : 'fa-venus';
-            const color = i === 0 ? '#60A5FA' : '#F472B6';
-            return `<div class="bg-bg rounded-lg p-3">
-                <span class="text-sm font-medium flex items-center gap-2 mb-2"><i class="fa-solid ${avatar}" style="color:${color}"></i> ${name}</span>
-                <div class="grid grid-cols-2 gap-2 text-xs">
-                    <div><span class="text-muted">Ingreso:</span> <span class="text-income font-medium">${fmt(inc)}</span> <span class="text-muted">(${incPct}%)</span></div>
-                    <div><span class="text-muted">Gasto:</span> <span class="text-expense font-medium">${fmt(exp)}</span> <span class="text-muted">(${expPct}%)</span></div>
-                </div>
-                <div class="mt-2 h-1.5 bg-brd rounded-full overflow-hidden flex">
-                    <div class="h-full bg-income/60 rounded-full" style="width:${incPct}%"></div>
-                    <div class="h-full bg-expense/60 rounded-full" style="width:${expPct}%"></div>
-                </div>
-            </div>`;
-        }).join('');
-    }
-
-    function renderRecentTransactions() {
-        const el = document.getElementById('recent-transactions');
-        const recent = state.transactions.slice(0, 8);
-        if (!recent.length) { el.innerHTML = '<p class="text-muted text-sm text-center py-6">Sin movimientos aún</p>'; return; }
-        el.innerHTML = recent.map(t => {
-            const cat = getCat(t.category); const isInc = t.type === 'income';
-            return `<div class="flex items-center gap-3 py-2 px-2 rounded-lg hover:bg-bg/50 transition">
-                <div class="w-8 h-8 rounded-lg flex items-center justify-center text-xs" style="background:${cat.color}20; color:${cat.color}"><i class="fa-solid ${cat.icon}"></i></div>
-                <div class="flex-1 min-w-0"><p class="text-sm truncate">${t.description || cat.name}</p><p class="text-xs text-muted">${fmtDate(t.date)} · ${t.user_name}</p></div>
-                <span class="text-sm font-medium ${isInc ? 'text-income' : 'text-expense'}">${isInc ? '+' : '-'}${fmt(Number(t.amount))}</span>
-            </div>`;
-        }).join('');
-    }
-
-    // ==================== TRANSACCIONES ====================
-    function renderTransactions() {
-        const type = document.getElementById('filter-type').value;
-        const user = document.getElementById('filter-user').value;
-        const cat = document.getElementById('filter-category').value;
-        const search = document.getElementById('filter-search').value.toLowerCase();
-        let filtered = [...state.transactions];
-        if (type !== 'all') filtered = filtered.filter(t => t.type === type);
-        if (user !== 'all') filtered = filtered.filter(t => t.user_name === user);
-        if (cat !== 'all') filtered = filtered.filter(t => t.category === cat);
-        if (search) filtered = filtered.filter(t => (t.description||'').toLowerCase().includes(search) || getCat(t.category).name.toLowerCase().includes(search));
-
-        const el = document.getElementById('transactions-list');
-        const empty = document.getElementById('transactions-empty');
-        if (!filtered.length) { el.innerHTML = ''; empty.classList.remove('hidden'); return; }
-        empty.classList.add('hidden');
-        const groups = {};
-        filtered.forEach(t => { (groups[t.date] = groups[t.date] || []).push(t); });
-        el.innerHTML = Object.entries(groups).map(([date, txs]) => {
-            const dayLabel = new Date(date + 'T12:00:00').toLocaleDateString('es', { weekday: 'long', day: 'numeric', month: 'long' });
-            return `<div class="mb-4 animate-fade-in"><p class="text-xs text-muted mb-2 px-1 capitalize">${dayLabel}</p><div class="space-y-1">${txs.map(t => {
-                const cat = getCat(t.category); const isInc = t.type === 'income';
-                return `<div class="flex items-center gap-3 py-3 px-3 bg-card rounded-xl border border-brd hover:border-brd transition group">
-                    <div class="w-10 h-10 rounded-xl flex items-center justify-center text-sm shrink-0" style="background:${cat.color}15; color:${cat.color}"><i class="fa-solid ${cat.icon}"></i></div>
-                    <div class="flex-1 min-w-0"><p class="text-sm font-medium truncate">${t.description || cat.name}</p><p class="text-xs text-muted">${cat.name} · ${t.user_name}</p></div>
-                    <span class="text-sm font-semibold ${isInc ? 'text-income' : 'text-expense'}">${isInc ? '+' : '-'}${fmt(Number(t.amount))}</span>
-                    <button onclick="confirmDelete('${t.id}')" class="w-8 h-8 rounded-lg hover:bg-expense/10 flex items-center justify-center transition opacity-0 group-hover:opacity-100 ml-1" title="Eliminar"><i class="fa-solid fa-trash text-expense text-xs"></i></button>
-                </div>`;
-            }).join('')}</div></div>`;
-        }).join('');
-    }
-
-    async function confirmDelete(id) {
-        const t = state.transactions.find(t => t.id === id); if (!t) return;
-        const el = document.createElement('div');
-        el.className = 'toast pointer-events-auto bg-card border border-brd px-4 py-3 rounded-lg text-sm shadow-lg flex items-center gap-3';
-        el.innerHTML = `<span>¿Eliminar <strong>${t.description || getCat(t.category).name}</strong>?</span>
-            <button onclick="doDelete('${id}', this)" class="bg-expense text-white text-xs px-3 py-1 rounded-lg font-medium hover:bg-red-600 transition">Sí</button>
-            <button onclick="this.closest('.toast').remove()" class="bg-brd text-xs px-3 py-1 rounded-lg font-medium hover:bg-muted/30 transition">No</button>`;
-        document.getElementById('toast-container').appendChild(el);
-        setTimeout(() => { if (el.parentNode) el.remove(); }, 8000);
-    }
-
-    async function doDelete(id, btn) {
-        btn.closest('.toast').remove();
-        await deleteTransaction(id);
-        await loadTransactions();
-        renderCurrentView();
-        toast('Transacción eliminada', 'success');
-    }
-
-    // ==================== ANALÍTICAS ====================
-    let chartMonthly = null, chartDonut = null, chartUsers = null;
-
-    function renderAnalytics() { renderMonthlyChart(); renderDonutChart(); renderUsersChart(); renderTopCategories(); }
-
-    function renderMonthlyChart() {
-        const ctx = document.getElementById('chart-monthly'); if (!ctx) return;
-        const labels = [], incomeData = [], expenseData = [], savingsData = [];
-        for (let i = -5; i <= 0; i++) {
-            const d = new Date(); d.setMonth(d.getMonth() + i, 1);
-            const start = new Date(d.getFullYear(), d.getMonth(), 1).toISOString().slice(0, 10);
-            const end = new Date(d.getFullYear(), d.getMonth() + 1, 0).toISOString().slice(0, 10);
-            labels.push(d.toLocaleDateString('es', { month: 'short', year: '2-digit' }));
-            const mTx = state.transactions.filter(t => t.date >= start && t.date <= end);
-            const inc = mTx.filter(t => t.type === 'income').reduce((s, t) => s + Number(t.amount), 0);
-            const exp = mTx.filter(t => t.type === 'expense').reduce((s, t) => s + Number(t.amount), 0);
-            incomeData.push(inc); expenseData.push(exp); savingsData.push(inc - exp);
-        }
-        if (chartMonthly) chartMonthly.destroy();
-        chartMonthly = new Chart(ctx, {
-            type: 'line',
-            data: { labels, datasets: [
-                { label: 'Ingresos', data: incomeData, borderColor: '#00D68F', backgroundColor: 'rgba(0,214,143,0.1)', fill: true, tension: 0.4, pointRadius: 4 },
-                { label: 'Gastos', data: expenseData, borderColor: '#FF6B6B', backgroundColor: 'rgba(255,107,107,0.1)', fill: true, tension: 0.4, pointRadius: 4 },
-                { label: 'Ahorro', data: savingsData, borderColor: '#FFB800', backgroundColor: 'rgba(255,184,0,0.05)', fill: true, tension: 0.4, pointRadius: 4, borderDash: [5,5] }
-            ]},
-            options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { labels: { color: '#888', font: { size: 11 }, boxWidth: 12, padding: 15 } } },
-                scales: { x: { grid: { display: false }, ticks: { color: '#888', font: { size: 11 } } }, y: { grid: { color: 'rgba(255,255,255,0.04)' }, ticks: { color: '#888', font: { size: 11 }, callback: v => v >= 1000 ? (v/1000)+'k' : v } } } }
-        });
-    }
-
-    function renderDonutChart() {
-        const ctx = document.getElementById('chart-donut'); if (!ctx) return;
-        const expenses = state.transactions.filter(t => t.type === 'expense');
-        const byCat = {}; expenses.forEach(t => { byCat[t.category] = (byCat[t.category] || 0) + Number(t.amount); });
-        const sorted = Object.entries(byCat).sort((a, b) => b[1] - a[1]);
-        const total = sorted.reduce((s, [,v]) => s + v, 0);
-        if (chartDonut) chartDonut.destroy();
-        chartDonut = new Chart(ctx, {
-            type: 'doughnut',
-            data: { labels: sorted.map(([k]) => getCat(k).name), datasets: [{ data: sorted.map(([,v]) => v), backgroundColor: sorted.map(([k]) => getCat(k).color), borderWidth: 0, hoverOffset: 8 }] },
-            options: { responsive: true, maintainAspectRatio: false, cutout: '70%', plugins: { legend: { position: 'right', labels: { color: '#888', font: { size: 10 }, boxWidth: 10, padding: 8 } }, tooltip: { callbacks: { label: ctx => { const pct = total > 0 ? Math.round((ctx.raw/total)*100) : 0; return `${ctx.label}: ${fmt(ctx.raw)} (${pct}%)`; } } } } }
-        });
-    }
-
-    function renderUsersChart() {
-        const ctx = document.getElementById('chart-users'); if (!ctx) return;
-        const u1 = state.users.user1, u2 = state.users.user2;
-        const u1Inc = state.transactions.filter(t => t.user_name === u1 && t.type === 'income').reduce((s, t) => s + Number(t.amount), 0);
-        const u2Inc = state.transactions.filter(t => t.user_name === u2 && t.type === 'income').reduce((s, t) => s + Number(t.amount), 0);
-        const u1Exp = state.transactions.filter(t => t.user_name === u1 && t.type === 'expense').reduce((s, t) => s + Number(t.amount), 0);
-        const u2Exp = state.transactions.filter(t => t.user_name === u2 && t.type === 'expense').reduce((s, t) => s + Number(t.amount), 0);
-        if (chartUsers) chartUsers.destroy();
-        chartUsers = new Chart(ctx, {
-            type: 'bar',
-            data: { labels: ['Ingresos', 'Gastos', 'Ahorro'], datasets: [
-                { label: u1, data: [u1Inc, u1Exp, u1Inc-u1Exp], backgroundColor: 'rgba(96,165,250,0.7)', borderRadius: 6 },
-                { label: u2, data: [u2Inc, u2Exp, u2Inc-u2Exp], backgroundColor: 'rgba(244,114,182,0.7)', borderRadius: 6 }
-            ]},
-            options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { labels: { color: '#888', font: { size: 11 }, boxWidth: 12 } } },
-                scales: { x: { grid: { display: false }, ticks: { color: '#888' } }, y: { grid: { color: 'rgba(255,255,255,0.04)' }, ticks: { color: '#888', callback: v => v >= 1000 ? (v/1000)+'k' : v } } } }
-        });
-    }
-
-    function renderTopCategories() {
-        const el = document.getElementById('top-categories');
-        const expenses = state.transactions.filter(t => t.type === 'expense');
-        const byCat = {}; expenses.forEach(t => { byCat[t.category] = (byCat[t.category] || 0) + Number(t.amount); });
-        const sorted = Object.entries(byCat).sort((a, b) => b[1] - a[1]).slice(0, 6);
-        const max = sorted[0]?.[1] || 1;
-        el.innerHTML = sorted.map(([id, amount]) => {
-            const cat = getCat(id); const pct = Math.round((amount / max) * 100);
-            return `<div><div class="flex items-center justify-between mb-1"><span class="text-sm flex items-center gap-2"><i class="fa-solid ${cat.icon} text-xs" style="color:${cat.color}"></i> ${cat.name}</span><span class="text-sm font-medium">${fmt(amount)}</span></div><div class="h-2 bg-brd rounded-full overflow-hidden"><div class="h-full rounded-full transition-all duration-500" style="width:${pct}%; background:${cat.color}"></div></div></div>`;
-        }).join('');
-        if (!sorted.length) el.innerHTML = '<p class="text-muted text-sm text-center py-4">Sin datos</p>';
-    }
-
-    // ==================== AJUSTES ====================
-    function renderSettings() {
-        document.getElementById('settings-user1').value = state.users.user1;
-        document.getElementById('settings-user2').value = state.users.user2;
-        document.getElementById('settings-currency').value = state.currency;
-        const sbEl = document.getElementById('settings-supabase');
-        if (state.sbClient) {
-            sbEl.innerHTML = `<p class="text-sm text-income flex items-center gap-2"><i class="fa-solid fa-circle-check"></i> Conectado a Supabase</p><p class="text-xs text-muted mt-1">${SB_URL}</p>`;
-        } else {
-            sbEl.innerHTML = `<p class="text-sm text-expense flex items-center gap-2"><i class="fa-solid fa-circle-xmark"></i> Sin conexión</p><button onclick="retryConnect()" class="mt-2 text-xs text-accent hover:text-accenthover transition">Reintentar conexión</button>`;
-        }
-    }
-
-    function saveUserNames() {
-        state.users.user1 = document.getElementById('settings-user1').value || 'Él';
-        state.users.user2 = document.getElementById('settings-user2').value || 'Ella';
-        localStorage.setItem('hf_users', JSON.stringify(state.users));
-        updateFilterOptions(); updateSidebarUsers(); renderCurrentView();
-        toast('Nombres actualizados', 'success');
-    }
-
-    function saveCurrency() {
-        state.currency = document.getElementById('settings-currency').value;
-        localStorage.setItem('hf_currency', state.currency);
-        renderCurrentView();
-    }
-
-    function exportData() {
-        const blob = new Blob([JSON.stringify(state.transactions, null, 2)], { type: 'application/json' });
-        const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = `hogarfin-${today()}.json`; a.click();
-        toast('Datos exportados', 'success');
-    }
-
-    function clearAllData() {
-        const el = document.createElement('div');
-        el.className = 'toast pointer-events-auto bg-expense/90 px-4 py-3 rounded-lg text-sm shadow-lg flex items-center gap-3 text-white';
-        el.innerHTML = `<span>¿Borrar TODOS los datos?</span><button onclick="doClearAll(this)" class="bg-white text-expense text-xs px-3 py-1 rounded-lg font-bold transition">Sí</button><button onclick="this.closest('.toast').remove()" class="bg-white/20 text-xs px-3 py-1 rounded-lg font-medium transition">No</button>`;
-        document.getElementById('toast-container').appendChild(el);
-    }
-
-    async function doClearAll(btn) {
-        btn.closest('.toast').remove();
-        if (state.sbClient) { try { await state.sbClient.from('transactions').delete().neq('id', '00000000-0000-0000-0000-000000000000'); } catch {} }
-        localSave([]); state.transactions = []; renderCurrentView(); toast('Datos eliminados', 'success');
-    }
-
-    // ==================== MODAL AGREGAR ====================
-    function openAddModal() {
-        document.getElementById('modal-add').classList.remove('hidden');
-        document.getElementById('modal-amount').value = '';
-        document.getElementById('modal-desc').value = '';
-        document.getElementById('modal-date').value = today();
-        state.modalType = 'expense'; state.modalCategory = 'alimentacion'; state.modalUser = state.users.user1;
-        updateModalType(); renderModalCategories(); renderModalUsers();
-        setTimeout(() => document.getElementById('modal-amount').focus(), 100);
-    }
-    function closeAddModal() { document.getElementById('modal-add').classList.add('hidden'); }
-
-    function setModalType(type) { state.modalType = type; state.modalCategory = type === 'income' ? 'trabajo' : 'alimentacion'; updateModalType(); renderModalCategories(); }
-
-    function updateModalType() {
-        const expBtn = document.getElementById('btn-type-expense'), incBtn = document.getElementById('btn-type-income');
-        if (state.modalType === 'expense') {
-            expBtn.className = 'flex-1 py-2.5 rounded-lg text-sm font-semibold transition bg-expense/10 text-expense border-2 border-expense';
-            incBtn.className = 'flex-1 py-2.5 rounded-lg text-sm font-semibold transition bg-card text-muted border-2 border-transparent';
-        } else {
-            incBtn.className = 'flex-1 py-2.5 rounded-lg text-sm font-semibold transition bg-income/10 text-income border-2 border-income';
-            expBtn.className = 'flex-1 py-2.5 rounded-lg text-sm font-semibold transition bg-card text-muted border-2 border-transparent';
-        }
-    }
-
-    function renderModalCategories() {
-        const cats = state.modalType === 'income' ? CATEGORIES.filter(c => ['trabajo','freelance','regalos','otros'].includes(c.id)) : CATEGORIES.filter(c => !['trabajo','freelance'].includes(c.id));
-        document.getElementById('modal-categories').innerHTML = cats.map(c => `<button onclick="selectCategory('${c.id}')" class="cat-btn flex flex-col items-center gap-1 p-2 rounded-lg border-2 transition ${state.modalCategory === c.id ? 'border-accent bg-accent/5' : 'border-transparent bg-card hover:bg-cardhover'}"><i class="fa-solid ${c.icon} text-sm" style="color:${c.color}"></i><span class="text-[10px] ${state.modalCategory === c.id ? 'text-white' : 'text-muted'}">${c.name}</span></button>`).join('');
-    }
-    function selectCategory(id) { state.modalCategory = id; renderModalCategories(); }
-
-    function renderModalUsers() {
-        document.getElementById('modal-users').innerHTML = [state.users.user1, state.users.user2].map((name, i) => `<button onclick="selectUser('${name}')" class="cat-btn flex items-center justify-center gap-2 py-2.5 rounded-lg border-2 transition ${state.modalUser === name ? 'border-accent bg-accent/5' : 'border-transparent bg-card hover:bg-cardhover'}"><i class="fa-solid ${i === 0 ? 'fa-mars' : 'fa-venus'} ${i === 0 ? 'text-blue-400' : 'text-pink-400'} text-sm"></i><span class="text-sm ${state.modalUser === name ? 'text-white font-medium' : 'text-muted'}">${name}</span></button>`).join('');
-    }
-    function selectUser(name) { state.modalUser = name; renderModalUsers(); }
-
-    async function addTransaction() {
-        const amount = parseFloat(document.getElementById('modal-amount').value);
-        if (!amount || amount <= 0) { toast('Ingresa un monto válido', 'error'); return; }
-        const t = { user_name: state.modalUser, type: state.modalType, category: state.modalCategory, amount, description: document.getElementById('modal-desc').value.trim(), date: document.getElementById('modal-date').value || today() };
-        await saveTransaction(t);
-        await loadTransactions();
-        closeAddModal();
-        renderCurrentView();
-        toast(`${t.type === 'income' ? 'Ingreso' : 'Gasto'} registrado: ${getCat(t.category).name}`, 'success');
-    }
-
-    // ==================== SETUP ====================
-    function copySQL() {
-        const sql = document.getElementById('sql-code').textContent;
-        navigator.clipboard.writeText(sql).then(() => toast('SQL copiado al portapapeles', 'success'));
-    }
-
-    async function connectAndStart() {
-        const u1 = document.getElementById('setup-user1').value.trim() || 'Él';
-        const u2 = document.getElementById('setup-user2').value.trim() || 'Ella';
-        state.users.user1 = u1; state.users.user2 = u2;
-        localStorage.setItem('hf_users', JSON.stringify(state.users));
-
-        try {
-            state.sbClient = supabase.createClient(SB_URL, SB_KEY);
-            const { error } = await state.sbClient.from('transactions').select('id').limit(1);
-            if (error) throw error;
-            state.isOnline = true;
-            subscribeRealtime();
-            toast('Conectado a Supabase', 'success');
-        } catch (e) {
-            console.error('Error conexión Supabase:', e);
-            state.sbClient = null;
-            state.isOnline = false;
-            toast('No se pudo conectar. ¿Creaste la tabla? Usando datos locales.', 'error');
-        }
-
-        localStorage.setItem('hf_setup_done', '1');
-        document.getElementById('setup-overlay').style.display = 'none';
-        document.getElementById('app').classList.remove('hidden');
-        updateSidebarUsers(); updateFilterOptions(); updateSyncStatus();
-        await loadTransactions();
-        renderDashboard();
-    }
-
-    async function retryConnect() {
-        try {
-            state.sbClient = supabase.createClient(SB_URL, SB_KEY);
-            const { error } = await state.sbClient.from('transactions').select('id').limit(1);
-            if (error) throw error;
-            state.isOnline = true;
-            subscribeRealtime();
-            toast('Conectado a Supabase', 'success');
-            await loadTransactions();
-            renderCurrentView();
-        } catch (e) {
-            toast('Aún sin conexión. Verifica que la tabla exista.', 'error');
-        }
-        updateSyncStatus(); renderSettings();
-    }
-
-    function updateSidebarUsers() {
-        document.getElementById('sidebar-users').innerHTML = `<div class="flex -space-x-2"><div class="w-8 h-8 rounded-full bg-blue-500/20 border-2 border-surface flex items-center justify-center"><i class="fa-solid fa-mars text-blue-400 text-xs"></i></div><div class="w-8 h-8 rounded-full bg-pink-500/20 border-2 border-surface flex items-center justify-center"><i class="fa-solid fa-venus text-pink-400 text-xs"></i></div></div><span class="text-xs text-muted">${state.users.user1} & ${state.users.user2}</span>`;
-    }
-
-    function updateFilterOptions() {
-        document.getElementById('filter-user').innerHTML = `<option value="all">Ambos</option><option value="${state.users.user1}">${state.users.user1}</option><option value="${state.users.user2}">${state.users.user2}</option>`;
-        document.getElementById('filter-category').innerHTML = `<option value="all">Categorías</option>` + CATEGORIES.map(c => `<option value="${c.id}">${c.name}</option>`).join('');
-    }
-
-    // ==================== INIT ====================
-    (function init() {
-        const users = localStorage.getItem('hf_users');
-        const currency = localStorage.getItem('hf_currency');
-        if (users) try { state.users = JSON.parse(users); } catch {}
-        if (currency) state.currency = currency;
-
-        if (localStorage.getItem('hf_setup_done')) {
-            // Auto-conectar si ya se configuró antes
-            (async () => {
-                try {
-                    state.sbClient = supabase.createClient(SB_URL, SB_KEY);
-                    const { error } = await state.sbClient.from('transactions').select('id').limit(1);
-                    if (error) throw error;
-                    state.isOnline = true;
-                    subscribeRealtime();
-                } catch { state.sbClient = null; state.isOnline = false; }
-                document.getElementById('setup-overlay').style.display = 'none';
-                document.getElementById('app').classList.remove('hidden');
-                updateSidebarUsers(); updateFilterOptions(); updateSyncStatus();
-                await loadTransactions();
-                renderDashboard();
-            })();
-        }
-
-        // Pre-poblar campos del setup
-        document.getElementById('setup-user1').value = state.users.user1;
-        document.getElementById('setup-user2').value = state.users.user2;
-    })();
-
-    // Sidebar click outside
-    document.addEventListener('click', e => {
-        const sb = document.getElementById('sidebar');
-        if (sb.classList.contains('open') && !sb.contains(e.target) && !e.target.closest('[onclick*="toggleSidebar"]')) closeSidebar();
-    });
-
-    // Atajos
-    document.addEventListener('keydown', e => {
-        if (e.key === 'Escape') closeAddModal();
-        if (e.key === 'n' && !e.ctrlKey && !e.metaKey && !e.target.closest('input,textarea,select') && document.getElementById('modal-add').classList.contains('hidden') && document.getElementById('setup-overlay').style.display === 'none') openAddModal();
-    });
-    </script>
+// Mobile: delete on long press
+let longPressTimer=null;
+document.addEventListener('touchstart',e=>{const btn=e.target.closest('[onclick*="confirmDel"]');if(btn){longPressTimer=setTimeout(()=>btn.click(),500)}},{passive:true});
+document.addEventListener('touchend',()=>clearTimeout(longPressTimer));
+document.addEventListener('touchmove',()=>clearTimeout(longPressTimer));
+</script>
 </body>
 </html>
