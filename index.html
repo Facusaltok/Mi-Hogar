@@ -805,31 +805,85 @@ function renderAnalytics(){
     document.getElementById('analytics-top').innerHTML=sorted.map(function(e){var c=catById(e[0]),p=(e[1]/maxV*100).toFixed(0);return'<div class="flex items-center gap-3"><div class="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0" style="background:'+c.color+'18;border:1px solid '+c.color+'30"><i class="fa-solid '+c.icon+' text-xs" style="color:'+c.color+'"></i></div><div class="flex-1"><div class="flex items-center justify-between mb-1"><span class="text-xs font-medium">'+c.name+'</span><span class="text-xs text-muted">'+fmt(e[1])+'</span></div><div class="progress-bar"><div class="progress-fill" style="width:'+p+'%;background:'+c.color+'"></div></div></div></div>';}).join('');
 }
 
-function renderSettings(){document.getElementById('s-u1').value=S.u1;document.getElementById('s-u2').value=S.u2;document.getElementById('s-curr').value=S.curr;if(S.sb){document.getElementById('s-sb-url').value=S.sb.url;document.getElementById('s-sb-key').value=S.sb.key;document.getElementById('s-sb-status').innerHTML=S.online?'<span class="text-income"><i class="fa-solid fa-circle-check mr-1"></i>Conectado</span>':'<span class="text-[#EAB308]"><i class="fa-solid fa-circle-exclamation mr-1"></i>Desconectado</span>';}else{document.getElementById('s-sb-status').innerHTML='<span class="text-muted">No configurado</span>';}}
-function saveNames(){S.u1=document.getElementById('s-u1').value.trim()||S.u1;S.u2=document.getElementById('s-u2').value.trim()||S.u2;saveLocal();if(S.online)pushSB();renderAll();toast('Nombres actualizados','success');}
-function saveCurr(){S.curr=document.getElementById('s-curr').value;saveLocal();if(S.online)pushSB();renderAll();toast('Moneda actualizada','success');}
-function saveSBConfig(){var u=document.getElementById('s-sb-url').value.trim(),k=document.getElementById('s-sb-key').value.trim();if(!u||!k){toast('Completá URL y Key','warn');return;}if(initSB(u,k)){saveLocal();renderAll();}else{toast('Error al conectar','error');}}
-function exportCSV(){var csv='Fecha,Tipo,Categoría,Persona,Descripción,Monto,Cuenta\n';S.tx.forEach(function(t){csv+=t.date+','+t.type+','+catById(t.category).name+','+t.user+',"'+(t.description||'').replace(/"/g,'""')+'",'+t.amount+','+t.account+'\n';});var b=new Blob([csv],{type:'text/csv'}),a=document.createElement('a');a.href=URL.createObjectURL(b);a.download='hogarfin_export.csv';a.click();toast('CSV exportado','success');}
-function clearAllData(){if(!confirm('Se borrarán todos los datos. Continuar?'))return;S.tx=[];S.accts=[];S.goals=[];S.inst=[];S.budgets={};saveLocal();if(S.online)pushSB();renderAll();toast('Datos eliminados','info');}
+function renderSettings() {
+    document.getElementById('s-u1').value = S.u1;
+    document.getElementById('s-u2').value = S.u2;
+    document.getElementById('s-curr').value = S.curr;
 
-/* ============================================================
-   INIT
-   ============================================================ */
-document.addEventListener('DOMContentLoaded', function() {
-    if (loadLocal()) {
-        document.getElementById('setup-overlay').style.display = 'none';
-        document.getElementById('app').classList.remove('hidden');
-        if (S.sb) { initSB(S.sb.url, S.sb.key); }
-        else { initSB(SB_URL, SB_KEY); }
-        S.mUser = S.u1;
-        renderAll();
+    /* Siempre mostrar las credenciales: las guardadas o las hardcodeadas */
+    var url = (S.sb && S.sb.url) ? S.sb.url : SB_URL;
+    var key = (S.sb && S.sb.key) ? S.sb.key : SB_KEY;
+    document.getElementById('s-sb-url').value = url;
+    document.getElementById('s-sb-key').value = key;
+
+    if (S.online) {
+        document.getElementById('s-sb-status').innerHTML = '<span class="text-income"><i class="fa-solid fa-circle-check mr-1"></i>Conectado</span>';
+    } else if (S.sb) {
+        document.getElementById('s-sb-status').innerHTML = '<span class="text-[#EAB308]"><i class="fa-solid fa-circle-exclamation mr-1"></i>Desconectado</span>';
+    } else {
+        document.getElementById('s-sb-status').innerHTML = '<span class="text-muted">No configurado</span>';
     }
-    var fab = document.querySelector('.fab-center');
-    if (fab) { setTimeout(function() { fab.style.animation = 'iconPop 0.5s cubic-bezier(0.22,1,0.36,1) forwards'; }, 600); }
-    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
-        document.querySelectorAll('.orb').forEach(function(o) { o.style.animation = 'none'; });
+}
+
+function saveSBConfig() {
+    /* Usar lo que haya en los campos, o las hardcodeadas si están vacíos */
+    var u = document.getElementById('s-sb-url').value.trim() || SB_URL;
+    var k = document.getElementById('s-sb-key').value.trim() || SB_KEY;
+
+    document.getElementById('s-sb-url').value = u;
+    document.getElementById('s-sb-key').value = k;
+
+    toast('Conectando a Supabase...', 'info');
+    initSB(u, k);
+    saveLocal();
+}
+
+function initSB(url, key) {
+    if (!url || !key) {
+        toast('Falta URL o Key', 'error');
+        return false;
     }
-});
-</script>
-</body>
-</html>
+    try {
+        S.sb = { url: url, key: key };
+        S.online = false;
+        updateSyncUI();
+
+        fetch(url + '/rest/v1/hogarfin?select=id&limit=1', {
+            headers: {
+                apikey: key,
+                Authorization: 'Bearer ' + key,
+                'Content-Type': 'application/json'
+            }
+        }).then(function(r) {
+            console.log('Supabase status:', r.status);
+            if (r.status === 401) {
+                S.online = false;
+                toast('Supabase 401: clave inválida o proyecto pausado', 'error');
+            } else if (r.status === 403) {
+                S.online = false;
+                toast('Supabase 403: permisos insuficientes (RLS)', 'error');
+            } else if (r.ok) {
+                S.online = true;
+                toast('Supabase conectado', 'success');
+                pullSB();
+            } else {
+                r.text().then(function(t) {
+                    console.log('Supabase response:', t);
+                });
+                S.online = false;
+                toast('Supabase error ' + r.status, 'error');
+            }
+            updateSyncUI();
+            saveLocal();
+        }).catch(function(err) {
+            S.online = false;
+            toast('Error de red: ' + err.message, 'error');
+            updateSyncUI();
+        });
+        return true;
+    } catch (e) {
+        S.online = false;
+        toast('Error: ' + e.message, 'error');
+        return false;
+    }
+}
