@@ -1261,12 +1261,17 @@ function updateSyncUI() {
 /* ============================================================
    SETUP INICIAL
    ============================================================ */
-function finishSetup() {
+function function finishSetup() {
     S.u1 = document.getElementById('setup-u1').value.trim() || 'Facu';
     S.u2 = document.getElementById('setup-u2').value.trim() || 'Marie';
     S.curr = document.getElementById('setup-curr').value;
     var sbUrl = document.getElementById('setup-sb-url').value.trim();
     var sbKey = document.getElementById('setup-sb-key').value.trim();
+
+    // Credenciales hardcodeadas
+    if (!sbUrl) sbUrl = 'https://mzdmpurmudvysnjylrik.supabase.co';
+    if (!sbKey) sbKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im16ZG1wdXJtdWR2eXNuanlscmlrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTEyMTA4OTksImV4cCI6MjEwNjc4Njg5OX0.toFiyG9uoXlGgpvkq21of5S304RTZLr92N-4Skkp_gE';
+
     if (sbUrl && sbKey) { initSB(sbUrl, sbKey); }
     S.mUser = S.u1;
     saveLocal();
@@ -1277,6 +1282,7 @@ function finishSetup() {
         document.getElementById('app').classList.remove('hidden');
         renderAll();
     }, 400);
+}
 }
 
 /* ============================================================
@@ -2002,7 +2008,14 @@ document.addEventListener('DOMContentLoaded', function() {
     if (loadLocal()) {
         document.getElementById('setup-overlay').style.display = 'none';
         document.getElementById('app').classList.remove('hidden');
-        if (S.sb) { initSB(S.sb.url, S.sb.key); }
+        if (S.sb) {
+            initSB(S.sb.url, S.sb.key);
+        } else {
+            initSB(
+                'https://mzdmpurmudvysnjylrik.supabase.co',
+                'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im16ZG1wdXJtdWR2eXNuanlscmlrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTEyMTA4OTksImV4cCI6MjEwNjc4Njg5OX0.toFiyG9uoXlGgpvkq21of5S304RTZLr92N-4Skkp_gE'
+            );
+        }
         S.mUser = S.u1;
         renderAll();
     }
@@ -2016,6 +2029,3 @@ document.addEventListener('DOMContentLoaded', function() {
         document.querySelectorAll('.orb').forEach(function(o) { o.style.animation = 'none'; });
     }
 });
-</script>
-</body>
-</html>
