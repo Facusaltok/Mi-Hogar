@@ -1412,10 +1412,14 @@ async function initSupabase(url,key){
             const{error}=await client.from('transactions').select('id').limit(1);
             if(error&&error.code!=='42P01'&&error.code!=='PGRST205'){throw error}
             S.online=true;
-            toast('Supabase conectado','success');
+            if(error&&(error.code==='42P01'||error.code==='PGRST205'||error.code==='PGRST204')){
+                toast('Supabase conectado pero faltan tablas. Cargá el SQL del panel para crearlas.','warn');
+            }else{
+                toast('Supabase conectado','success');
+            }
         }catch(testErr){
             S.online=true;
-            toast('Supabase conectado. Creá las tablas en el panel SQL.','info');
+            toast('Supabase conectado. Cargá el SQL del panel para crear las tablas.','info');
         }
     }catch(e){
         S.sb=null;S.online=false;
@@ -1430,6 +1434,13 @@ function sbTableOk(result){
 }
 
 async function loadAll(){
+    /* Guardamos lo que ya hay en memoria/localStorage antes de pisar
+       para poder hacer MERGE si Supabase devuelve vacío (RLS o tablas faltantes) */
+    const localTx=lLoad('hf_tx');
+    const localAccts=lLoad('hf_accts');
+    const localGoals=lLoad('hf_goals');
+    const localInst=lLoad('hf_inst');
+
     if(S.sb){
         try{
             const[tr,ac,gl,ins]=await Promise.all([
@@ -1438,22 +1449,29 @@ async function loadAll(){
                 S.sb.from('goals').select('*').order('created_at'),
                 S.sb.from('installments').select('*').order('created_at')
             ]);
-            /* Si todas las consultas funcionaron, usamos la nube */
-            if(sbTableOk(tr)&&sbTableOk(ac)&&sbTableOk(gl)&&sbTableOk(ins)){
-                S.tx=tr.data||[];
-                S.accts=ac.data||[];
-                S.goals=gl.data||[];
-                S.inst=ins.data||[];
-                S.online=true;updSync();return;
-            }else{
-                /* Alguna tabla no existe -> mezclamos: lo que se pudo cargar + localStorage */
-                console.warn('Supabase: algunas tablas no existen. Combinando con datos locales.');
-                if(sbTableOk(tr))S.tx=tr.data||[];else S.tx=lLoad('hf_tx');
-                if(sbTableOk(ac))S.accts=ac.data||[];else S.accts=lLoad('hf_accts');
-                if(sbTableOk(gl))S.goals=gl.data||[];else S.goals=lLoad('hf_goals');
-                if(sbTableOk(ins))S.inst=ins.data||[];else S.inst=lLoad('hf_inst');
-                S.online=true;updSync();return;
-            }
+
+            /* MERGE: si la consulta a Supabase anduvo pero devolvió NULL (tabla faltante)
+               o array vacío (RLS bloquea o sin datos), conservamos lo local */
+            const mergeData=(result,fallback)=>{
+                if(!sbTableOk(result))return fallback;          // tabla no existe -> uso local
+                const data=result.data||[];
+                if(data.length===0){
+                    /* Supabase respondió OK pero sin filas. Podría ser porque no hay datos,
+                       O porque RLS bloquea. Para no pisar datos locales, MERGE: */
+                    if(fallback.length>0){
+                        /* Hay datos locales -> los conservamos y agregamos los del server (que son 0) */
+                        return fallback;
+                    }
+                    return data;
+                }
+                return data;                                     // hay datos en server -> uso server
+            };
+            S.tx=mergeData(tr,localTx);
+            S.accts=mergeData(ac,localAccts);
+            S.goals=mergeData(gl,localGoals);
+            S.inst=mergeData(ins,localInst);
+            S.online=true;updSync();
+            return;
         }catch(e){
             console.warn('loadAll: Supabase falló, usando localStorage:',e.message);
             S.online=false;updSync();
@@ -1503,7 +1521,15 @@ async function saveTx(t){
                 persistTxLocal(data[0]);
                 return data[0];
             }else if(error){
-                console.warn('Supabase insert tx falló (guardado localmente):',error.message);
+                console.warn('Supabase insert tx falló (guardado localmente):',error.message,'código:',error.code);
+                /* Avisar al usuario qué pasó para que pueda arreglarlo */
+                if(error.code==='42P01'||error.code==='PGRST205'||error.code==='PGRST204'){
+                    toast('La tabla "transactions" no existe en Supabase. Creala con el SQL del panel. Se guardó localmente.','warn');
+                }else if(error.code==='42501'||error.message?.toLowerCase().includes('policy')||error.message?.toLowerCase().includes('rls')){
+                    toast('RLS bloquea el insert en "transactions". Activá las políticas con el SQL. Se guardó localmente.','warn');
+                }else{
+                    toast('Supabase insert falló: '+error.message+'. Se guardó localmente.','warn');
+                }
                 /* Mantenemos el guardado local que ya hicimos */
             }
         }catch(e){
@@ -1535,7 +1561,7 @@ async function saveAcct(a){
     a.id=a.id||crypto.randomUUID();a.created_at=a.created_at||new Date().toISOString();
     persistAcctLocal(a);
     if(S.sb){
-        try{const{data,error}=await S.sb.from('accounts').insert(a).select();if(!error&&data&&data[0]){S.online=true;updSync();persistAcctLocal(data[0]);return data[0]}}catch(e){console.warn('Supabase insert acct falló:',e.message)}
+        try{const{data,error}=await S.sb.from('accounts').insert(a).select();if(!error&&data&&data[0]){S.online=true;updSync();persistAcctLocal(data[0]);return data[0]}else if(error){console.warn('Supabase insert acct falló:',error.message,'código:',error.code);if(error.code==='42P01'||error.code==='PGRST205'||error.code==='PGRST204'){toast('La tabla "accounts" no existe. Creala con el SQL del panel. Se guardó localmente.','warn')}else if(error.code==='42501'||error.message?.toLowerCase().includes('policy')||error.message?.toLowerCase().includes('rls')){toast('RLS bloquea el insert en "accounts". Activá las políticas. Se guardó localmente.','warn')}}}catch(e){console.warn('Supabase insert acct exception:',e.message)}
     }
     return a;
 }
@@ -1554,7 +1580,7 @@ async function saveGoal(g){
     g.id=g.id||crypto.randomUUID();g.created_at=g.created_at||new Date().toISOString();
     persistGoalLocal(g);
     if(S.sb){
-        try{const{data,error}=await S.sb.from('goals').insert(g).select();if(!error&&data&&data[0]){S.online=true;updSync();persistGoalLocal(data[0]);return data[0]}}catch(e){console.warn('Supabase insert goal falló:',e.message)}
+        try{const{data,error}=await S.sb.from('goals').insert(g).select();if(!error&&data&&data[0]){S.online=true;updSync();persistGoalLocal(data[0]);return data[0]}else if(error){console.warn('Supabase insert goal falló:',error.message,'código:',error.code);if(error.code==='42P01'||error.code==='PGRST205'||error.code==='PGRST204'){toast('La tabla "goals" no existe. Creala con el SQL del panel. Se guardó localmente.','warn')}else if(error.code==='42501'||error.message?.toLowerCase().includes('policy')||error.message?.toLowerCase().includes('rls')){toast('RLS bloquea el insert en "goals". Activá las políticas. Se guardó localmente.','warn')}}}catch(e){console.warn('Supabase insert goal exception:',e.message)}
     }
     return g;
 }
@@ -1573,7 +1599,7 @@ async function saveInst(ins){
     ins.id=ins.id||crypto.randomUUID();ins.created_at=ins.created_at||new Date().toISOString();
     persistInstLocal(ins);
     if(S.sb){
-        try{const{data,error}=await S.sb.from('installments').insert(ins).select();if(!error&&data&&data[0]){S.online=true;updSync();persistInstLocal(data[0]);return data[0]}}catch(e){console.warn('Supabase insert inst falló:',e.message)}
+        try{const{data,error}=await S.sb.from('installments').insert(ins).select();if(!error&&data&&data[0]){S.online=true;updSync();persistInstLocal(data[0]);return data[0]}else if(error){console.warn('Supabase insert inst falló:',error.message,'código:',error.code);if(error.code==='42P01'||error.code==='PGRST205'||error.code==='PGRST204'){toast('La tabla "installments" no existe. Creala con el SQL del panel. Se guardó localmente.','warn')}else if(error.code==='42501'||error.message?.toLowerCase().includes('policy')||error.message?.toLowerCase().includes('rls')){toast('RLS bloquea el insert en "installments". Activá las políticas. Se guardó localmente.','warn')}}}catch(e){console.warn('Supabase insert inst exception:',e.message)}
     }
     return ins;
 }
