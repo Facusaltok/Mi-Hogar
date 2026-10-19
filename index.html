@@ -982,27 +982,98 @@ function doParseStatement(text,cardName,userName,closeDate){
 
     const subscriptionsList=results.filter(r=>r.subscription);
 
-    /* Totales separados por moneda. Para gastos en USD, sumamos el monto en USD.
-       Para gastos en ARS, sumamos el monto en ARS. */
-    let totalARS=0,totalUSD=0,countARS=0,countUSD=0;
+    /* Suma de consumos detectados por moneda (estos son los gastos reales del usuario) */
+    let sumARS=0,sumUSD=0,countARS=0,countUSD=0;
     for(const r of results){
         if(r.currency==='USD'){
-            totalUSD+=Number(r.amount)||0;
+            sumUSD+=Number(r.amount)||0;
             countUSD++;
         }else{
-            totalARS+=Number(r.amount)||0;
+            sumARS+=Number(r.amount)||0;
             countARS++;
         }
     }
-    /* Para planes de cuotas: el monto de la cuota actual es el que entra en el resumen de este mes.
-       Ya está incluido en results[] porque isInstallment=true, asique no hace falta sumar aparte. */
+
+    /* EXTRAER EL SALDO FINAL DEL RESUMEN DEL BANCO.
+       Buscamos líneas como "SALDO ACTUAL $ 183.215,78 U$S 24,97" o
+       "VENCIMIENTO SALDO $ ... U$S ..." que tienen el monto total a pagar
+       que calculó el banco (incluye consumos + impuestos + comisiones -
+       pagos - devoluciones). Este es el monto que el usuario realmente
+       debe pagar, y es lo que queremos mostrar arriba del modal. */
+    let totalARS=null,totalUSD=null;
+    const allLines=text.split(/\n/).map(l=>l.trim());
+    /* Patrón 1: "SALDO ACTUAL $ X,XX U$S Y,YY" (con variantes de moneda) */
+    for(const ln of allLines){
+        if(!totalARS){
+            const m=ln.match(/SALDO\s+ACTUAL\s*\$?\s*(\d{1,3}(?:[.,]\d{3})*(?:[.,]\d{1,2})?)/i);
+            if(m){
+                const v=parseAmtStr(m[1]);
+                if(v>0)totalARS=v;
+            }
+        }
+        if(!totalUSD){
+            const m=ln.match(/SALDO\s+ACTUAL\s*.*?U\$S\s*(\d{1,3}(?:[.,]\d{3})*(?:[.,]\d{1,2})?)/i);
+            if(m){
+                const v=parseAmtStr(m[1]);
+                if(v>0)totalUSD=v;
+            }
+        }
+        if(totalARS&&totalUSD)break;
+    }
+    /* Patrón 2: línea con "VENCIMIENTO ... SALDO $ X U$S Y" (header del resumen) */
+    if(!totalARS||!totalUSD){
+        for(const ln of allLines){
+            /* Tiene fecha (XX.XX.XX) + dos montos en formato $ X,XX U$S Y,YY */
+            const m=ln.match(/\d{2}[\/\-.]\d{2}[\/\-.]\d{2,4}.*\$?\s*(\d{1,3}(?:[.,]\d{3})*(?:[.,]\d{1,2})?)\s+U\$S\s*(\d{1,3}(?:[.,]\d{3})*(?:[.,]\d{1,2})?)/i);
+            if(m){
+                /* Solo lo usamos si aparece la palabra "VENCIMIENTO" o "SALDO" cerca */
+                if(/VENCIMIENTO|SALDO/i.test(ln)){
+                    if(!totalARS){
+                        const v=parseAmtStr(m[1]);
+                        if(v>0)totalARS=v;
+                    }
+                    if(!totalUSD){
+                        const v=parseAmtStr(m[2]);
+                        if(v>0)totalUSD=v;
+                    }
+                }
+            }
+            if(totalARS&&totalUSD)break;
+        }
+    }
+    /* Patrón 3: cualquier línea con "SALDO $ X U$S Y" sin la palabra ACTUAL */
+    if(!totalARS||!totalUSD){
+        for(const ln of allLines){
+            if(!totalARS){
+                const m=ln.match(/SALDO\s*\$?\s*(\d{1,3}(?:[.,]\d{3})*(?:[.,]\d{1,2})?)/i);
+                if(m){
+                    const v=parseAmtStr(m[1]);
+                    if(v>0)totalARS=v;
+                }
+            }
+            if(!totalUSD){
+                const m=ln.match(/SALDO\s*.*?U\$S\s*(\d{1,3}(?:[.,]\d{3})*(?:[.,]\d{1,2})?)/i);
+                if(m){
+                    const v=parseAmtStr(m[1]);
+                    if(v>0)totalUSD=v;
+                }
+            }
+            if(totalARS&&totalUSD)break;
+        }
+    }
+    /* Si no encontramos el saldo del banco en alguna moneda, usamos la suma
+       de consumos detectados en esa moneda (fallback). */
+    if(totalARS===null)totalARS=sumARS;
+    if(totalUSD===null)totalUSD=sumUSD;
 
     return{
         expenses,
         installments:installmentPlans,
-        total:totalARS+totalUSD, /* legacy: para compatibilidad */
+        total:totalARS+totalUSD, /* legacy */
         totalARS,
         totalUSD,
+        sumARS,
+        sumUSD,
         countARS,
         countUSD,
         count:results.length,
@@ -1536,12 +1607,18 @@ async function loadStatementPDF(file){
    ============================================================ */
 function renderParsedResult(){
     if(!parsedResult)return;
-    const{expenses,installments,total,count}=parsedResult;
-    /* Totales separados por moneda */
+    const{expenses,installments,count}=parsedResult;
+    /* Total a pagar = saldo del banco. Suma de consumos = solo lo detectado. */
     const totalARS=parsedResult.totalARS||0;
     const totalUSD=parsedResult.totalUSD||0;
+    const sumARS=parsedResult.sumARS||0;
+    const sumUSD=parsedResult.sumUSD||0;
     const countARS=parsedResult.countARS||0;
     const countUSD=parsedResult.countUSD||0;
+
+    /* Detectar si los totales vienen del banco (saldo) o si son suma de consumos */
+    const arsFromBank=totalARS!==sumARS;
+    const usdFromBank=totalUSD!==sumUSD;
 
     /* Detectar suscripciones dentro de los gastos */
     const subs=expenses.filter(e=>e.subscription);
@@ -1550,17 +1627,17 @@ function renderParsedResult(){
     const instMonthly=installments.reduce((s,i)=>s+Number(i.cuotaAmount),0);
 
     document.getElementById('parsed-summary').textContent=`${count} movimientos detectados · ${parsedResult.cardName}`;
-    /* 4 tarjetas: Total $, Total U$S, Gastos (cant.), Cuotas (cant.) */
+    /* 4 tarjetas: Total $ (saldo a pagar), Total U$S (saldo a pagar), Gastos, Cuotas */
     document.getElementById('parsed-stats').innerHTML=`
         <div class="card-flat p-3 text-center">
             <p class="text-[10px] text-muted mb-1 flex items-center justify-center gap-1"><i class="fa-solid fa-coins text-[8px] text-accent"></i> Total resumen $</p>
             <p class="text-base font-display font-bold text-expense">${fmt(totalARS)}</p>
-            ${countARS?`<p class="text-[9px] text-muted mt-0.5">${countARS} ${countARS===1?'gasto':'gastos'} ARS</p>`:''}
+            <p class="text-[9px] text-muted mt-0.5">${arsFromBank?'Saldo a pagar del banco':'Consumos en ARS'}${countARS?' · '+countARS+' gastos':''}</p>
         </div>
         <div class="card-flat p-3 text-center">
             <p class="text-[10px] text-muted mb-1 flex items-center justify-center gap-1"><i class="fa-solid fa-dollar-sign text-[8px] text-blue"></i> Total resumen U$S</p>
             <p class="text-base font-display font-bold ${totalUSD>0?'text-blue':''}" style="${totalUSD>0?'':'opacity:0.4'}">${totalUSD>0?fmtUSD(totalUSD):'—'}</p>
-            ${countUSD?`<p class="text-[9px] text-muted mt-0.5">${countUSD} ${countUSD===1?'gasto':'gastos'} USD</p>`:''}
+            <p class="text-[9px] text-muted mt-0.5">${usdFromBank?'Saldo a pagar del banco':'Consumos en USD'}${countUSD?' · '+countUSD+' gastos':''}</p>
         </div>
         <div class="card-flat p-3 text-center">
             <p class="text-[10px] text-muted mb-1 flex items-center justify-center gap-1"><i class="fa-solid fa-receipt text-[8px]"></i> Gastos</p>
