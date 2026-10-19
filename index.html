@@ -9,6 +9,14 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <!-- PDF.js para extraer texto de PDFs de resúmenes de tarjeta (versión UMD no-modular) -->
+    <script src="https://cdn.jsdelivr.net/npm/pdfjs-dist@3.11.174/build/pdf.min.js"></script>
+    <script>
+    /* Configuramos el worker de PDF.js apenas carga la librería */
+    if(window.pdfjsLib){
+        window.pdfjsLib.GlobalWorkerOptions.workerSrc='https://cdn.jsdelivr.net/npm/pdfjs-dist@3.11.174/build/pdf.worker.min.js';
+    }
+    </script>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <script>
@@ -483,8 +491,12 @@
                 <textarea id="card-text" rows="10" placeholder="01/03 MERCADOPAGO*NETFLIX    8.999,00&#10;03/03 STARBUCKS               4.500,00&#10;05/03 AMAZON PRIME 3/6       3.450,00&#10;12/03 CUOTA 2/12 SAMSUNG     12.345,00&#10;15/03 GAS NATURAL             5.678,90" class="input-elegant w-full px-4 py-3 text-sm font-mono leading-relaxed"></textarea>
             </div>
             <div class="mb-4">
-                <label class="text-xs text-muted block mb-1.5">O cargá un archivo de texto</label>
-                <input type="file" id="card-file" accept=".txt,.csv" onchange="loadStatementFile(event)" class="w-full text-xs text-muted file:mr-3 file:py-2 file:px-3 file:rounded-xl file:border-0 file:text-xs file:font-medium file:bg-bg file:text-accent file:cursor-pointer">
+                <label class="text-xs text-muted block mb-1.5">O cargá un archivo (PDF / TXT / CSV)</label>
+                <input type="file" id="card-file" accept=".pdf,.txt,.csv,application/pdf,text/plain,text/csv" onchange="loadStatementFile(event)" class="w-full text-xs text-muted file:mr-3 file:py-2 file:px-3 file:rounded-xl file:border-0 file:text-xs file:font-medium file:bg-bg file:text-accent file:cursor-pointer">
+                <p id="pdf-progress" class="hidden text-[11px] text-accent mt-1.5 flex items-center gap-2">
+                    <span class="loader" style="width:14px;height:14px;border-top-color:#B07D2A;border-color:#E9ECF1;border-top-color:#B07D2A"></span>
+                    <span id="pdf-progress-text">Procesando PDF...</span>
+                </p>
             </div>
             <button onclick="parseStatement()" id="btn-parse" class="btn-primary w-full py-3.5 text-sm flex items-center justify-center gap-2">
                 <i class="fa-solid fa-wand-magic-sparkles"></i> Analizar resumen
@@ -1203,15 +1215,131 @@ function groupInstallments(installments){
     return Object.values(groups);
 }
 
+/* ============================================================
+   CARGA DE ARCHIVOS (PDF / TXT / CSV)
+   ============================================================ */
 function loadStatementFile(ev){
     const file=ev.target.files[0];
     if(!file)return;
+    const name=file.name.toLowerCase();
+    const type=file.type||'';
+    /* Detectar PDF por extensión o MIME type */
+    if(name.endsWith('.pdf')||type==='application/pdf'){
+        loadStatementPDF(file);
+    }else if(name.endsWith('.txt')||name.endsWith('.csv')||type.startsWith('text/')){
+        loadStatementText(file);
+    }else{
+        /* Intento con PDF por defecto si el tipo es desconocido pero tiene extensión .pdf */
+        if(name.endsWith('.pdf')){
+            loadStatementPDF(file);
+        }else{
+            toast('Formato no soportado. Usá PDF, TXT o CSV.','warn');
+            ev.target.value='';
+        }
+    }
+}
+
+function loadStatementText(file){
     const reader=new FileReader();
     reader.onload=(e)=>{
         document.getElementById('card-text').value=e.target.result;
         toast('Archivo cargado: '+file.name,'success');
     };
+    reader.onerror=()=>{
+        toast('Error al leer el archivo de texto','error');
+    };
     reader.readAsText(file);
+}
+
+/* Extrae texto de un PDF usando pdf.js.
+   Recorre todas las páginas y concatena el texto extraído. */
+async function loadStatementPDF(file){
+    /* Verificar que pdf.js esté cargado */
+    if(!window.pdfjsLib){
+        toast('Librería PDF no disponible. Recargá la página o usá TXT/CSV.','error');
+        return;
+    }
+    /* Asegurar worker configurado */
+    if(!window.pdfjsLib.GlobalWorkerOptions.workerSrc){
+        window.pdfjsLib.GlobalWorkerOptions.workerSrc='https://cdn.jsdelivr.net/npm/pdfjs-dist@3.11.174/build/pdf.worker.min.js';
+    }
+    /* Mostrar indicador de progreso */
+    const prog=document.getElementById('pdf-progress');
+    const progText=document.getElementById('pdf-progress-text');
+    const textarea=document.getElementById('card-text');
+    prog.classList.remove('hidden');
+    progText.textContent=`Leyendo ${file.name}...`;
+    /* Limpiar textarea previo */
+    textarea.value='';
+    try{
+        /* Leer el archivo como ArrayBuffer (pdf.js lo requiere) */
+        const buffer=await file.arrayBuffer();
+        const loadingTask=window.pdfjsLib.getDocument({data:buffer});
+        const pdf=await loadingTask.promise;
+        const total=pdf.numPages;
+        progText.textContent=`Procesando ${total} ${total===1?'página':'páginas'}...`;
+        /* Extraer texto de cada página en orden */
+        const allText=[];
+        for(let i=1;i<=total;i++){
+            const page=await pdf.getPage(i);
+            const content=await page.getTextContent();
+            /* Reconstruir líneas basándose en los items del PDF.
+               Cada item tiene .str (el texto), .transform (posicionamiento),
+               .hasEOL (indica fin de línea). */
+            let lastY=null;
+            let currentLine='';
+            const lines=[];
+            for(const item of content.items){
+                const y=item.transform?item.transform[5]:null;
+                /* Si cambia de Y (con tolerancia) y ya hay línea, es nueva línea */
+                if(lastY!==null&&y!==null&&Math.abs(y-lastY)>2){
+                    if(currentLine.trim())lines.push(currentLine.trim());
+                    currentLine='';
+                }
+                currentLine+=(item.str||'');
+                if(item.hasEOL){
+                    if(currentLine.trim())lines.push(currentLine.trim());
+                    currentLine='';
+                    lastY=null;
+                }else{
+                    lastY=y;
+                }
+            }
+            if(currentLine.trim())lines.push(currentLine.trim());
+            allText.push(lines.join('\n'));
+            /* Actualizar progreso */
+            progText.textContent=`Procesando página ${i} de ${total}...`;
+            /* Liberar memoria de la página */
+            page.cleanup();
+        }
+        /* Unir todo con doble newline entre páginas */
+        const fullText=allText.join('\n');
+        /* Poner en el textarea para que el usuario vea y eventualmente edite */
+        textarea.value=fullText;
+        /* Contar líneas no vacías para mostrar al usuario */
+        const lineCount=fullText.split('\n').filter(l=>l.trim().length>0).length;
+        prog.classList.add('hidden');
+        toast(`PDF cargado: ${total} ${total===1?'página':'páginas'}, ${lineCount} líneas extraídas`,'success');
+        /* Log informativo en consola por si el usuario quiere depurar */
+        console.log(`[PDF] ${file.name} — ${total} páginas, ${lineCount} líneas extraídas`);
+    }catch(err){
+        console.error('[PDF] error:',err);
+        prog.classList.add('hidden');
+        /* Mensaje de error específico */
+        let msg='Error al leer el PDF: '+err.message;
+        if(err.message&&err.message.includes('password')){
+            msg='El PDF está protegido con contraseña. Eliminá la protección y volvé a intentar.';
+        }else if(err.message&&err.message.includes('worker')){
+            msg='No se pudo cargar el worker de PDF. Verificá tu conexión a internet y recargá la página.';
+        }else if(err.name==='InvalidPDFException'){
+            msg='El archivo no es un PDF válido o está corrupto.';
+        }
+        toast(msg,'error');
+    }finally{
+        /* Reset del input para poder cargar el mismo archivo otra vez si hace falta */
+        const fileInput=document.getElementById('card-file');
+        if(fileInput)fileInput.value='';
+    }
 }
 
 /* ============================================================
