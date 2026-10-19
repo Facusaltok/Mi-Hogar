@@ -584,42 +584,178 @@ const ACCT_COLORS={bank:'#2563EB',cash:'#0E9F6E',card:'#DC2626',investment:'#B07
 const ACCT_LABELS={bank:'Banco',cash:'Efectivo',card:'Tarjeta',investment:'Inversión',other:'Otro'};
 
 const MERCHANT_MAP={
-    'MERCADO':'alimentacion','MERCADOLIBRE':'otros','MERCADOPAGO':'otros',
-    'NETFLIX':'ocio','SPOTIFY':'ocio','AMAZON':'otros','DISNEY':'ocio',
-    'YOUTUBE':'ocio','APPLE':'ocio','GOOGLE':'ocio','STARBUCKS':'alimentacion',
-    'MCDONALDS':'alimentacion','MCDONALD':'alimentacion','BURGER':'alimentacion',
-    'PEDIDOSYA':'alimentacion','UBEREATS':'alimentacion','RAPPI':'alimentacion',
-    'WALMART':'alimentacion','CARREFOUR':'alimentacion','JUMBO':'alimentacion',
-    'CENCOSUD':'alimentacion','DISCO':'alimentacion','VEA':'alimentacion',
-    'COTO':'alimentacion','DIUNSA':'alimentacion','VITAL':'alimentacion',
-    'UBER':'transporte','CABIFY':'transporte','DIIDEMO':'transporte',
-    'GAS':'servicios','EDESUR':'servicios','EDENOR':'servicios','AYSA':'servicios',
-    'METROGAS':'servicios','PERSONAL':'servicios','CLARO':'servicios',
-    'MOVISTAR':'servicios','FLOW':'servicios','TELECENTRO':'servicios',
-    'DIRECTV':'servicios','FARMACITY':'salud','DROGUERIA':'salud',
-    'HOSPITAL':'salud','CLINICA':'salud','OSDE':'salud','SWISS':'salud',
-    'ZARA':'ropa','ADIDAS':'ropa','NIKE':'ropa','SHEIN':'ropa',
-    'STEAM':'ocio','PLAYSTATION':'ocio','EPIC':'ocio','GARBARINO':'otros',
-    'FRAVEGA':'otros','MUSIMUNDO':'otros','COMPUMUNDO':'otros','TODO1':'otros',
-    'BLANCO':'vivienda','FALABELLA':'ropa','RIPLEY':'ropa','LIVERPOOL':'ropa',
-    'PALACIO':'ropa','H&M':'ropa','KIKA':'ropa','TATA':'alimentacion',
-    'WALLMART':'alimentacion','LIDER':'alimentacion','EXITO':'alimentacion',
-    'CARULLA':'alimentacion','OLIMPICA':'alimentacion','D1':'alimentacion',
-    'ARA':'alimentacion','TIENDA INGLES':'ropa','MULTIAHORRO':'alimentacion',
-    'SUPERMERCADO':'alimentacion','SUPER':'alimentacion','ALMACEN':'alimentacion',
-    'PANADERIA':'alimentacion','KIOSCO':'alimentacion','FARMACIA':'salud',
-    'ESTACIONAMIENTO':'transporte','PEAJE':'transporte','SEGURO':'servicios',
-    'EXPENSAS':'vivienda','ALQUILER':'vivienda','HIPOTECA':'vivienda',
-    'COLEGIO':'educacion','UNIVERSIDAD':'educacion','CURSO':'educacion',
-    'UDACITY':'educacion','COURSERA':'educacion','PLATZI':'educacion',
-    'CREHANA':'educacion','DOMESTIKA':'educacion','LINKEDIN':'educacion',
-    'BILLETERA':'otros','TRANSFER':'otros','RETIRO':'otros','DEPOSITO':'otros',
-    'INTERES':'otros','COMISION':'servicios','SHOPIFY':'otros','ETSY':'otros',
-    'ALIEXPRESS':'otros','ASOS':'ropa','MACYS':'ropa','ITUNES':'ocio',
-    'APPSTORE':'ocio','PLAYSTORE':'ocio','XBOX':'ocio','NINTENDO':'ocio',
-    'TWITCH':'ocio','PATREON':'ocio','AUDIBLE':'ocio','KINDLE':'ocio',
-    'AEROLINEAS':'transporte','DESPEGAR':'transporte','BOOKING':'transporte',
-    'TRIVAGO':'transporte','AIRBNB':'transporte','SAMSUNG':'otros'
+    /* Streaming y ocio digital */
+    'NETFLIX':'ocio','SPOTIFY':'ocio','DISNEY':'ocio','DISNEYPLUS':'ocio','DISNEY+':'ocio',
+    'HBO MAX':'ocio','HBOMAX':'ocio','MAXSTREAM':'ocio','PRIME VIDEO':'ocio','AMAZONPRIME':'ocio',
+    'PARAMOUNT+':'ocio','PARAMOUNTPLUS':'ocio','APPLETV+':'ocio','APPLETV':'ocio','APPLE MUSIC':'ocio',
+    'APPLEMUSIC':'ocio','APPLEONE':'ocio','APPLEICLOUD':'servicios','APPLEBOOKS':'ocio','APPLENEWS':'ocio',
+    'YOUTUBE':'ocio','YOUTUBEPREMIUM':'ocio','YOUTUBEMUSIC':'ocio','GOOGLEONE':'servicios',
+    'GOOGLEDRIVE':'servicios','GOOGLEPLAYMUSIC':'ocio','GOOGLEPLAY':'ocio','GOOGLESTORAGE':'servicios',
+    'GOOGLEADS':'servicios','GOOGLECLOUD':'servicios','STEAM':'ocio','PLAYSTATION':'ocio','PSPLUS':'ocio',
+    'EPIC':'ocio','XBOX':'ocio','XBOXGAME':'ocio','GAMEPASS':'ocio','NINTENDO':'ocio','TWITCH':'ocio',
+    'PATREON':'ocio','AUDIBLE':'ocio','KINDLE':'ocio','CRUNCHYROLL':'ocio','FUNIMATION':'ocio','DAZN':'ocio',
+    'ESPN':'ocio','STARTV':'ocio','STAR+':'ocio','STARPLUS':'ocio','NFL':'ocio','MLB':'ocio','NBA':'ocio',
+    'FIFA':'ocio','PELOTON':'ocio','MASTERCLASS':'ocio','SKILLSHARE':'ocio','NOTION':'ocio','SLACK':'ocio',
+    'ZOOM':'ocio','MICROSOFT':'ocio','M365':'ocio','OFFICE':'ocio','CANVA':'ocio','ADOBE':'ocio',
+    'CREATIVECLOUD':'ocio','LIGHTROOM':'ocio','PHOTOSHOP':'ocio','FIGMA':'ocio','GITHUB':'ocio',
+    'GITLAB':'ocio','JIRA':'ocio','ATLASSIAN':'ocio','LINKEDIN':'educacion','LINKEDINPREMIUM':'educacion',
+    'TINDER':'ocio','BUMBLE':'ocio','TIKTOK':'ocio','TIKTOKPROMO':'ocio','DUOLINGO':'ocio','BUSUU':'ocio',
+    'HEADSPACE':'ocio','CALM':'ocio','NETFLIXCOM':'ocio','NETFLIXGIFT':'ocio','AMAZONGIFTCARD':'ocio',
+    'GIFT':'ocio','GIFTCARD':'ocio','ITUNES':'ocio','ITUNESSTORE':'ocio','APPSTORE':'ocio',
+    'PLAYSTORE':'ocio','CLOUDFLARE':'servicios','AWS':'servicios','AMAZONAWS':'servicios',
+    'DOMAIN':'servicios','GODADDY':'servicios','HOSTINGER':'servicios','NAMECHEAP':'servicios',
+    'DROPBOX':'servicios','ONEDRIVE':'servicios','MEGA':'servicios','SHOPIFY':'otros','ETSY':'otros',
+    'TIENDANUBE':'otros','UDEMY':'educacion','COURSERA':'educacion','PLATZI':'educacion','CREHANA':'educacion',
+    'DOMESTIKA':'educacion','UDACITY':'educacion','EDX':'educacion',
+    /* Supermercados y alimentación */
+    'MERCADO':'alimentacion','MERCADOLIBRE':'otros','MERCADOPAGO':'otros','MELI':'otros',
+    'WALMART':'alimentacion','WALLMART':'alimentacion','CARREFOUR':'alimentacion','JUMBO':'alimentacion',
+    'MASS':'alimentacion','CENCOSUD':'alimentacion','DISCO':'alimentacion','VEA':'alimentacion',
+    'MASON':'alimentacion','COTO':'alimentacion','COTOMAXI':'alimentacion','DIUNSA':'alimentacion',
+    'VITAL':'alimentacion','TATA':'alimentacion','TIA':'alimentacion','LIDER':'alimentacion',
+    'EXITO':'alimentacion','CARULLA':'alimentacion','OLIMPICA':'alimentacion','D1':'alimentacion',
+    'ARA':'alimentacion','MULTIAHORRO':'alimentacion','SUPERMERCADO':'alimentacion','SUPER':'alimentacion',
+    'ALMACEN':'alimentacion','HIPERLIB':'alimentacion','CHANGOMAS':'alimentacion','LAANONIMA':'alimentacion',
+    'DIA':'alimentacion','DIARGENTINA':'alimentacion','IDEAL':'alimentacion','PLAZA':'alimentacion',
+    'PANADERIA':'alimentacion','KIOSCO':'alimentacion','QUIOSCO':'alimentacion','TABACO':'alimentacion',
+    'MAXICONSULTO':'alimentacion','CONSUM':'alimentacion','HIPER':'alimentacion','MINIMARKET':'alimentacion',
+    'MINIMERCADO':'alimentacion','QUILMES':'alimentacion','CERVEZA':'alimentacion','BAR':'ocio','RESTO':'ocio',
+    'RESTAURANT':'ocio','CAFE':'ocio','CAFETERIA':'ocio',
+    /* Comida rápida y delivery */
+    'STARBUCKS':'alimentacion','MCDONALDS':'alimentacion','MCDONALD':'alimentacion','BURGER':'alimentacion',
+    'WENDYS':'alimentacion','KFC':'alimentacion','SUBWAY':'alimentacion','PIZZA':'alimentacion',
+    'DOMINOS':'alimentacion','PAPAJOHNS':'alimentacion','PEDIDOSYA':'alimentacion','UBEREATS':'alimentacion',
+    'UBEREAT':'alimentacion','RAPPI':'alimentacion','GLOVO':'alimentacion','GLOVOEXP':'alimentacion',
+    'GLOVOMKT':'alimentacion','IFOOD':'alimentacion','PIDEALGO':'alimentacion','PIKKABU':'alimentacion',
+    /* Transporte y combustibles */
+    'UBER':'transporte','UBERTRIP':'transporte','CABIFY':'transporte','DIIDEMO':'transporte',
+    'COMBUSTIBLE':'transporte','YPF':'transporte','SHELL':'transporte','AXION':'transporte',
+    'REPSOL':'transporte','PUMA':'transporte','ACEITE':'transporte','NAFTA':'transporte','GASOIL':'transporte',
+    'GNC':'transporte','ESTACION':'transporte','COLECTIVO':'transporte','SUBE':'transporte','TAXI':'transporte',
+    'REMIS':'transporte','TREN':'transporte','METRO':'transporte','SUBTE':'transporte','ESTACIONAR':'transporte',
+    'PARQUIMETRO':'transporte','CONCESIONARIA':'transporte','CONCESION':'transporte','AUSA':'transporte',
+    'PEAJE':'transporte','ESTACIONAMIENTO':'transporte','AEROLINEAS':'transporte','AEROLINEA':'transporte',
+    'DESPEGAR':'transporte','BOOKING':'transporte','TRIVAGO':'transporte','AIRBNB':'transporte','VUELO':'transporte',
+    'FLIGHT':'transporte','LATAM':'transporte','GOL':'transporte','AVIANCA':'transporte','COPA':'transporte',
+    'IBERIA':'transporte','LUFTHANSA':'transporte','EMIRATES':'transporte','QATAR':'transporte','KLM':'transporte',
+    'AIRFRANCE':'transporte','AMERICAN':'transporte','UNITED':'transporte','DELTA':'transporte','ALITALIA':'transporte',
+    'AEROMEXICO':'transporte','JETBLUE':'transporte','SOUTHWEST':'transporte','SPIRIT':'transporte','FRONTIER':'transporte',
+    /* Servicios públicos e impuestos */
+    'GAS':'servicios','EDESUR':'servicios','EDENOR':'servicios','EDESE':'servicios','AYSA':'servicios',
+    'METROGAS':'servicios','CAMUGAS':'servicios','AGUAS':'servicios','AGUASARGENTINAS':'servicios',
+    'AGUA':'servicios','PERSONAL':'servicios','CLARO':'servicios','NEXTEL':'servicios','MOVISTAR':'servicios',
+    'TELEFONICA':'servicios','FLOW':'servicios','TELECENTRO':'servicios','SPEEDY':'servicios','DIRECTV':'servicios',
+    'TIVEDIRECT':'servicios','INTERCABLE':'servicios','CABLEVISION':'servicios','IMPUESTO':'servicios',
+    'IMPUESTOS':'servicios','RENTAS':'servicios','AFIP':'servicios','AGIP':'servicios','ARBA':'servicios',
+    'SERVICIOS':'servicios','SERVICIO':'servicios','SERV':'servicios','SEGURO':'servicios','SEGUROS':'servicios',
+    'ALLIANZ':'servicios','LASEGUNDA':'servicios','FEDERADA':'servicios','SANCOR':'servicios','GALICIA':'servicios',
+    'ORIGENES':'servicios','BERKLEY':'servicios','COMISION':'servicios','INTERES':'otros',
+    /* Salud */
+    'FARMACITY':'salud','DROGUERIA':'salud','FARMACIA':'salud','FARMASHOP':'salud','SANARTIS':'salud',
+    'HOSPITAL':'salud','CLINICA':'salud','OSDE':'salud','SWISS':'salud','GALENO':'salud','OMINT':'salud',
+    'COELIAC':'salud','NEFRO':'salud','NEUMO':'salud','DERMATO':'salud','CARDIO':'salud','GINECO':'salud',
+    'PEDIATRIA':'salud','LABORATORIO':'salud','ANALISIS':'salud','BIOQUIMICA':'salud','OBRA':'salud',
+    'SOCIAL':'salud','PREPAGA':'salud',
+    /* Ropa y moda */
+    'ZARA':'ropa','ADIDAS':'ropa','NIKE':'ropa','SHEIN':'ropa','PUMA':'ropa','REEBOK':'ropa','UNDER':'ropa',
+    'FALABELLA':'ropa','RIPLEY':'ropa','LIVERPOOL':'ropa','PALACIO':'ropa','H&M':'ropa','KIKA':'ropa',
+    'TIENDA INGLES':'ropa','ASOS':'ropa','MACYS':'ropa','TIENDA':'otros','COMPRAS':'otros','SHOPPING':'otros',
+    /* Vivienda */
+    'BLANCO':'vivienda','EXPENSAS':'vivienda','ALQUILER':'vivienda','HIPOTECA':'vivienda',
+    'INMOBILIARIA':'vivienda','BARRIO':'vivienda','CONSORCIO':'vivienda','CONSORCI':'vivienda',
+    'ADMINISTRACION':'vivienda','ALQ':'vivienda',
+    /* Educación */
+    'COLEGIO':'educacion','UNIVERSIDAD':'educacion','CURSO':'educacion','BOCA':'educacion',
+    /* Otros / Tecnología */
+    'GARBARINO':'otros','FRAVEGA':'otros','MUSIMUNDO':'otros','COMPUMUNDO':'otros','TODO1':'otros',
+    'SAMSUNG':'otros','GALAXY':'otros','XIAOMI':'otros','MOTOROLA':'otros','LG':'otros','COMPU':'otros',
+    'COMPUTACION':'otros','LAPTOP':'otros','NOTEBOOK':'otros','PC':'otros','IMPRESORA':'otros',
+    'BILLETERA':'otros','TRANSFER':'otros','RETIRO':'otros','DEPOSITO':'otros','EXTRACCION':'otros',
+    'ALIEXPRESS':'otros','AMAZON':'otros','TIENDAS':'otros','PROMO':'otros','PROMOCIONES':'otros',
+    'DESCUENTO':'otros','CASHBACK':'otros','CINES':'ocio','CINEMARK':'ocio','CINEMA':'ocio','SHOWCASE':'ocio',
+    'HOYTS':'ocio','ENTRADA':'ocio','ENTRADAS':'ocio','TICKET':'ocio','TICKETEK':'ocio','PLATEANET':'ocio',
+    'GYM':'ocio','GIMNASIO':'ocio','CROSSFIT':'ocio','SMARTFIT':'ocio','GYMPASS':'ocio',
+    'VIAJES':'ocio','VIAJE':'ocio','TOUR':'ocio','HOTEL':'ocio','HOSTEL':'ocio','CRUCEROS':'ocio'
+};
+
+/* Lista de servicios de suscripción recurrente conocidos. Sirve para detectarlos y ofrecer una auditoría. */
+const SUBSCRIPTIONS={
+    'NETFLIX':{name:'Netflix',cat:'ocio'},
+    'SPOTIFY':{name:'Spotify Premium',cat:'ocio'},
+    'DISNEYPLUS':{name:'Disney Plus',cat:'ocio'},
+    'DISNEY+':{name:'Disney Plus',cat:'ocio'},
+    'DISNEY PLUS':{name:'Disney Plus',cat:'ocio'},
+    'HBO MAX':{name:'HBO Max',cat:'ocio'},
+    'HBOMAX':{name:'HBO Max',cat:'ocio'},
+    'MAXSTREAM':{name:'Max',cat:'ocio'},
+    'PRIME VIDEO':{name:'Amazon Prime Video',cat:'ocio'},
+    'AMAZONPRIME':{name:'Amazon Prime Video',cat:'ocio'},
+    'PARAMOUNT+':{name:'Paramount+',cat:'ocio'},
+    'PARAMOUNTPLUS':{name:'Paramount+',cat:'ocio'},
+    'APPLETV+':{name:'Apple TV+',cat:'ocio'},
+    'APPLETV':{name:'Apple TV+',cat:'ocio'},
+    'APPLE MUSIC':{name:'Apple Music',cat:'ocio'},
+    'APPLEMUSIC':{name:'Apple Music',cat:'ocio'},
+    'APPLEONE':{name:'Apple One',cat:'ocio'},
+    'APPLEICLOUD':{name:'iCloud Storage',cat:'servicios'},
+    'ICLOUD':{name:'iCloud Storage',cat:'servicios'},
+    'YOUTUBE PREMIUM':{name:'YouTube Premium',cat:'ocio'},
+    'YOUTUBEPREMIUM':{name:'YouTube Premium',cat:'ocio'},
+    'YOUTUBE MUSIC':{name:'YouTube Music',cat:'ocio'},
+    'YOUTUBEMUSIC':{name:'YouTube Music',cat:'ocio'},
+    'GOOGLE ONE':{name:'Google One',cat:'servicios'},
+    'GOOGLEONE':{name:'Google One',cat:'servicios'},
+    'GOOGLEDRIVE':{name:'Google Drive',cat:'servicios'},
+    'GOOGLESTORAGE':{name:'Google Storage',cat:'servicios'},
+    'DROPBOX':{name:'Dropbox',cat:'servicios'},
+    'ONEDRIVE':{name:'OneDrive',cat:'servicios'},
+    'MEGA':{name:'Mega',cat:'servicios'},
+    'ADOBE CREATIVECLOUD':{name:'Adobe Creative Cloud',cat:'ocio'},
+    'CREATIVECLOUD':{name:'Adobe Creative Cloud',cat:'ocio'},
+    'ADOBE':{name:'Adobe Creative Cloud',cat:'ocio'},
+    'CANVA PRO':{name:'Canva Pro',cat:'ocio'},
+    'CANVA':{name:'Canva Pro',cat:'ocio'},
+    'NOTION':{name:'Notion Plus',cat:'ocio'},
+    'SLACK':{name:'Slack Pro',cat:'ocio'},
+    'ZOOM':{name:'Zoom Pro',cat:'ocio'},
+    'GITHUB':{name:'GitHub Pro',cat:'ocio'},
+    'MICROSOFT 365':{name:'Microsoft 365',cat:'ocio'},
+    'M365':{name:'Microsoft 365',cat:'ocio'},
+    'OFFICE 365':{name:'Microsoft 365',cat:'ocio'},
+    'OFFICE':{name:'Microsoft 365',cat:'ocio'},
+    'MICROSOFT':{name:'Microsoft 365',cat:'ocio'},
+    'CRUNCHYROLL':{name:'Crunchyroll',cat:'ocio'},
+    'DAZN':{name:'DAZN',cat:'ocio'},
+    'ESPN':{name:'ESPN',cat:'ocio'},
+    'STAR+':{name:'Star+',cat:'ocio'},
+    'STARPLUS':{name:'Star+',cat:'ocio'},
+    'STARTV':{name:'Star+',cat:'ocio'},
+    'HEADSPACE':{name:'Headspace',cat:'ocio'},
+    'CALM':{name:'Calm',cat:'ocio'},
+    'DUOLINGO':{name:'Duolingo Plus',cat:'ocio'},
+    'MASTERCLASS':{name:'MasterClass',cat:'ocio'},
+    'SKILLSHARE':{name:'Skillshare',cat:'ocio'},
+    'UDEMY':{name:'Udemy',cat:'educacion'},
+    'COURSERA':{name:'Coursera Plus',cat:'educacion'},
+    'PLATZI':{name:'Platzi',cat:'educacion'},
+    'CREHANA':{name:'Crehana',cat:'educacion'},
+    'DOMESTIKA':{name:'Domestika',cat:'educacion'},
+    'UDACITY':{name:'Udacity',cat:'educacion'},
+    'SMARTFIT':{name:'SmartFit',cat:'ocio'},
+    'GYMPASS':{name:'Gympass',cat:'ocio'},
+    'PATREON':{name:'Patreon',cat:'ocio'},
+    'TWITCH':{name:'Twitch Turbo',cat:'ocio'},
+    'LINKEDIN PREMIUM':{name:'LinkedIn Premium',cat:'educacion'},
+    'LINKEDINPREMIUM':{name:'LinkedIn Premium',cat:'educacion'},
+    'TINDER GOLD':{name:'Tinder Gold',cat:'ocio'},
+    'TINDER PLUS':{name:'Tinder Plus',cat:'ocio'},
+    'TINDER':{name:'Tinder',cat:'ocio'},
+    'BUMBLE':{name:'Bumble Boost',cat:'ocio'},
+    'SPOTIFYPREMIUM':{name:'Spotify Premium',cat:'ocio'},
+    'NETFLIXCOM':{name:'Netflix',cat:'ocio'},
+    'NETFLIXGIFT':{name:'Netflix',cat:'ocio'},
+    'AMAZONGIFTCARD':{name:'Amazon Gift Card',cat:'ocio'},
+    'GIFTCARD':{name:'Gift Card',cat:'ocio'}
 };
 
 const CURR_MAP={USD:'$',EUR:'€',ARS:'$',MXN:'$',COP:'$',UYU:'U$',BRL:'R$',CLP:'$'};
@@ -702,12 +838,71 @@ function parseAmtStr(s){
     return parseFloat(s)||0;
 }
 
+/* Normaliza un merchant: quita códigos numéricos al final, asteriscos y referencias a cuotas */
+function normalizeMerchant(m){
+    let s=(m||'').toUpperCase().trim();
+    /* Quitar códigos de 4 dígitos al inicio o fin (tipicos "1234 NETFLIX COM" o "NETFLIX 1234") */
+    s=s.replace(/\b\d{4,}\b/g,' ').replace(/\*+/g,' ').replace(/\s+/g,' ').trim();
+    /* Quitar sufijos de país/común */
+    s=s.replace(/\s+(COM|ARG|AR|SRL|SA|INC|LLC)\s*$/,'').trim();
+    /* Quitar referencias a cuotas que hayan quedado pegadas */
+    s=s.replace(/\s*\(?\s*\d+\s*\/\s*\d+\s*\)?\s*$/,'').trim();
+    s=s.replace(/\s*CUOTA\s*\d*\s*\/?\s*\d*\s*$/,'').trim();
+    s=s.replace(/\s*\d+\s*\/\s*\d+\s*$/,'').trim();
+    return s;
+}
+
+/* Devuelve la categoría para un merchant usando matching fuzzy:
+   - Limpia el texto (quita números, sufijos, etc.)
+   - Busca la key más larga del MERCHANT_MAP que esté incluida (más específica primero)
+   - Si no encuentra, prueba bigramas
+   - Default 'otros' */
 function guessCat(merchant){
-    const u=(merchant||'').toUpperCase();
-    for(const[k,v]of Object.entries(MERCHANT_MAP)){
-        if(u.includes(k))return v;
+    const raw=(merchant||'').toUpperCase();
+    const u=normalizeMerchant(raw);
+    if(!u)return 'otros';
+    /* Ordenar keys por largo descendente para evitar que 'GAS' capture 'GASPAR' antes que 'GASPARIN' */
+    const keys=Object.keys(MERCHANT_MAP).sort((a,b)=>b.length-a.length);
+    /* Buscar inclusión directa */
+    for(const k of keys){
+        if(!k)continue;
+        if(u.includes(k))return MERCHANT_MAP[k];
     }
+    /* Si la cadena original (sin normalizar) contiene una key, usar esa */
+    for(const k of keys){
+        if(!k)continue;
+        if(raw.includes(k))return MERCHANT_MAP[k];
+    }
+    /* Heurísticas por palabra clave cuando no hay match en el map */
+    const low=u;
+    if(/\\b(SUPER|MERCADO|ALMACEN|CARNICER|VERDUL|PANADER|KIOSC|QUIOSC|DESPENSA)\\b/.test(low))return 'alimentacion';
+    if(/\\b(RESTO|CAFETER|BAR|PIZZER|HAMBURG|COMIDA|DELIVERY)\\b/.test(low))return 'alimentacion';
+    if(/\\b(TAXI|REMIS|UBER|CABIFY|COLECTIVO|SUBE|TREN|SUBTE|NAFTA|GASOIL|COMBUSTIBLE|ESTACIONAM)\\b/.test(low))return 'transporte';
+    if(/\\b(FARMAC|HOSPITAL|CLINIC|LABORATOR|MEDIC|ANALIS|CONSULTA|DENTAL|DENTISTA)\\b/.test(low))return 'salud';
+    if(/\\b(PELUQU|BARBER|SPA|MASAJE|GYM|GIMNAS|ENTREN|CROSSFIT|YOGA|PILATES)\\b/.test(low))return 'ocio';
+    if(/\\b(CINE|CINEMA|ENTRAD|TICKET|CONCIERTO|TEATRO|SHOW)\\b/.test(low))return 'ocio';
+    if(/\\b(SEGURO|EXPENSA|ALQUILER|CONSORCI|IMPUESTO|RENTAS|AFIP|AGIP|ARBA|GAS|LUZ|AGUA|INTERNET|TELEF|MOVISTAR|CLARO|FLOW)\\b/.test(low))return 'servicios';
+    if(/\\b(ROPA|TIENDA|MODA|INDUMENT|ZAPATILL|ZAPATOS|RELOJ|JOYA)\\b/.test(low))return 'ropa';
+    if(/\\b(CURSO|UNIVERS|COLEGIO|CAPACIT|DIPLOMAT|MASTER|MBA|SEMINAR)\\b/.test(low))return 'educacion';
     return 'otros';
+}
+
+/* Detecta si una línea del resumen corresponde a una suscripción recurrente conocida.
+   Devuelve {subName, subCat} o null si no es una suscripción identificada. */
+function detectSubscription(merchant){
+    const u=(merchant||'').toUpperCase();
+    if(!u)return null;
+    /* Buscar key más específica primero */
+    const keys=Object.keys(SUBSCRIPTIONS).sort((a,b)=>b.length-a.length);
+    for(const k of keys){
+        if(!k)continue;
+        /* Coincidencia más flexible: la key aparece como palabra/trozo sin espacios o con espacios */
+        if(u.includes(k)){
+            const s=SUBSCRIPTIONS[k];
+            return {subName:s.name,subCat:s.cat};
+        }
+    }
+    return null;
 }
 
 /* ============================================================
@@ -762,104 +957,247 @@ function doParseStatement(text,cardName,userName,closeDate){
     const installments=results.filter(r=>r.isInstallment);
     const installmentPlans=groupInstallments(installments);
 
-    return{expenses,installments:installmentPlans,total:results.reduce((s,r)=>s+r.amount,0),count:results.length,cardName,userName,closeDate};
+    const subscriptionsList=results.filter(r=>r.subscription);
+    return{expenses,installments:installmentPlans,total:results.reduce((s,r)=>s+r.amount,0),count:results.length,cardName,userName,closeDate,subscriptionsList};
+}
+
+/* Tabla de meses en español para parsear fechas como "12 MAR 2024" o "5 SEP" */
+const MONTH_ES={ENE:1,FEB:2,MAR:3,ABR:4,MAY:5,JUN:6,JUL:7,AGO:8,SEP:9,SET:9,OCT:10,NOV:11,DIC:12,
+    ENERO:1,FEBRERO:2,MARZO:3,ABRIL:4,MAYO:5,JUNIO:6,JULIO:7,AGOSTO:8,SEPTIEMBRE:9,SEPT:9,SETIEMBRE:9,
+    OCTUBRE:10,NOVIEMBRE:11,DICIEMBRE:12};
+/* Meses en inglés por si el resumen viene en ese formato */
+const MONTH_EN={JAN:1,FEB:2,MAR:3,APR:4,MAY:5,JUN:6,JUL:7,AUG:8,SEP:9,SEPT:9,OCT:10,NOV:11,DEC:12,
+    JANUARY:1,FEBRUARY:2,MARCH:3,APRIL:4,MAY:5,JUNE:6,JULY:7,AUGUST:8,SEPTEMBER:9,OCTOBER:10,NOVEMBER:11,DECEMBER:12};
+
+function parseDateToken(str,closeDate){
+    if(!str)return null;
+    str=str.trim();
+    /* DD/MM/YYYY o DD-MM-YY */
+    let m=str.match(/^(\d{1,2})[\/\-.](\d{1,2})[\/\-.](\d{2,4})$/);
+    if(m){
+        const yr=m[3].length===2?'20'+m[3]:m[3];
+        return yr+'-'+m[2].padStart(2,'0')+'-'+m[1].padStart(2,'0');
+    }
+    /* YYYY-MM-DD */
+    m=str.match(/^(\d{4})[\/\-.](\d{1,2})[\/\-.](\d{1,2})$/);
+    if(m)return m[1]+'-'+m[2].padStart(2,'0')+'-'+m[3].padStart(2,'0');
+    /* DD/MM o DD-MM */
+    m=str.match(/^(\d{1,2})[\/\-.](\d{1,2})$/);
+    if(m){
+        const yr=closeDate?closeDate.slice(0,4):new Date().getFullYear().toString();
+        return yr+'-'+m[2].padStart(2,'0')+'-'+m[1].padStart(2,'0');
+    }
+    /* 12 MAR 2024 / 5 SEP / 12 MARZO 2024 */
+    m=str.match(/^(\d{1,2})\s+([A-ZÁÉÍÓÚ]+)\.?\s*(\d{4})?$/i);
+    if(m){
+        const mes=(m[2]||'').toUpperCase().replace(/Á/,'A').replace(/É/,'E').replace(/Í/,'I').replace(/Ó/,'O').replace(/Ú/,'U');
+        const mesNum=MONTH_ES[mes]||MONTH_EN[mes];
+        if(mesNum){
+            const yr=m[3]||(closeDate?closeDate.slice(0,4):new Date().getFullYear().toString());
+            return yr+'-'+String(mesNum).padStart(2,'0')+'-'+m[1].padStart(2,'0');
+        }
+    }
+    /* 12-03 (ya cubierto arriba) */
+    return null;
 }
 
 function parseLine(line,closeDate){
-    const datePatterns=[
-        /(\d{2})[\/\-](\d{2})[\/\-](\d{2,4})/,
-        /(\d{4})[\/\-](\d{2})[\/\-](\d{2})/,
-        /(\d{2})[\/\-](\d{2})/,
-    ];
-
-    let dateStr=null,dateMatch=null,dateEnd=0;
-    for(const pat of datePatterns){
-        const m=line.match(pat);
-        if(m){
-            dateMatch=m;
-            dateEnd=m.index+m[0].length;
-            if(pat===datePatterns[1]){
-                dateStr=m[1]+'-'+m[2]+'-'+m[3];
-            }else if(pat===datePatterns[0]){
-                const yr=m[3].length===2?'20'+m[3]:m[3];
-                dateStr=yr+'-'+m[2].padStart(2,'0')+'-'+m[1].padStart(2,'0');
-            }else{
+    /* 1) FECHA: buscar al inicio de la línea */
+    let dateStr=null,dateEnd=0;
+    /* DD/MM/YYYY o DD-MM-YY al inicio */
+    let m=line.match(/^(\d{1,2})[\/\-.](\d{1,2})[\/\-.](\d{2,4})/);
+    if(m){
+        const yr=m[3].length===2?'20'+m[3]:m[3];
+        dateStr=yr+'-'+m[2].padStart(2,'0')+'-'+m[1].padStart(2,'0');
+        dateEnd=m[0].length;
+    }else{
+        /* YYYY-MM-DD */
+        m=line.match(/^(\d{4})[\/\-.](\d{1,2})[\/\-.](\d{1,2})/);
+        if(m){dateStr=m[1]+'-'+m[2].padStart(2,'0')+'-'+m[3].padStart(2,'0');dateEnd=m[0].length}
+        else{
+            /* DD/MM al inicio */
+            m=line.match(/^(\d{1,2})[\/\-.](\d{1,2})\b/);
+            if(m){
                 const yr=closeDate?closeDate.slice(0,4):new Date().getFullYear().toString();
                 dateStr=yr+'-'+m[2].padStart(2,'0')+'-'+m[1].padStart(2,'0');
+                dateEnd=m[0].length;
+            }else{
+                /* 12 MAR 2024 / 12 MARZO / 5 SEP */
+                m=line.match(/^(\d{1,2})\s+([A-ZÁÉÍÓÚ]+)\.?\s*(\d{4})?/i);
+                if(m){
+                    const mes=(m[2]||'').toUpperCase().replace(/Á/,'A').replace(/É/,'E').replace(/Í/,'I').replace(/Ó/,'O').replace(/Ú/,'U');
+                    const mesNum=MONTH_ES[mes]||MONTH_EN[mes];
+                    if(mesNum){
+                        const yr=m[3]||(closeDate?closeDate.slice(0,4):new Date().getFullYear().toString());
+                        dateStr=yr+'-'+String(mesNum).padStart(2,'0')+'-'+m[1].padStart(2,'0');
+                        dateEnd=m[0].length;
+                    }
+                }
             }
-            break;
         }
     }
 
-    let amount=0,amountStart=0;
-    const amtMatch=line.match(/([+-]?\s*(?:[U$R$€]*\s*)?[\d]+(?:[.,]\d{3})*(?:[.,]\d{1,2}))\s*$/);
+    /* 2) MONTO: buscar al final de la línea.
+       Acepta prefijos de moneda opcional, signo +/-, separadores de miles y coma decimal. */
+    let amount=0,amountStr='',amountStart=line.length;
+    /* Patrón amplio: captura el monto al final de la línea */
+    const amtMatch=line.match(/([+-]?\s*(?:U\$S|US\$|U\$|R\$|\$|€|£|ARS|USD|EUR)?\s*[-+]?\s*[\d.,]+)\s*$/) ;
     if(amtMatch){
-        amount=parseAmtStr(amtMatch[1]);
-        amountStart=amtMatch.index;
+        const candidate=amtMatch[1];
+        const val=parseAmtStr(candidate);
+        if(val>0){
+            amount=val;
+            amountStr=candidate.trim();
+            amountStart=amtMatch.index;
+        }
     }
 
     if(amount<=0)return null;
 
+    /* 3) MERCHANT: todo lo que está entre la fecha y el monto */
     let merchant=line;
     if(dateEnd>0)merchant=merchant.slice(dateEnd);
     if(amountStart>dateEnd)merchant=merchant.slice(0,amountStart-dateEnd);
     merchant=merchant.trim().replace(/\s+/g,' ').replace(/^[-|•·→>]+\s*/,'').replace(/\s*[-|•·→>]+$/,'');
 
+    /* 4) DETECCIÓN DE CUOTAS: patrones ampliados */
     let isInstallment=false,cuotaCurrent=0,cuotaTotal=0;
+    /* Mapa de patrones -> orden de los grupos (current, total) */
     const cuotaPatterns=[
-        /CUOTA\s+(\d+)\s*[\/\\ DE]+\s*(\d+)/i,
-        /C\.?\s*(\d+)\s*[\/\\]\s*(\d+)/i,
-        /PAGO\s+(\d+)\s+DE\s+(\d+)/i,
-        /(\d+)\s*[\/\\]\s*(\d+)\s*$/,
-        /(\d+)\s+DE\s+(\d+)/i,
-        /(\d+)\/(\d+)\s*$/,
+        /* Formato "CUOTA N 2/12", "CUOTA 2/12", "CUOTA 02/12" - con palabra clave al inicio */
+        {re:/^CUOTA\s*(?:N?[ºo.]?\s*)?(\d+)\s*[\/\\ DE]+\s*(\d+)\b/i,g:1},
+        {re:/^C\.?\s*(\d+)\s*[\/\\]\s*(\d+)\b/i,g:1},
+        {re:/^CTA\.?\s*(\d+)\s*[\/\\ DE]+\s*(\d+)\b/i,g:1},
+        {re:/^PAGO\s+(\d+)\s+DE\s+(\d+)\b/i,g:1},
+        /* "(3/12)" o "(3 DE 12)" con paréntesis */
+        {re:/^\(\s*(\d+)\s*\/\s*(\d+)\s*\)/,g:1},
+        {re:/^\(\s*(\d+)\s+DE\s+(\d+)\s*\)/i,g:1},
+        /* "2/12 MERCHANT..." al inicio (común en resúmenes argentinos) */
+        {re:/^(\d{1,2})\s*\/\s*(\d{1,3})\s+/,g:1},
+        /* "2 DE 12 MERCHANT..." al inicio */
+        {re:/^(\d{1,2})\s+DE\s+(\d{1,3})\s+/i,g:1},
+        /* Cualquier patron anterior pero que aparezca en el medio/fin */
+        {re:/CUOTA\s*(?:N?[ºo.]?\s*)?(\d+)\s*[\/\\ DE]+\s*(\d+)/i,g:1},
+        {re:/C\.?\s*(\d+)\s*[\/\\]\s*(\d+)/i,g:1},
+        {re:/CTA\.?\s*(\d+)\s*[\/\\ DE]+\s*(\d+)/i,g:1},
+        {re:/PAGO\s+(\d+)\s+DE\s+(\d+)/i,g:1},
+        {re:/\(\s*(\d+)\s*\/\s*(\d+)\s*\)/,g:1},
+        {re:/\(\s*(\d+)\s+DE\s+(\d+)\s*\)/i,g:1},
+        {re:/\s(\d+)\s*\/\s*(\d+)\s*$/,g:1},
+        {re:/\s(\d+)\s+DE\s+(\d+)\s*$/i,g:1},
     ];
     for(const cp of cuotaPatterns){
-        const cm=merchant.match(cp);
+        const cm=merchant.match(cp.re);
         if(cm){
-            cuotaCurrent=parseInt(cm[1]);
-            cuotaTotal=parseInt(cm[2]);
-            if(cuotaTotal>1&&cuotaCurrent<=cuotaTotal){
+            const cur=parseInt(cm[1]);
+            const tot=parseInt(cm[2]);
+            if(tot>1&&cur>=1&&cur<=tot){
                 isInstallment=true;
-                merchant=merchant.replace(cm[0],'').trim();
+                cuotaCurrent=cur;
+                cuotaTotal=tot;
+                merchant=merchant.replace(cm[0],' ').trim();
                 break;
             }
         }
     }
 
-    merchant=merchant.replace(/\*+/g,' ').replace(/\s+/g,' ').replace(/^\s+|\s+$/g,'');
+    /* Limpieza final del merchant */
+    merchant=merchant.replace(/\*+/g,' ').replace(/\s+/g,' ').replace(/^\s+|\s+$/g,'').replace(/^[-|•·→>]+/,'').replace(/[-|•·→>]+$/,'');
     if(!merchant)merchant='Gasto tarjeta';
 
+    /* 5) CATEGORÍA + SUSCRIPCIÓN RECURRENTE */
     const category=guessCat(merchant);
+    const subscription=detectSubscription(merchant);
+
+    /* 6) INDICAR SI ES USD (para mostrarlo y eventualmente convertir) */
+    const isUSD=/U\$S|US\$|USD|U\$/.test(amountStr)||(line.match(/\bUSD\b|U\$S?\b/i)!==null&&amount>0);
 
     return{
         date:dateStr||closeDate,
         merchant,
         amount,
+        currency:isUSD?'USD':'ARS',
         category,
         isInstallment,
         cuotaCurrent,
         cuotaTotal,
+        subscription,
         description:merchant
     };
+}
+
+/* Genera una clave de agrupación para cuotas. Usa el merchant normalizado + total de cuotas + monto.
+   Si dos merchants tienen el mismo nombre pero diferente monto de cuota, son planes distintos. */
+function instGroupKey(inst){
+    const m=normalizeMerchant(inst.merchant);
+    return (m+'_'+inst.cuotaTotal+'_'+(inst.amount||0).toFixed(2)).toUpperCase();
+}
+
+/* Estima el CFT (costo financiero total) aproximado del plan si tenemos monto de cuota y total.
+   No es un cálculo exacto porque no conocemos la tasa de la tarjeta, pero sí una estimación
+   comparando con el precio de contado aproximado. Como no tenemos precio de contado,
+   asumimos interés típico de mercado argentino para planes de cuotas (aprox 70-120% CFT). */
+function estimateInstallmentCFT(cuotaAmount,totalCuotas,totalAmount){
+    /* Total financiado = monto cuota * cantidad de cuotas.
+       Sin precio de contado, no podemos calcular CFT exacto.
+       Devolvemos null si no hay info suficiente. */
+    if(!cuotaAmount||!totalCuotas||!totalAmount)return null;
+    /* Si el total coincide exactamente con cuotaAmount*totalCuotas => no hay interés visible (no podemos estimarlo) */
+    return null;
+}
+
+/* Suma meses a una fecha YYYY-MM-DD sin problemas de zona horaria */
+function addMonths(dateStr,months){
+    if(!dateStr)return null;
+    const d=new Date(dateStr+'T12:00:00');
+    if(isNaN(d.getTime()))return null;
+    d.setMonth(d.getMonth()+months);
+    return d.toISOString().slice(0,10);
+}
+
+/* Calcula la fecha de finalización proyectada de un plan de cuotas
+   a partir de la fecha de inicio y la cantidad total de cuotas. */
+function projectEndDate(startDateStr,totalCuotas){
+    if(!startDateStr||!totalCuotas)return null;
+    return addMonths(startDateStr,totalCuotas-1);
+}
+
+/* Calcula el monto pendiente total de un plan */
+function planRemaining(plan){
+    const paid=Number(plan.paid_cuotas||plan.cuotaCurrent>0?plan.cuotaCurrent-1:0);
+    const total=Number(plan.total_cuotas||plan.cuotaTotal);
+    const remaining=Math.max(0,total-paid);
+    const cuotaAmt=Number(plan.cuota_amount||plan.cuotaAmount||0);
+    return {remaining,remainingAmount:remaining*cuotaAmt,paid,total};
 }
 
 function groupInstallments(installments){
     const groups={};
     for(const inst of installments){
-        const key=(inst.merchant+'_'+inst.cuotaTotal).toUpperCase().replace(/\s+/g,'_');
-        if(!groups[key])groups[key]={
-            merchant:inst.merchant,
-            category:inst.category,
-            cuotaTotal:inst.cuotaTotal,
-            cuotaCurrent:inst.cuotaCurrent,
-            cuotaAmount:inst.amount,
-            totalAmount:inst.amount*inst.cuotaTotal,
-            date:inst.date,
-            cardName:inst.cardName,
-            userName:inst.userName,
-            items:[]
-        };
+        const key=instGroupKey(inst);
+        if(!groups[key]){
+            groups[key]={
+                merchant:inst.merchant,
+                category:inst.category,
+                cuotaTotal:inst.cuotaTotal,
+                /* Siempre tomamos la cuota más alta vista como "current" */
+                cuotaCurrent:inst.cuotaCurrent,
+                cuotaAmount:inst.amount,
+                totalAmount:inst.amount*inst.cuotaTotal,
+                date:inst.date,
+                startDate:inst.date,
+                endDate:projectEndDate(inst.date,inst.cuotaTotal),
+                cardName:inst.cardName,
+                userName:inst.userName,
+                subscription:inst.subscription||null,
+                items:[]
+            };
+        }else{
+            /* Mantener la cuota más alta vista como actual */
+            if(inst.cuotaCurrent>groups[key].cuotaCurrent){
+                groups[key].cuotaCurrent=inst.cuotaCurrent;
+            }
+        }
         groups[key].items.push(inst);
     }
     return Object.values(groups);
@@ -883,31 +1221,89 @@ function renderParsedResult(){
     if(!parsedResult)return;
     const{expenses,installments,total,count}=parsedResult;
 
-    document.getElementById('parsed-summary').textContent=`${count} gastos detectados en ${parsedResult.cardName}`;
+    /* Detectar suscripciones dentro de los gastos */
+    const subs=expenses.filter(e=>e.subscription);
+    const subsMonthly=subs.reduce((s,e)=>s+Number(e.amount),0);
+    /* Compromiso mensual en cuotas + suscripciones */
+    const instMonthly=installments.reduce((s,i)=>s+Number(i.cuotaAmount),0);
+
+    document.getElementById('parsed-summary').textContent=`${count} movimientos detectados · ${parsedResult.cardName}`;
     document.getElementById('parsed-stats').innerHTML=`
-        <div class="card-flat p-3 text-center"><p class="text-[10px] text-muted mb-1">Total</p><p class="text-sm font-display font-bold text-expense">${fmt(total)}</p></div>
+        <div class="card-flat p-3 text-center"><p class="text-[10px] text-muted mb-1">Total resumen</p><p class="text-sm font-display font-bold text-expense">${fmt(total)}</p></div>
         <div class="card-flat p-3 text-center"><p class="text-[10px] text-muted mb-1">Gastos</p><p class="text-sm font-display font-bold">${expenses.length}</p></div>
-        <div class="card-flat p-3 text-center"><p class="text-[10px] text-muted mb-1">En cuotas</p><p class="text-sm font-display font-bold">${installments.length}</p></div>
+        <div class="card-flat p-3 text-center"><p class="text-[10px] text-muted mb-1">Cuotas</p><p class="text-sm font-display font-bold">${installments.length}</p></div>
     `;
 
     const listEl=document.getElementById('parsed-list');
     listEl.innerHTML=expenses.map((e,i)=>renderParsedRow(e,i)).join('');
 
+    /* Sección suscripciones */
+    let subsSec=document.getElementById('parsed-subs-section');
+    if(!subsSec){
+        /* Lo creamos e insertamos antes de la sección de cuotas */
+        const cuotaSec=document.getElementById('parsed-cuotas-section');
+        subsSec=document.createElement('div');
+        subsSec.id='parsed-subs-section';
+        subsSec.className='mb-4 hidden';
+        subsSec.innerHTML=`
+            <h3 class="font-display font-semibold text-sm mb-2 flex items-center gap-2"><i class="fa-solid fa-repeat-arrow text-violet"></i> Suscripciones recurrentes detectadas</h3>
+            <div id="parsed-subs" class="space-y-2"></div>
+            <div id="parsed-subs-total" class="mt-2"></div>
+        `;
+        cuotaSec.parentNode.insertBefore(subsSec,cuotaSec);
+    }
+    if(subs.length){
+        subsSec.classList.remove('hidden');
+        document.getElementById('parsed-subs').innerHTML=subs.map(e=>{
+            const c=catById(e.subscription.subCat||e.category);
+            return`<div class="card-flat p-3 flex items-center gap-3">
+                <div class="w-9 h-9 rounded-xl flex items-center justify-center" style="background:${c.color}12;color:${c.color}"><i class="fa-solid fa-repeat text-xs"></i></div>
+                <div class="flex-1">
+                    <p class="text-xs font-semibold">${escapeHtml(e.subscription.subName)}</p>
+                    <p class="text-[10px] text-muted">Mensual recurrente · ${fmtD(e.date)}</p>
+                </div>
+                <span class="text-xs font-bold text-violet">${fmt(e.amount)}</span>
+            </div>`;
+        }).join('');
+        document.getElementById('parsed-subs-total').innerHTML=`<div class="text-[11px] text-muted">Total mensual en suscripciones: <span class="font-bold text-violet">${fmt(subsMonthly)}</span></div>`;
+    }else{
+        subsSec.classList.add('hidden');
+    }
+
+    /* Sección cuotas con detalle ampliado */
     const cuotaSec=document.getElementById('parsed-cuotas-section');
     const cuotaEl=document.getElementById('parsed-cuotas');
     if(installments.length>0){
         cuotaSec.classList.remove('hidden');
         cuotaEl.innerHTML=installments.map((inst,i)=>{
             const c=catById(inst.category);
-            return`<div class="card-flat p-3 flex items-center gap-3">
-                <div class="w-9 h-9 rounded-xl flex items-center justify-center" style="background:${c.color}12;color:${c.color}"><i class="fa-solid ${c.icon} text-xs"></i></div>
-                <div class="flex-1">
-                    <p class="text-xs font-semibold">${escapeHtml(inst.merchant)}</p>
-                    <p class="text-[10px] text-muted">${fmt(inst.cuotaAmount)}/cuota · ${inst.cuotaTotal} cuotas · Total: ${fmt(inst.totalAmount)}</p>
+            const rem=inst.cuotaTotal-inst.cuotaCurrent+1;
+            const pct=Math.round((inst.cuotaCurrent/inst.cuotaTotal)*100);
+            const endDate=inst.endDate;
+            return`<div class="card-flat p-3">
+                <div class="flex items-center gap-3 mb-2">
+                    <div class="w-9 h-9 rounded-xl flex items-center justify-center" style="background:${c.color}12;color:${c.color}"><i class="fa-solid ${c.icon} text-xs"></i></div>
+                    <div class="flex-1">
+                        <p class="text-xs font-semibold">${escapeHtml(inst.merchant)}</p>
+                        <p class="text-[10px] text-muted">${fmt(inst.cuotaAmount)}/cuota · Cuota ${inst.cuotaCurrent}/${inst.cuotaTotal} · Termina ${endDate?fmtD(endDate):'-'}</p>
+                    </div>
+                    <span class="text-xs font-bold text-expense">${fmt(inst.totalAmount)}</span>
                 </div>
-                <span class="text-xs font-bold text-expense">${fmt(inst.totalAmount)}</span>
+                <div class="progress-bar"><div class="progress-fill" style="width:${pct}%;background:${c.color}"></div></div>
+                <div class="flex justify-between text-[9px] text-muted mt-1">
+                    <span>Pagadas: ${inst.cuotaCurrent}/${inst.cuotaTotal}</span>
+                    <span>Restan ${rem} ${rem===1?'cuota':'cuotas'} = ${fmt(rem*inst.cuotaAmount)}</span>
+                </div>
             </div>`;
         }).join('');
+        /* Agregar resumen mensual de cuotas abajo */
+        const summary=document.createElement('div');
+        summary.className='mt-2 text-[11px] text-muted';
+        summary.innerHTML=`Comprometido mensual en cuotas: <span class="font-bold text-expense">${fmt(instMonthly)}</span>`;
+        const existing=cuotaEl.parentNode.querySelector('.inst-summary');
+        if(existing)existing.remove();
+        summary.classList.add('inst-summary');
+        cuotaEl.parentNode.appendChild(summary);
     }else{
         cuotaSec.classList.add('hidden');
     }
@@ -1283,6 +1679,15 @@ function renderHome(){
     const activeInst=S.inst.filter(i=>Number(i.paid_cuotas)<Number(i.total_cuotas));
     const totalCommitted=activeInst.reduce((s,i)=>s+(Number(i.total_cuotas)-Number(i.paid_cuotas))*Number(i.cuota_amount),0);
     const monthlyCommit=activeInst.reduce((s,i)=>s+Number(i.cuota_amount),0);
+    const todayStr=today();
+    /* Calcular próximas cuotas a vencer (en los próximos 30 días) */
+    const upcoming=activeInst.map(i=>{
+        if(!i.start_date)return null;
+        const nextD=addMonths(i.start_date,Number(i.paid_cuotas));
+        if(!nextD)return null;
+        const days=Math.ceil((new Date(nextD)-new Date(todayStr))/(1000*60*60*24));
+        return {i,nextD,days};
+    }).filter(Boolean).filter(x=>x.days>=0&&x.days<=30).sort((a,b)=>a.days-b.days);
     document.getElementById('cuotas-total').textContent=fmt(totalCommitted);
     document.getElementById('cuotas-count').textContent=activeInst.length;
     document.getElementById('cuotas-monthly').textContent=fmt(monthlyCommit);
@@ -1290,14 +1695,40 @@ function renderHome(){
     const instEl=document.getElementById('home-installments');
     instEl.innerHTML=activeInst.length?activeInst.map(i=>{
         const c=catById(i.category||'otros');
-        const pct=Math.round((Number(i.paid_cuotas)/Math.max(1,Number(i.total_cuotas)))*100);
-        const rem=Number(i.total_cuotas)-Number(i.paid_cuotas);
-        return`<div class="card p-3 flex items-center gap-3">
+        const paid=Number(i.paid_cuotas)||0;
+        const totalC=Number(i.total_cuotas)||1;
+        const pct=Math.round((paid/Math.max(1,totalC))*100);
+        const rem=totalC-paid;
+        const cuotaAmt=Number(i.cuota_amount)||0;
+        const remainingAmount=rem*cuotaAmt;
+        /* Calcular fecha fin proyectada: usamos start_date + total_cuotas-1 meses */
+        let endDateStr=null,nextPayStr=null;
+        if(i.start_date){
+            const endD=addMonths(i.start_date,totalC-1);
+            if(endD)endDateStr=endD;
+            const nextD=addMonths(i.start_date,paid);
+            if(nextD)nextPayStr=nextD;
+        }
+        const todayStr=today();
+        /* Alerta si el plan termina en los próximos 60 días */
+        const endsSoon=endDateStr&&((new Date(endDateStr)-new Date(todayStr))/(1000*60*60*24))<=60;
+        /* Alerta si el plan tiene muchas cuotas restantes */
+        const heavyPlan=rem>=12;
+        const alertColor=endsSoon?'#0E9F6E':heavyPlan?'#DC2626':c.color;
+        return`<div class="card p-3 flex items-center gap-3" style="border-left:3px solid ${alertColor};border-radius:0 14px 14px 0">
             <div class="w-9 h-9 rounded-xl flex items-center justify-center" style="background:${c.color}12;color:${c.color}"><i class="fa-solid ${c.icon} text-xs"></i></div>
             <div class="flex-1 min-w-0">
                 <p class="text-xs font-semibold truncate">${escapeHtml(i.merchant||i.description)}</p>
-                <p class="text-[10px] text-muted">${escapeHtml(i.card_name||'Tarjeta')} · ${fmt(Number(i.cuota_amount))}/cuota · Quedan ${rem}</p>
+                <p class="text-[10px] text-muted">
+                    ${escapeHtml(i.card_name||'Tarjeta')} · ${fmt(cuotaAmt)}/cuota ·
+                    <span class="font-medium ${endsSoon?'text-income':heavyPlan?'text-expense':''}">Quedan ${rem}</span>
+                    ${endDateStr?'· Termina '+fmtD(endDateStr):''}
+                </p>
                 <div class="progress-bar mt-1.5"><div class="progress-fill" style="width:${pct}%;background:${c.color}"></div></div>
+                <div class="flex justify-between text-[9px] text-muted mt-1">
+                    <span>Pagadas ${paid}/${totalC} (${pct}%)</span>
+                    <span>Restante: ${fmt(remainingAmount)}</span>
+                </div>
             </div>
             <div class="flex items-center gap-1">
                 <button onclick="markCuotaPaid('${i.id}')" class="act-btn bg-income/10 text-income" title="Pagar cuota"><i class="fa-solid fa-check text-[10px]"></i></button>
@@ -1823,15 +2254,18 @@ function generateInsights(){
     const exp=mTx.filter(t=>t.type==='expense').reduce((s,t)=>s+Number(t.amount),0);
     const sav=inc-exp;
     const savRate=inc>0?Math.round((sav/inc)*100):0;
+    const todayStr=today();
 
     let html='';
 
+    /* === 1) RESUMEN FINANCIERO MENSUAL === */
     if(sav>0){
         html+=insightCard('income','Tasa de ahorro: '+savRate+'%','Estás ahorrando '+fmt(sav)+' de tus ingresos este mes. '+(savRate>=20?'Excelente trabajo, superás la regla del 20%.':savRate>=10?'Vas por buen camino, intentá llegar al 20%.':'Tu tasa es baja. Considerá aumentar el ahorro al 20%.'));
     }else if(inc>0){
         html+=insightCard('expense','Gastos superan ingresos','Tus gastos superan los ingresos por '+fmt(Math.abs(sav))+'. Revisá en qué podés recortar para equilibrar el presupuesto.');
     }
 
+    /* === 2) MAYOR CATEGORÍA DE GASTO === */
     const byCat={};
     mTx.filter(t=>t.type==='expense').forEach(t=>{byCat[t.category]=(byCat[t.category]||0)+Number(t.amount)});
     const topCat=Object.entries(byCat).sort((a,b)=>b[1]-a[1]);
@@ -1840,6 +2274,7 @@ function generateInsights(){
         html+=insightCard(c.color,'Mayor gasto: '+c.name,fmt(amt)+' este mes ('+Math.round((amt/Math.max(1,exp))*100)+'% del total).'+(topCat.length>1?' Seguido por '+catById(topCat[1][0]).name+': '+fmt(topCat[1][1])+'.':''));
     }
 
+    /* === 3) ALERTAS DE PRESUPUESTO === */
     const budgetAlerts=Object.entries(S.budgets).filter(([,v])=>Number(v)>0).map(([cid,limit])=>{
         const spent=byCat[cid]||0;
         if(spent>Number(limit))return{cid,spent,limit,over:true};
@@ -1852,22 +2287,96 @@ function generateInsights(){
         else html+=insightCard('#B07D2A','Cuidado con: '+c.name,'Ya gastaste el '+Math.round((ba.spent/Number(ba.limit))*100)+'% del presupuesto ('+fmt(ba.spent)+' / '+fmt(Number(ba.limit))+').');
     }
 
+    /* === 4) AUDITORÍA DE SUSCRIPCIONES === */
+    /* Buscar todas las transacciones que coinciden con un servicio de suscripción conocido.
+       Revisamos los últimos 90 días para capturar suscripciones mensuales/bimestrales/trimestrales. */
+    const subsCutoff=new Date();subsCutoff.setDate(subsCutoff.getDate()-90);
+    const subsCutoffStr=subsCutoff.toISOString().slice(0,10);
+    const subsTx=S.tx.filter(t=>t.date>=subsCutoffStr&&t.type==='expense');
+    const subsMap={};
+    subsTx.forEach(t=>{
+        const det=detectSubscription(t.description||'');
+        if(det){
+            const key=det.subName;
+            if(!subsMap[key])subsMap[key]={name:det.subName,cat:det.subCat,amount:Number(t.amount),count:1,lastDate:t.date};
+            else{subsMap[key].count++;subsMap[key].amount=Math.max(subsMap[key].amount,Number(t.amount));subsMap[key].lastDate=t.date>subsMap[key].lastDate?t.date:subsMap[key].lastDate}
+        }
+    });
+    const subsList=Object.values(subsMap);
+    if(subsList.length){
+        const monthlyTotal=subsList.reduce((s,x)=>s+x.amount,0);
+        const annualTotal=monthlyTotal*12;
+        const detailList=subsList.sort((a,b)=>b.amount-a.amount).slice(0,6).map(x=>`${escapeHtml(x.name)} (${fmt(x.amount)})`).join(' · ');
+        let msg=`${subsList.length} suscripciones activas por ${fmt(monthlyTotal)}/mes · ${fmt(annualTotal)} anuales. ${detailList}.`;
+        /* Recomendaciones */
+        if(monthlyTotal>inc*0.05&&inc>0)msg+=` Las suscripciones representan más del 5% de tus ingresos mensuales. Considerá cancelar las que menos uses.`;
+        else if(subsList.length>=5)msg+=` Tenés varias suscripciones, revisá si usás todas. Cancelar 2-3 de las más chicas te ahorra ${fmt(subsList.slice(-3).reduce((s,x)=>s+x.amount,0))}/mes.`;
+        html+=insightCard('#7C3AED','Auditoría de suscripciones',msg);
+    }
+
+    /* === 5) ANÁLISIS PROFUNDO DE DEUDA EN CUOTAS === */
     const activeInst=S.inst.filter(i=>Number(i.paid_cuotas)<Number(i.total_cuotas));
     if(activeInst.length){
         const monthlyCommit=activeInst.reduce((s,i)=>s+Number(i.cuota_amount),0);
         const totalRemaining=activeInst.reduce((s,i)=>s+(Number(i.total_cuotas)-Number(i.paid_cuotas))*Number(i.cuota_amount),0);
-        html+=insightCard('blue','Comprometido en cuotas',activeInst.length+' planes activos. Pagás '+fmt(monthlyCommit)+'/mes. Total pendiente: '+fmt(totalRemaining)+'. '+(monthlyCommit>inc*0.3&&inc>0?'Las cuotas representan más del 30% de tus ingresos, es riesgoso.':''));
+        const debtRatio=inc>0?Math.round((monthlyCommit/inc)*100):0;
+
+        /* Plan más caro (mayor cuota individual) */
+        const mostExpensive=activeInst.reduce((m,i)=>Number(i.cuota_amount)>(m?.cuota_amount||0)?i:m,null);
+        /* Plan más largo (más cuotas restantes) */
+        const longestPlan=activeInst.reduce((m,i)=>{
+            const rem=Number(i.total_cuotas)-Number(i.paid_cuotas);
+            const remM=m?(Number(m.total_cuotas)-Number(m.paid_cuotas)):0;
+            return rem>remM?i:m;
+        },null);
+        /* Planes que terminan en los próximos 60 días */
+        const endingSoon=activeInst.filter(i=>{
+            if(!i.start_date)return false;
+            const endD=addMonths(i.start_date,Number(i.total_cuotas)-1);
+            if(!endD)return false;
+            const days=Math.ceil((new Date(endD)-new Date(todayStr))/(1000*60*60*24));
+            return days<=60&&days>=0;
+        });
+
+        let msg=`${activeInst.length} planes activos. Pagás ${fmt(monthlyCommit)}/mes · Total pendiente: ${fmt(totalRemaining)}.`;
+        if(inc>0){
+            if(debtRatio>=30)msg+=` Las cuotas representan el ${debtRatio}% de tus ingresos. Es riesgoso: idealmente no debería superar el 25-30%.`;
+            else if(debtRatio>=20)msg+=` Las cuotas representan el ${debtRatio}% de tus ingresos. Estás en el límite aceptable.`;
+            else msg+=` Las cuotas representan el ${debtRatio}% de tus ingresos. Estás dentro de niveles saludables.`;
+        }
+        if(mostExpensive)msg+=` Tu cuota más alta: ${escapeHtml(mostExpensive.merchant||mostExpensive.description)} por ${fmt(Number(mostExpensive.cuota_amount))}/mes.`;
+        if(longestPlan){
+            const rem=Number(longestPlan.total_cuotas)-Number(longestPlan.paid_cuotas);
+            if(rem>=12)msg+=` Tu plan más largo: ${escapeHtml(longestPlan.merchant||longestPlan.description)} con ${rem} cuotas restantes.`;
+        }
+        if(endingSoon.length){
+            msg+=` ${endingSoon.length} ${endingSoon.length===1?'plan termina':'planes terminan'} en los próximos 60 días, vas a liberar ${fmt(endingSoon.reduce((s,i)=>s+Number(i.cuota_amount),0))}/mes.`;
+        }
+        html+=insightCard('blue','Deuda en cuotas',msg);
+
+        /* Sub-insight: oportunidad de cancelación anticipada */
+        /* Identificar planes donde ya pagaste casi todo pero el compromiso mensual sigue */
+        const almostPaid=activeInst.filter(i=>{
+            const rem=Number(i.total_cuotas)-Number(i.paid_cuotas);
+            return rem>=3&&rem<=6;
+        });
+        if(almostPaid.length){
+            const savedCancel=almostPaid.reduce((s,i)=>s+Number(i.cuota_amount)*3,0);
+            html+=insightCard('#B07D2A','Oportunidad: cancelación anticipada',`${almostPaid.length} ${almostPaid.length===1?'plan está':'planes están'} a pocas cuotas de terminar (${almostPaid.map(i=>escapeHtml(i.merchant||i.description)).join(', ')}). Si los cancelás antes, ahorrarías aproximadamente ${fmt(savedCancel)} en los próximos 3 meses.`);
+        }
     }
 
+    /* === 6) METAS DE AHORRO === */
     for(const g of S.goals){
         const pct=Math.round((Number(g.current)/Math.max(1,Number(g.target)))*100);
         if(pct>=80)html+=insightCard('income','Meta casi lista: '+g.name,'Ya tenés el '+pct+'% ('+fmt(Number(g.current))+' de '+fmt(Number(g.target))+'). Falta '+fmt(Number(g.target)-Number(g.current))+'.');
         else if(g.deadline){
             const daysLeft=Math.ceil((new Date(g.deadline)-new Date())/(1000*60*60*24));
-            if(daysLeft>0&&daysLeft<=30&&pct<80)html+=insightCard('expense','Meta en riesgo: '+g.name,'Faltan '+daysLeft+' días y solo tenés el '+pct+'%. Necesitás acelerar el ahorro.');
+            if(daysLeft>0&&daysLeft<=30&&pct<80)html+=insightCard('expense','Meta en riesgo: '+g.name,'Faltan '+daysLeft+' días y solo tenés el '+pct+'%. Necesitás ahorrar '+fmt((Number(g.target)-Number(g.current))/Math.max(1,daysLeft))+' por día para llegar.');
         }
     }
 
+    /* === 7) COMPARATIVA MENSUAL === */
     const prevD=new Date();prevD.setMonth(prevD.getMonth()-1);
     const ps=new Date(prevD.getFullYear(),prevD.getMonth(),1).toISOString().slice(0,10);
     const pe=new Date(prevD.getFullYear(),prevD.getMonth()+1,0).toISOString().slice(0,10);
@@ -1876,18 +2385,91 @@ function generateInsights(){
         const change=Math.round(((exp-prevExp)/prevExp)*100);
         if(Math.abs(change)>=10){
             const up=change>0;
-            html+=insightCard(up?'expense':'income','Gastos '+(up?'aumentaron':'bajaron')+' '+Math.abs(change)+'%','Comparado con el mes anterior: '+fmt(exp)+' vs '+fmt(prevExp)+'.');
+            html+=insightCard(up?'expense':'income','Gastos '+(up?'aumentaron':'bajaron')+' '+Math.abs(change)+'%','Comparado con el mes anterior: '+fmt(exp)+' vs '+fmt(prevExp)+'.'+(up?' Revisá qué categorías subieron para identificar gastos innecesarios.':' Mantené este ritmo, estás haciendo ajustes positivos.'));
         }
     }
 
+    /* === 8) DETECCIÓN DE ANOMALÍAS === */
+    /* Detectar gastos atípicamente altos (mayores al promedio + 2 desvíos estándar)
+       o que representan más del 15% del gasto total mensual */
+    if(exp>0){
+        const expensesArr=mTx.filter(t=>t.type==='expense').map(t=>Number(t.amount)).filter(x=>x>0);
+        if(expensesArr.length>=5){
+            const avg=expensesArr.reduce((a,b)=>a+b,0)/expensesArr.length;
+            const variance=expensesArr.reduce((s,x)=>s+Math.pow(x-avg,2),0)/expensesArr.length;
+            const std=Math.sqrt(variance);
+            const threshold=avg+2*std;
+            const anomalies=mTx.filter(t=>t.type==='expense'&&Number(t.amount)>threshold&&Number(t.amount)>exp*0.10);
+            if(anomalies.length){
+                const totalAnom=anomalies.reduce((s,t)=>s+Number(t.amount),0);
+                const worst=anomalies.sort((a,b)=>Number(b.amount)-Number(a.amount))[0];
+                const c=catById(worst.category);
+                html+=insightCard('expense','Gasto atípico detectado',`${anomalies.length} ${anomalies.length===1?'movimiento':'movimientos'} por encima de tu patrón habitual (más de ${fmt(threshold)}). El mayor: ${escapeHtml(worst.description)} por ${fmt(Number(worst.amount))} en ${c.name}. Total atípico: ${fmt(totalAnom)}.`);
+            }
+        }
+    }
+
+    /* === 9) GASTOS FRECUENTES / SUSCRIPCIONES NO MAPEADAS === */
     const descCount={};
     mTx.filter(t=>t.type==='expense').forEach(t=>{const k=(t.description||'').toLowerCase().trim();if(k)descCount[k]=(descCount[k]||0)+1});
     const recurrent=Object.entries(descCount).filter(([,c])=>c>=3).sort((a,b)=>b[1]-a[1]);
     if(recurrent.length){
-        html+=insightCard('#7C3AED','Gastos frecuentes detectados',recurrent.slice(0,3).map(([d,c])=>`"${escapeHtml(d)}" aparece ${c} veces`).join('. ')+'. Considerá si alguno se puede optimizar.');
+        const recurrentTotal=recurrent.filter(([,c])=>c>=3).reduce((s,[d,c])=>{
+            const txs=mTx.filter(t=>(t.description||'').toLowerCase().trim()===d);
+            return s+txs.reduce((acc,t)=>acc+Number(t.amount),0);
+        },0);
+        if(recurrentTotal>0){
+            html+=insightCard('#7C3AED','Gastos frecuentes detectados',recurrent.slice(0,3).map(([d,c])=>`"${escapeHtml(d)}" ${c} veces`).join(' · ')+'. Total: '+fmt(recurrentTotal)+'. Considerá si alguno es cancelable o se puede renegociar.');
+        }
     }
 
-    if(!html)html=insightCard('accent','Pocos datos para analizar','Agregá más transacciones y configurá presupuestos para obtener insights personalizados y útiles para tu hogar.');
+    /* === 10) VELOCIDAD DE GASTO Y PROYECCIÓN === */
+    if(mTx.length>=3){
+        const dayOfMonth=Number(todayStr.slice(8,10));
+        const dailyAvg=exp/Math.max(1,dayOfMonth);
+        const projectedMonth=dailyAvg*30;
+        const daysLeft=30-dayOfMonth;
+        const budgetLeft=inc-projectedMonth;
+        if(daysLeft>0&&inc>0){
+            if(projectedMonth>inc)html+=insightCard('expense','Proyección: superarías tus ingresos',`Al ritmo actual (${fmt(dailyAvg)}/día), terminarías el mes con ${fmt(projectedMonth)} en gastos. Necesitás recortar ${fmt(projectedMonth-inc)} o aumentar ingresos.`);
+            else if(budgetLeft<inc*0.1)html+=insightCard('#B07D2A','Margen de ahorro ajustado',`Al ritmo actual, terminarías el mes con solo ${fmt(budgetLeft)} de margen (${fmt(dailyAvg)}/día). Reduciendo ${fmt(dailyAvg*0.1)}/día alcanzarías ${fmt(budgetLeft+dailyAvg*0.1*daysLeft)}.`);
+        }
+    }
+
+    /* === 11) DISTRIBUCIÓN DE GASTOS ENTRE PERSONAS === */
+    const us=users();
+    if(us.length>1&&exp>0){
+        const perUser=us.map(u=>({
+            u,
+            exp:mTx.filter(t=>t.type==='expense'&&t.user_name===u).reduce((s,t)=>s+Number(t.amount),0),
+            inc:mTx.filter(t=>t.type==='income'&&t.user_name===u).reduce((s,t)=>s+Number(t.amount),0)
+        })).filter(p=>p.exp>0||p.inc>0);
+        if(perUser.length>=2){
+            const sorted=[...perUser].sort((a,b)=>(b.exp-b.inc)-(a.exp-a.inc));
+            const top=sorted[0];
+            const low=sorted[sorted.length-1];
+            const diff=Math.abs((top.exp-top.inc)-(low.exp-low.inc));
+            if(diff>exp*0.2){
+                html+=insightCard('blue','Distribución desbalanceada',`${escapeHtml(top.u)} tiene ${fmt(top.exp-top.inc)} neto negativo vs ${escapeHtml(low.u)} con ${fmt(low.exp-low.inc)}. Diferencia: ${fmt(diff)}. Considerá equilibrar la carga de gastos.`);
+            }
+        }
+    }
+
+    /* === 12) RECOMENDACIÓN FINAL ACCIONABLE === */
+    const recommendations=[];
+    if(sav>0&&savRate>=20)recommendations.push('Mantené el ritmo de ahorro del '+savRate+'%');
+    if(activeInst.length&&inc>0){
+        const monthlyCommit=activeInst.reduce((s,i)=>s+Number(i.cuota_amount),0);
+        const debtRatio=Math.round((monthlyCommit/inc)*100);
+        if(debtRatio>=30)recommendations.push('Reducí el compromiso en cuotas (actual: '+debtRatio+'% de los ingresos)');
+    }
+    if(subsList.length>=4)recommendations.push('Auditá tus '+subsList.length+' suscripciones');
+    if(budgetAlerts.some(b=>b.over))recommendations.push('Recortá las categorías con presupuesto excedido');
+    if(recommendations.length){
+        html+=insightCard('accent','Próximos pasos',recommendations.map(r=>'• '+r+'. ').join(''));
+    }
+
+    if(!html)html=insightCard('accent','Pocos datos para analizar','Agregá más transacciones y cargá resúmenes de tarjeta para obtener insights personalizados y útiles para tu hogar.');
 
     return html;
 }
