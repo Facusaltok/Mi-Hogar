@@ -337,7 +337,7 @@
                 <button onclick="setMType('expense')" id="mt-exp" class="flex-1 py-2.5 rounded-xl text-sm font-semibold bg-white text-expense shadow-sm"><i class="fa-solid fa-minus mr-1"></i>Gasto</button>
                 <button onclick="setMType('income')" id="mt-inc" class="flex-1 py-2.5 rounded-xl text-sm font-semibold text-muted"><i class="fa-solid fa-plus mr-1"></i>Ingreso</button>
             </div>
-            <div class="mb-4"><label class="text-xs text-muted block mb-1.5">Monto</label><input id="m-amt" type="number" min="0" step="0.01" placeholder="0.00" class="input-elegant w-full px-4 py-3.5 amount-input"></div>
+            <div class="mb-4"><label class="text-xs text-muted block mb-1.5">Monto</label><input id="m-amt" type="text" inputmode="decimal" placeholder="0,00" class="input-elegant w-full px-4 py-3.5 amount-input"></div>
             <div class="mb-4"><label class="text-xs text-muted block mb-2">Categoría</label><div id="m-cats" class="grid grid-cols-4 gap-2"></div></div>
             <div class="mb-4"><label class="text-xs text-muted block mb-2">Persona</label><div id="m-users" class="grid grid-cols-2 gap-2"></div></div>
             <div class="mb-4"><label class="text-xs text-muted block mb-1.5">Descripción</label><input id="m-desc" type="text" placeholder="Ej: Supermercado" class="input-elegant w-full px-4 py-2.5 text-sm"></div>
@@ -362,7 +362,7 @@
                 <button onclick="setEditType('expense')" id="et-exp" class="flex-1 py-2.5 rounded-xl text-xs font-semibold bg-white text-expense shadow-sm">Gasto</button>
                 <button onclick="setEditType('income')" id="et-inc" class="flex-1 py-2.5 rounded-xl text-xs font-semibold text-muted">Ingreso</button>
             </div>
-            <div class="mb-3"><label class="text-xs text-muted block mb-1.5">Monto</label><input id="et-amt" type="number" step="0.01" class="input-elegant w-full px-4 py-3 text-lg font-display font-bold text-center"></div>
+            <div class="mb-3"><label class="text-xs text-muted block mb-1.5">Monto</label><input id="et-amt" type="text" inputmode="decimal" placeholder="0,00" class="input-elegant w-full px-4 py-3 text-lg font-display font-bold text-center"></div>
             <div class="mb-3"><label class="text-xs text-muted block mb-2">Categoría</label><div id="et-cats" class="grid grid-cols-4 gap-2"></div></div>
             <div class="mb-3"><label class="text-xs text-muted block mb-2">Persona</label><div id="et-users" class="grid grid-cols-2 gap-2"></div></div>
             <div class="mb-3"><label class="text-xs text-muted block mb-1.5">Descripción</label><input id="et-desc" type="text" class="input-elegant w-full px-4 py-2.5 text-sm"></div>
@@ -388,7 +388,7 @@
             </div>
             <div class="mb-3"><input id="ac-name" type="text" placeholder="Nombre (ej: Banco Nación)" class="input-elegant w-full px-4 py-2.5 text-sm"></div>
             <div class="mb-3"><select id="ac-type" class="input-elegant w-full px-3 py-2.5 text-sm"><option value="bank">Banco</option><option value="cash">Efectivo</option><option value="card">Tarjeta Crédito</option><option value="investment">Inversión</option><option value="other">Otro</option></select></div>
-            <div class="mb-4"><input id="ac-bal" type="number" step="0.01" placeholder="Saldo actual" class="input-elegant w-full px-4 py-2.5 text-sm"></div>
+            <div class="mb-4"><input id="ac-bal" type="text" inputmode="decimal" placeholder="Saldo actual" class="input-elegant w-full px-4 py-2.5 text-sm"></div>
             <button onclick="addAccount()" class="btn-primary w-full py-3.5 text-sm">Crear cuenta</button>
         </div>
     </div>
@@ -406,7 +406,7 @@
             </div>
             <div class="mb-3"><input id="ea-name" type="text" placeholder="Nombre" class="input-elegant w-full px-4 py-2.5 text-sm"></div>
             <div class="mb-3"><select id="ea-type" class="input-elegant w-full px-3 py-2.5 text-sm"><option value="bank">Banco</option><option value="cash">Efectivo</option><option value="card">Tarjeta Crédito</option><option value="investment">Inversión</option><option value="other">Otro</option></select></div>
-            <div class="mb-4"><input id="ea-bal" type="number" step="0.01" placeholder="Saldo" class="input-elegant w-full px-4 py-2.5 text-sm"></div>
+            <div class="mb-4"><input id="ea-bal" type="text" inputmode="decimal" placeholder="Saldo" class="input-elegant w-full px-4 py-2.5 text-sm"></div>
             <input type="hidden" id="ea-id">
             <div class="grid grid-cols-2 gap-3">
                 <button onclick="doDeleteAcct()" class="btn-danger py-3 text-sm flex items-center justify-center gap-2"><i class="fa-solid fa-trash"></i>Eliminar</button>
@@ -427,8 +427,8 @@
                 <button onclick="closeGoalModal()" class="w-9 h-9 rounded-full bg-bg flex items-center justify-center hover:bg-brdsoft transition"><i class="fa-solid fa-xmark text-sm text-muted"></i></button>
             </div>
             <div class="mb-3"><input id="gl-name" type="text" placeholder="Nombre (ej: Viaje)" class="input-elegant w-full px-4 py-2.5 text-sm"></div>
-            <div class="mb-3"><input id="gl-target" type="number" step="0.01" placeholder="Objetivo ($)" class="input-elegant w-full px-4 py-2.5 text-sm"></div>
-            <div class="mb-3"><input id="gl-current" type="number" step="0.01" placeholder="Ahorrado hasta ahora" class="input-elegant w-full px-4 py-2.5 text-sm"></div>
+            <div class="mb-3"><input id="gl-target" type="text" inputmode="decimal" placeholder="Objetivo ($)" class="input-elegant w-full px-4 py-2.5 text-sm"></div>
+            <div class="mb-3"><input id="gl-current" type="text" inputmode="decimal" placeholder="Ahorrado hasta ahora" class="input-elegant w-full px-4 py-2.5 text-sm"></div>
             <div class="mb-4"><label class="text-xs text-muted block mb-1.5">Fecha objetivo</label><input id="gl-deadline" type="date" class="input-elegant w-full px-4 py-2.5 text-sm"></div>
             <button onclick="addGoal()" class="btn-primary w-full py-3.5 text-sm">Crear meta</button>
         </div>
@@ -446,8 +446,8 @@
                 <button onclick="closeEditGoal()" class="w-9 h-9 rounded-full bg-bg flex items-center justify-center hover:bg-brdsoft transition"><i class="fa-solid fa-xmark text-sm text-muted"></i></button>
             </div>
             <div class="mb-3"><input id="eg-name" type="text" placeholder="Nombre" class="input-elegant w-full px-4 py-2.5 text-sm"></div>
-            <div class="mb-3"><input id="eg-target" type="number" step="0.01" placeholder="Objetivo ($)" class="input-elegant w-full px-4 py-2.5 text-sm"></div>
-            <div class="mb-3"><input id="eg-current" type="number" step="0.01" placeholder="Ahorrado" class="input-elegant w-full px-4 py-2.5 text-sm"></div>
+            <div class="mb-3"><input id="eg-target" type="text" inputmode="decimal" placeholder="Objetivo ($)" class="input-elegant w-full px-4 py-2.5 text-sm"></div>
+            <div class="mb-3"><input id="eg-current" type="text" inputmode="decimal" placeholder="Ahorrado" class="input-elegant w-full px-4 py-2.5 text-sm"></div>
             <div class="mb-4"><input id="eg-deadline" type="date" class="input-elegant w-full px-4 py-2.5 text-sm"></div>
             <input type="hidden" id="eg-id">
             <div class="grid grid-cols-2 gap-3">
@@ -645,16 +645,24 @@ let chartInstances={};
 function fmt(n){
     const s=CURR_MAP[S.curr]||'$';
     const a=Math.abs(Number(n)||0);
-    const f=a>=10000?a.toLocaleString('es',{maximumFractionDigits:0}):a>=100?a.toLocaleString('es',{maximumFractionDigits:0}):a.toFixed(a%1===0?0:2);
+    /* Formato argentino: 100.000,00 — siempre 2 decimales con punto miles y coma decimal */
+    const f=a.toLocaleString('es-AR',{minimumFractionDigits:2,maximumFractionDigits:2});
     return(n<0?'-':'')+s+f;
 }
 function fmtShort(n){
     const a=Math.abs(Number(n)||0);
-    if(a>=1000000)return(n<0?'-':'')+(a/1000000).toFixed(1)+'M';
-    if(a>=1000)return(n<0?'-':'')+(a/1000).toFixed(1)+'K';
+    if(a>=1000000)return(n<0?'-':'')+(a/1000000).toFixed(1).replace('.',',')+'M';
+    if(a>=1000)return(n<0?'-':'')+(a/1000).toFixed(1).replace('.',',')+'K';
     return fmt(n);
 }
 function fmtD(d){if(!d)return'';try{return new Date(d+'T12:00:00').toLocaleDateString('es',{day:'numeric',month:'short'})}catch{return d}}
+function fmtEditable(n){
+    /* Devuelve el monto en formato editable argentino: 100000 -> "100000,00" o "100000,50" */
+    const num=Number(n)||0;
+    const isInt=num===Math.floor(num);
+    if(isInt)return num.toLocaleString('es-AR',{maximumFractionDigits:0,useGrouping:false});
+    return num.toLocaleString('es-AR',{minimumFractionDigits:2,maximumFractionDigits:2,useGrouping:false});
+}
 function today(){return new Date().toISOString().slice(0,10)}
 function catById(id){return CATS.find(c=>c.id===id)||CATS[CATS.length-1]}
 function mRange(){
@@ -1004,22 +1012,25 @@ async function initSupabase(url,key){
         if(typeof window.supabase==='undefined'&&!window.supabase?.createClient){S.sb=null;S.online=false;return}
         const client=window.supabase.createClient(url,key);
         S.sb=client;
-        /* Test de conexión - si la tabla no existe, igualmente permite usar la BD local */
         try{
             const{error}=await client.from('transactions').select('id').limit(1);
             if(error&&error.code!=='42P01'&&error.code!=='PGRST205'){throw error}
             S.online=true;
             toast('Supabase conectado','success');
         }catch(testErr){
-            /* La tabla no existe pero la conexión es válida */
             S.online=true;
             toast('Supabase conectado. Creá las tablas en el panel SQL.','info');
         }
     }catch(e){
         S.sb=null;S.online=false;
-        toast('Error al conectar Supabase','error');
+        toast('Error al conectar Supabase. Usando datos locales.','error');
     }
     updSync();
+}
+
+/* Si las tablas de Supabase no existen o fallan, hacemos fallback a localStorage */
+function sbTableOk(result){
+    return result&&(!result.error||(result.error.code!=='42P01'&&result.error.code!=='PGRST205'&&result.error.code!=='PGRST204'));
 }
 
 async function loadAll(){
@@ -1031,69 +1042,155 @@ async function loadAll(){
                 S.sb.from('goals').select('*').order('created_at'),
                 S.sb.from('installments').select('*').order('created_at')
             ]);
-            if(!tr.error)S.tx=tr.data||[];
-            if(!ac.error)S.accts=ac.data||[];
-            if(!gl.error)S.goals=gl.data||[];
-            if(!ins.error)S.inst=ins.data||[];
-            S.online=true;updSync();return;
-        }catch{S.online=false;updSync()}
+            /* Si todas las consultas funcionaron, usamos la nube */
+            if(sbTableOk(tr)&&sbTableOk(ac)&&sbTableOk(gl)&&sbTableOk(ins)){
+                S.tx=tr.data||[];
+                S.accts=ac.data||[];
+                S.goals=gl.data||[];
+                S.inst=ins.data||[];
+                S.online=true;updSync();return;
+            }else{
+                /* Alguna tabla no existe -> mezclamos: lo que se pudo cargar + localStorage */
+                console.warn('Supabase: algunas tablas no existen. Combinando con datos locales.');
+                if(sbTableOk(tr))S.tx=tr.data||[];else S.tx=lLoad('hf_tx');
+                if(sbTableOk(ac))S.accts=ac.data||[];else S.accts=lLoad('hf_accts');
+                if(sbTableOk(gl))S.goals=gl.data||[];else S.goals=lLoad('hf_goals');
+                if(sbTableOk(ins))S.inst=ins.data||[];else S.inst=lLoad('hf_inst');
+                S.online=true;updSync();return;
+            }
+        }catch(e){
+            console.warn('loadAll: Supabase falló, usando localStorage:',e.message);
+            S.online=false;updSync();
+        }
     }
     S.tx=lLoad('hf_tx');S.accts=lLoad('hf_accts');S.goals=lLoad('hf_goals');S.inst=lLoad('hf_inst');
 }
 
 function loadBudgets(){S.budgets=JSON.parse(localStorage.getItem('hf_budgets')||'{}')}
 
+/* Helper: guarda SIEMPRE en localStorage, e intenta también en Supabase si está conectado */
+function persistTxLocal(t){
+    /* Reemplazar si ya existe (mismo id), si no, agregar al inicio */
+    const idx=S.tx.findIndex(x=>x.id===t.id);
+    if(idx>=0)S.tx[idx]=t;else S.tx.unshift(t);
+    lSave('hf_tx',S.tx);
+}
+function persistAcctLocal(a){
+    const idx=S.accts.findIndex(x=>x.id===a.id);
+    if(idx>=0)S.accts[idx]=a;else S.accts.push(a);
+    lSave('hf_accts',S.accts);
+}
+function persistGoalLocal(g){
+    const idx=S.goals.findIndex(x=>x.id===g.id);
+    if(idx>=0)S.goals[idx]=g;else S.goals.push(g);
+    lSave('hf_goals',S.goals);
+}
+function persistInstLocal(ins){
+    const idx=S.inst.findIndex(x=>x.id===ins.id);
+    if(idx>=0)S.inst[idx]=ins;else S.inst.push(ins);
+    lSave('hf_inst',S.inst);
+}
+
 async function saveTx(t){
-    if(S.sb){try{const{data,error}=await S.sb.from('transactions').insert(t).select();if(!error&&data){S.online=true;updSync();return data[0]}}catch{S.online=false;updSync()}}
-    t.id=t.id||crypto.randomUUID();t.created_at=t.created_at||new Date().toISOString();
-    S.tx.unshift(t);lSave('hf_tx',S.tx);return t;
+    /* Asegurar id y timestamp antes de todo */
+    t.id=t.id||crypto.randomUUID();
+    t.created_at=t.created_at||new Date().toISOString();
+    /* 1) SIEMPRE guardar localmente primero (fuente de verdad inmediata) */
+    persistTxLocal(t);
+    /* 2) Intentar también en Supabase si está configurado */
+    if(S.sb){
+        try{
+            const{data,error}=await S.sb.from('transactions').insert(t).select();
+            if(!error&&data&&data[0]){
+                S.online=true;updSync();
+                /* Reemplazar la versión local con la del server (por si hay triggers) */
+                persistTxLocal(data[0]);
+                return data[0];
+            }else if(error){
+                console.warn('Supabase insert tx falló (guardado localmente):',error.message);
+                /* Mantenemos el guardado local que ya hicimos */
+            }
+        }catch(e){
+            console.warn('Supabase insert tx exception (guardado localmente):',e.message);
+        }
+    }
+    return t;
 }
 async function updTx(id,d){
-    if(S.sb){try{const{data,error}=await S.sb.from('transactions').update(d).eq('id',id).select();if(!error&&data){S.online=true;updSync();return data[0]}}catch{}}
-    const i=S.tx.findIndex(t=>t.id===id);if(i>=0){Object.assign(S.tx[i],d);lSave('hf_tx',S.tx);return S.tx[i]}
+    /* Actualizar local siempre */
+    const i=S.tx.findIndex(t=>t.id===id);
+    if(i>=0){Object.assign(S.tx[i],d);lSave('hf_tx',S.tx);}
+    if(S.sb){
+        try{
+            const{data,error}=await S.sb.from('transactions').update(d).eq('id',id).select();
+            if(!error&&data&&data[0]){S.online=true;updSync();Object.assign(S.tx[i>=0?i:S.tx.findIndex(t=>t.id===id)],data[0]);lSave('hf_tx',S.tx);return data[0]}
+        }catch(e){console.warn('Supabase update tx falló:',e.message)}
+    }
+    return S.tx[i];
 }
 async function delTx(id){
-    if(S.sb){try{await S.sb.from('transactions').delete().eq('id',id);S.online=true;updSync();return}catch{}}
+    /* Borrar local siempre */
     S.tx=S.tx.filter(t=>t.id!==id);lSave('hf_tx',S.tx);
+    if(S.sb){
+        try{await S.sb.from('transactions').delete().eq('id',id);S.online=true;updSync();}catch(e){console.warn('Supabase delete tx falló:',e.message)}
+    }
 }
 async function saveAcct(a){
-    if(S.sb){try{const{data,error}=await S.sb.from('accounts').insert(a).select();if(!error&&data)return data[0]}catch{}}
     a.id=a.id||crypto.randomUUID();a.created_at=a.created_at||new Date().toISOString();
-    S.accts.push(a);lSave('hf_accts',S.accts);return a;
+    persistAcctLocal(a);
+    if(S.sb){
+        try{const{data,error}=await S.sb.from('accounts').insert(a).select();if(!error&&data&&data[0]){S.online=true;updSync();persistAcctLocal(data[0]);return data[0]}}catch(e){console.warn('Supabase insert acct falló:',e.message)}
+    }
+    return a;
 }
 async function updAcct(id,d){
-    if(S.sb){try{const{data,error}=await S.sb.from('accounts').update(d).eq('id',id).select();if(!error&&data)return data[0]}catch{}}
-    const i=S.accts.findIndex(a=>a.id===id);if(i>=0){Object.assign(S.accts[i],d);lSave('hf_accts',S.accts);return S.accts[i]}
+    const i=S.accts.findIndex(a=>a.id===id);if(i>=0){Object.assign(S.accts[i],d);lSave('hf_accts',S.accts);}
+    if(S.sb){
+        try{const{data,error}=await S.sb.from('accounts').update(d).eq('id',id).select();if(!error&&data&&data[0]){S.online=true;updSync();return data[0]}}catch(e){}
+    }
+    return S.accts[i];
 }
 async function delAcct(id){
-    if(S.sb){try{await S.sb.from('accounts').delete().eq('id',id);return}catch{}}
     S.accts=S.accts.filter(a=>a.id!==id);lSave('hf_accts',S.accts);
+    if(S.sb){try{await S.sb.from('accounts').delete().eq('id',id);S.online=true;updSync();}catch(e){}}
 }
 async function saveGoal(g){
-    if(S.sb){try{const{data,error}=await S.sb.from('goals').insert(g).select();if(!error&&data)return data[0]}catch{}}
     g.id=g.id||crypto.randomUUID();g.created_at=g.created_at||new Date().toISOString();
-    S.goals.push(g);lSave('hf_goals',S.goals);return g;
+    persistGoalLocal(g);
+    if(S.sb){
+        try{const{data,error}=await S.sb.from('goals').insert(g).select();if(!error&&data&&data[0]){S.online=true;updSync();persistGoalLocal(data[0]);return data[0]}}catch(e){console.warn('Supabase insert goal falló:',e.message)}
+    }
+    return g;
 }
 async function updGoal(id,d){
-    if(S.sb){try{const{data,error}=await S.sb.from('goals').update(d).eq('id',id).select();if(!error&&data)return data[0]}catch{}}
-    const i=S.goals.findIndex(g=>g.id===id);if(i>=0){Object.assign(S.goals[i],d);lSave('hf_goals',S.goals);return S.goals[i]}
+    const i=S.goals.findIndex(g=>g.id===id);if(i>=0){Object.assign(S.goals[i],d);lSave('hf_goals',S.goals);}
+    if(S.sb){
+        try{const{data,error}=await S.sb.from('goals').update(d).eq('id',id).select();if(!error&&data&&data[0]){S.online=true;updSync();return data[0]}}catch(e){}
+    }
+    return S.goals[i];
 }
 async function delGoal(id){
-    if(S.sb){try{await S.sb.from('goals').delete().eq('id',id);return}catch{}}
     S.goals=S.goals.filter(g=>g.id!==id);lSave('hf_goals',S.goals);
+    if(S.sb){try{await S.sb.from('goals').delete().eq('id',id);S.online=true;updSync();}catch(e){}}
 }
 async function saveInst(ins){
-    if(S.sb){try{const{data,error}=await S.sb.from('installments').insert(ins).select();if(!error&&data)return data[0]}catch{}}
     ins.id=ins.id||crypto.randomUUID();ins.created_at=ins.created_at||new Date().toISOString();
-    S.inst.push(ins);lSave('hf_inst',S.inst);return ins;
+    persistInstLocal(ins);
+    if(S.sb){
+        try{const{data,error}=await S.sb.from('installments').insert(ins).select();if(!error&&data&&data[0]){S.online=true;updSync();persistInstLocal(data[0]);return data[0]}}catch(e){console.warn('Supabase insert inst falló:',e.message)}
+    }
+    return ins;
 }
 async function updInst(id,d){
-    if(S.sb){try{const{data,error}=await S.sb.from('installments').update(d).eq('id',id).select();if(!error&&data)return data[0]}catch{}}
-    const i=S.inst.findIndex(x=>x.id===id);if(i>=0){Object.assign(S.inst[i],d);lSave('hf_inst',S.inst);return S.inst[i]}
+    const i=S.inst.findIndex(x=>x.id===id);if(i>=0){Object.assign(S.inst[i],d);lSave('hf_inst',S.inst);}
+    if(S.sb){
+        try{const{data,error}=await S.sb.from('installments').update(d).eq('id',id).select();if(!error&&data&&data[0]){S.online=true;updSync();return data[0]}}catch(e){}
+    }
+    return S.inst[i];
 }
 async function delInst(id){
-    if(S.sb){try{await S.sb.from('installments').delete().eq('id',id);return}catch{}}
     S.inst=S.inst.filter(i=>i.id!==id);lSave('hf_inst',S.inst);
+    if(S.sb){try{await S.sb.from('installments').delete().eq('id',id);S.online=true;updSync();}catch(e){}}
 }
 
 function updSync(){
@@ -1481,7 +1578,7 @@ function renderModalAccounts(){
 }
 
 async function addTx(){
-    const amt=parseFloat(document.getElementById('m-amt').value);
+    const amt=parseAmtStr(document.getElementById('m-amt').value);
     if(!amt||amt<=0){toast('Ingresá un monto válido','warn');return}
     const desc=document.getElementById('m-desc').value||catById(S.mCat).name;
     const date=document.getElementById('m-date').value||today();
@@ -1516,7 +1613,7 @@ async function addTx(){
 function openEditTx(id){
     const t=S.tx.find(x=>x.id===id);if(!t)return;
     S.editType=t.type;S.editCat=t.category;S.editUser=t.user_name;
-    document.getElementById('et-amt').value=Number(t.amount);
+    document.getElementById('et-amt').value=fmtEditable(t.amount);
     document.getElementById('et-desc').value=t.description||'';
     document.getElementById('et-date').value=t.date;
     document.getElementById('et-id').value=t.id;
@@ -1557,7 +1654,7 @@ function renderEditUsers(){
 
 async function doEditTx(){
     const id=document.getElementById('et-id').value;
-    const amt=parseFloat(document.getElementById('et-amt').value);
+    const amt=parseAmtStr(document.getElementById('et-amt').value);
     if(!amt||amt<=0){toast('Monto inválido','warn');return}
     await updTx(id,{
         type:S.editType,
@@ -1588,7 +1685,7 @@ async function addAccount(){
     const name=document.getElementById('ac-name').value.trim();
     if(!name){toast('Ingresá un nombre','warn');return}
     const type=document.getElementById('ac-type').value;
-    const balance=parseFloat(document.getElementById('ac-bal').value)||0;
+    const balance=parseAmtStr(document.getElementById('ac-bal').value)||0;
     await saveAcct({name,type,balance,icon:ACCT_ICONS[type]||'fa-wallet',color:ACCT_COLORS[type]||'#B07D2A'});
     await loadAll();renderAll();closeAccountModal();
     document.getElementById('ac-name').value='';document.getElementById('ac-bal').value='';
@@ -1599,7 +1696,7 @@ function openEditAcct(id){
     const a=S.accts.find(x=>x.id===id);if(!a)return;
     document.getElementById('ea-name').value=a.name;
     document.getElementById('ea-type').value=a.type;
-    document.getElementById('ea-bal').value=Number(a.balance);
+    document.getElementById('ea-bal').value=fmtEditable(a.balance);
     document.getElementById('ea-id').value=a.id;
     showModal('modal-edit-acct');
 }
@@ -1610,7 +1707,7 @@ async function doEditAcct(){
     const name=document.getElementById('ea-name').value.trim();
     if(!name){toast('Ingresá un nombre','warn');return}
     const type=document.getElementById('ea-type').value;
-    const balance=parseFloat(document.getElementById('ea-bal').value)||0;
+    const balance=parseAmtStr(document.getElementById('ea-bal').value)||0;
     await updAcct(id,{name,type,balance,icon:ACCT_ICONS[type]||'fa-wallet',color:ACCT_COLORS[type]||'#B07D2A'});
     await loadAll();renderAll();closeEditAcct();
     toast('Cuenta actualizada','success');
@@ -1631,9 +1728,9 @@ function closeGoalModal(){hideModal('modal-goal')}
 
 async function addGoal(){
     const name=document.getElementById('gl-name').value.trim();
-    const target=parseFloat(document.getElementById('gl-target').value);
+    const target=parseAmtStr(document.getElementById('gl-target').value);
     if(!name||!target){toast('Completá nombre y objetivo','warn');return}
-    const current=parseFloat(document.getElementById('gl-current').value)||0;
+    const current=parseAmtStr(document.getElementById('gl-current').value)||0;
     const deadline=document.getElementById('gl-deadline').value||null;
     await saveGoal({name,target,current,icon:'fa-bullseye',color:'#B07D2A',deadline});
     await loadAll();renderAll();closeGoalModal();
@@ -1644,8 +1741,8 @@ async function addGoal(){
 function openEditGoal(id){
     const g=S.goals.find(x=>x.id===id);if(!g)return;
     document.getElementById('eg-name').value=g.name;
-    document.getElementById('eg-target').value=Number(g.target);
-    document.getElementById('eg-current').value=Number(g.current);
+    document.getElementById('eg-target').value=fmtEditable(g.target);
+    document.getElementById('eg-current').value=fmtEditable(g.current);
     document.getElementById('eg-deadline').value=g.deadline||'';
     document.getElementById('eg-id').value=g.id;
     showModal('modal-edit-goal');
@@ -1655,9 +1752,9 @@ function closeEditGoal(){hideModal('modal-edit-goal')}
 async function doEditGoal(){
     const id=document.getElementById('eg-id').value;
     const name=document.getElementById('eg-name').value.trim();
-    const target=parseFloat(document.getElementById('eg-target').value);
+    const target=parseAmtStr(document.getElementById('eg-target').value);
     if(!name||!target){toast('Completá nombre y objetivo','warn');return}
-    const current=parseFloat(document.getElementById('eg-current').value)||0;
+    const current=parseAmtStr(document.getElementById('eg-current').value)||0;
     const deadline=document.getElementById('eg-deadline').value||null;
     await updGoal(id,{name,target,current,deadline});
     await loadAll();renderAll();closeEditGoal();
@@ -1681,7 +1778,7 @@ function openBudgetModal(){
         return`<div class="flex items-center gap-3 p-2 rounded-xl hover:bg-bg transition">
             <div class="w-9 h-9 rounded-lg flex items-center justify-center shrink-0" style="background:${c.color}12;color:${c.color}"><i class="fa-solid ${c.icon} text-xs"></i></div>
             <span class="text-xs font-semibold flex-1">${c.name}</span>
-            <input type="number" data-cat="${c.id}" value="${val||''}" placeholder="0" class="input-elegant w-28 px-3 py-2 text-xs text-right">
+            <input type="text" inputmode="decimal" data-cat="${c.id}" value="${val?fmtEditable(val):''}" placeholder="0,00" class="input-elegant w-28 px-3 py-2 text-xs text-right">
         </div>`;
     }).join('');
     showModal('modal-budget');
@@ -1691,7 +1788,7 @@ function closeBudgetModal(){hideModal('modal-budget')}
 function saveBudgets(){
     const inputs=document.querySelectorAll('#budget-list input[data-cat]');
     const b={};
-    inputs.forEach(inp=>{const v=parseFloat(inp.value);if(v>0)b[inp.dataset.cat]=v});
+    inputs.forEach(inp=>{const v=parseAmtStr(inp.value);if(v>0)b[inp.dataset.cat]=v});
     S.budgets=b;localStorage.setItem('hf_budgets',JSON.stringify(b));
     renderAll();closeBudgetModal();
     toast('Presupuestos guardados','success');
