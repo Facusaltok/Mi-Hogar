@@ -797,6 +797,17 @@ function fmt(n){
     const f=a.toLocaleString('es-AR',{minimumFractionDigits:2,maximumFractionDigits:2});
     return(n<0?'-':'')+s+f;
 }
+/* Igual que fmt pero para un monto en USD: usa U$S como símbolo */
+function fmtUSD(n){
+    const a=Math.abs(Number(n)||0);
+    const f=a.toLocaleString('es-AR',{minimumFractionDigits:2,maximumFractionDigits:2});
+    return(n<0?'-':'')+'U$S '+f;
+}
+/* Devuelve el monto formateado según la moneda de la transacción.
+   Si se pasa currency='USD', usa U$S. Si no, usa la moneda principal de la app. */
+function fmtByCurr(n,currency){
+    return currency==='USD'?fmtUSD(n):fmt(n);
+}
 function fmtShort(n){
     const a=Math.abs(Number(n)||0);
     if(a>=1000000)return(n<0?'-':'')+(a/1000000).toFixed(1).replace('.',',')+'M';
@@ -1142,22 +1153,22 @@ function parseLine(line,closeDate){
     /* Si no tiene fecha al inicio, no es un consumo genuino */
     if(!dateStr)return null;
 
-    /* 2) DETECCIÓN DE USD: si la línea tiene "USD X,XX [X,XX]" o "U$S X,XX [X,XX]"
-       al final, hay dos montos: el original en USD y el equivalente en ARS según
-       el tipo de cambio de la tarjeta. Tomamos el equivalente en ARS como monto
-       principal, porque es lo que efectivamente se le debita al usuario en su
-       resumen en pesos. */
+    /* 2) DETECCIÓN DE USD: si la línea tiene "USD X,XX" (con o sin segundo monto),
+       es un consumo en dólares. El monto principal a guardar es el MONTO EN USD
+       (no el segundo valor, que en los resúmenes argentinos suele ser el monto
+       de la columna DOLARES — el mismo valor que el del detalle "USD X,XX").
+       El usuario paga en USD o convierte al cierre al tipo de cambio vendedor. */
     let isUSD=false;
     let usdAmount=0;
-    let usdToARSConversion=0;
+    let usdToARSConversion=0; /* segundo monto si aparece (lo guardamos como ref. pero no lo usamos como amount) */
     /* Patrón: "USD 9,99 9,99" o "USD 9.99 9.99" o "U$S 9,99 9,99" */
-    const usdMatch=line.match(/(?:USD|U\$S|U\$S|US\$)\s+(\d{1,3}(?:[.,]\d{3})*(?:[.,]\d{1,2})?)\s+(\d{1,3}(?:[.,]\d{3})*(?:[.,]\d{1,2})?)\s*$/i);
+    const usdMatch=line.match(/(?:USD|U\$S|US\$)\s+(\d{1,3}(?:[.,]\d{3})*(?:[.,]\d{1,2})?)\s+(\d{1,3}(?:[.,]\d{3})*(?:[.,]\d{1,2})?)\s*$/i);
     if(usdMatch){
         usdAmount=parseAmtStr(usdMatch[1]);
         usdToARSConversion=parseAmtStr(usdMatch[2]);
         isUSD=true;
     }
-    /* Patrón: "USD 9,99" sin conversión (sin segundo monto) */
+    /* Patrón: "USD 9,99" sin segundo monto */
     const usdOnlyMatch=!usdMatch?line.match(/(?:USD|U\$S|U\$|US\$)\s+(\d{1,3}(?:[.,]\d{3})*(?:[.,]\d{1,2})?)\s*$/i):null;
     if(usdOnlyMatch){
         usdAmount=parseAmtStr(usdOnlyMatch[1]);
@@ -1166,19 +1177,12 @@ function parseLine(line,closeDate){
 
     /* 3) MONTO: buscar al final de la línea */
     let amount=0,amountStr='',amountStart=line.length;
-    if(isUSD&&usdToARSConversion>0){
-        /* Si detectamos USD con conversión a ARS, usamos la conversión (ARS) */
-        amount=usdToARSConversion;
-        /* Encontrar dónde empieza "USD" para delimitar el merchant */
-        const usdIdx=line.toUpperCase().search(/\bUSD\b|\bU\$S\b/);
-        if(usdIdx>=0){
-            amountStart=usdIdx;
-            amountStr='USD '+usdAmount+' '+usdToARSConversion;
-        }
-    }else if(isUSD&&usdAmount>0){
-        /* USD sin conversión, usamos el monto en USD (asumimos ARS para no romper la app) */
+    if(isUSD&&usdAmount>0){
+        /* El monto principal es en USD. Lo guardamos como tal y marcamos currency=USD.
+           Si más adelante hay tipo de cambio configurado, la UI puede mostrar
+           el equivalente en ARS al lado. */
         amount=usdAmount;
-        const usdIdx=line.toUpperCase().search(/\bUSD\b|\bU\$S\b/);
+        const usdIdx=line.toUpperCase().search(/\bUSD\b|\bU\$S\b|\bUS\$\b/);
         if(usdIdx>=0){
             amountStart=usdIdx;
             amountStr='USD '+usdAmount;
@@ -1355,6 +1359,7 @@ function groupInstallments(installments){
                 cardName:inst.cardName,
                 userName:inst.userName,
                 subscription:inst.subscription||null,
+                currency:inst.currency||'ARS',
                 items:[]
             };
         }else{
@@ -1362,6 +1367,8 @@ function groupInstallments(installments){
             if(inst.cuotaCurrent>groups[key].cuotaCurrent){
                 groups[key].cuotaCurrent=inst.cuotaCurrent;
             }
+            /* Propagar currency: si cualquiera de las cuotas era USD, el plan es USD */
+            if(inst.currency==='USD')groups[key].currency='USD';
         }
         groups[key].items.push(inst);
     }
@@ -1561,19 +1568,23 @@ function renderParsedResult(){
             const rem=inst.cuotaTotal-inst.cuotaCurrent+1;
             const pct=Math.round((inst.cuotaCurrent/inst.cuotaTotal)*100);
             const endDate=inst.endDate;
+            const isUSD=inst.currency==='USD';
+            const cuotaAmtStr=isUSD?fmtUSD(inst.cuotaAmount):fmt(inst.cuotaAmount);
+            const totalAmtStr=isUSD?fmtUSD(inst.totalAmount):fmt(inst.totalAmount);
+            const remAmtStr=isUSD?fmtUSD(rem*inst.cuotaAmount):fmt(rem*inst.cuotaAmount);
             return`<div class="card-flat p-3">
                 <div class="flex items-center gap-3 mb-2">
                     <div class="w-9 h-9 rounded-xl flex items-center justify-center" style="background:${c.color}12;color:${c.color}"><i class="fa-solid ${c.icon} text-xs"></i></div>
                     <div class="flex-1">
-                        <p class="text-xs font-semibold">${escapeHtml(inst.merchant)}</p>
-                        <p class="text-[10px] text-muted">${fmt(inst.cuotaAmount)}/cuota · Cuota ${inst.cuotaCurrent}/${inst.cuotaTotal} · Termina ${endDate?fmtD(endDate):'-'}</p>
+                        <p class="text-xs font-semibold">${escapeHtml(inst.merchant)}${isUSD?' <span class="badge" style="color:#2563EB;background:rgba(37,99,235,0.1)"><i class="fa-solid fa-dollar-sign text-[8px]"></i> USD</span>':''}</p>
+                        <p class="text-[10px] text-muted">${cuotaAmtStr}/cuota · Cuota ${inst.cuotaCurrent}/${inst.cuotaTotal} · Termina ${endDate?fmtD(endDate):'-'}</p>
                     </div>
-                    <span class="text-xs font-bold text-expense">${fmt(inst.totalAmount)}</span>
+                    <span class="text-xs font-bold text-expense">${totalAmtStr}</span>
                 </div>
                 <div class="progress-bar"><div class="progress-fill" style="width:${pct}%;background:${c.color}"></div></div>
                 <div class="flex justify-between text-[9px] text-muted mt-1">
                     <span>Pagadas: ${inst.cuotaCurrent}/${inst.cuotaTotal}</span>
-                    <span>Restan ${rem} ${rem===1?'cuota':'cuotas'} = ${fmt(rem*inst.cuotaAmount)}</span>
+                    <span>Restan ${rem} ${rem===1?'cuota':'cuotas'} = ${remAmtStr}</span>
                 </div>
             </div>`;
         }).join('');
@@ -1592,16 +1603,18 @@ function renderParsedResult(){
 
 function renderParsedRow(e,i){
     const c=catById(e.category);
+    const isUSD=e.currency==='USD';
+    const amtStr=isUSD?fmtUSD(e.amount):fmt(e.amount);
     return`<div class="parsed-row ${e.checked?'checked':''} card-flat p-3 flex items-center gap-3 cursor-pointer" onclick="toggleParsedRow(${i})">
         <div class="w-5 h-5 rounded-md border-2 flex items-center justify-center shrink-0 ${e.checked?'bg-accent border-accent':'border-brd'}">
             ${e.checked?'<i class="fa-solid fa-check text-white text-[10px]"></i>':''}
         </div>
         <div class="w-8 h-8 rounded-lg flex items-center justify-center shrink-0" style="background:${c.color}12;color:${c.color}"><i class="fa-solid ${c.icon} text-[10px]"></i></div>
         <div class="flex-1 min-w-0">
-            <p class="text-xs font-semibold truncate">${escapeHtml(e.merchant)}</p>
+            <p class="text-xs font-semibold truncate">${escapeHtml(e.merchant)}${isUSD?' <span class="badge bg-blue/10 text-blue" style="color:#2563EB;background:rgba(37,99,235,0.1)"><i class="fa-solid fa-dollar-sign text-[8px]"></i> USD</span>':''}</p>
             <p class="text-[10px] text-muted">${fmtD(e.date)} · ${c.name}</p>
         </div>
-        <span class="text-xs font-bold text-expense shrink-0">${fmt(e.amount)}</span>
+        <span class="text-xs font-bold text-expense shrink-0">${amtStr}</span>
     </div>`;
 }
 
@@ -1620,6 +1633,7 @@ async function confirmParsed(){
     if(!parsedResult)return;
     const{expenses,installments}=parsedResult;
     let count=0;
+    let usdCount=0;
 
     for(const e of expenses){
         if(!e.checked)continue;
@@ -1631,9 +1645,11 @@ async function confirmParsed(){
             description:e.merchant,
             date:e.date,
             account_id:null,
-            cuota_info:''
+            cuota_info:'',
+            currency:e.currency||'ARS'
         });
         count++;
+        if(e.currency==='USD')usdCount++;
     }
 
     for(const inst of installments){
@@ -1647,7 +1663,8 @@ async function confirmParsed(){
             category:inst.category,
             user_name:inst.userName||S.u1,
             card_name:inst.cardName||'',
-            start_date:inst.date||today()
+            start_date:inst.date||today(),
+            currency:inst.currency||'ARS'
         });
 
         if(inst.cuotaCurrent>0){
@@ -1659,9 +1676,11 @@ async function confirmParsed(){
                 description:inst.merchant,
                 date:inst.date||today(),
                 account_id:null,
-                cuota_info:`Cuota ${inst.cuotaCurrent}/${inst.cuotaTotal}`
+                cuota_info:`Cuota ${inst.cuotaCurrent}/${inst.cuotaTotal}`,
+                currency:inst.currency||'ARS'
             });
             count++;
+            if(inst.currency==='USD')usdCount++;
         }
     }
 
@@ -1669,7 +1688,7 @@ async function confirmParsed(){
     renderAll();
     hideModal('modal-parsed');
     hideModal('modal-card');
-    toast(`${count} movimientos importados correctamente`,'success');
+    toast(`${count} movimientos importados correctamente${usdCount?` (${usdCount} en USD)`:''}`,'success');
 
     document.getElementById('card-text').value='';
     parsedResult=null;
@@ -2008,6 +2027,9 @@ function renderHome(){
         const rem=totalC-paid;
         const cuotaAmt=Number(i.cuota_amount)||0;
         const remainingAmount=rem*cuotaAmt;
+        const isUSD=i.currency==='USD';
+        const cuotaAmtStr=isUSD?fmtUSD(cuotaAmt):fmt(cuotaAmt);
+        const remainingAmountStr=isUSD?fmtUSD(remainingAmount):fmt(remainingAmount);
         /* Calcular fecha fin proyectada: usamos start_date + total_cuotas-1 meses */
         let endDateStr=null,nextPayStr=null;
         if(i.start_date){
@@ -2025,16 +2047,16 @@ function renderHome(){
         return`<div class="card p-3 flex items-center gap-3" style="border-left:3px solid ${alertColor};border-radius:0 14px 14px 0">
             <div class="w-9 h-9 rounded-xl flex items-center justify-center" style="background:${c.color}12;color:${c.color}"><i class="fa-solid ${c.icon} text-xs"></i></div>
             <div class="flex-1 min-w-0">
-                <p class="text-xs font-semibold truncate">${escapeHtml(i.merchant||i.description)}</p>
+                <p class="text-xs font-semibold truncate">${escapeHtml(i.merchant||i.description)}${isUSD?' <span class="badge" style="color:#2563EB;background:rgba(37,99,235,0.1);font-size:9px;padding:2px 6px;border-radius:20px;font-weight:600"><i class="fa-solid fa-dollar-sign text-[8px]"></i> USD</span>':''}</p>
                 <p class="text-[10px] text-muted">
-                    ${escapeHtml(i.card_name||'Tarjeta')} · ${fmt(cuotaAmt)}/cuota ·
+                    ${escapeHtml(i.card_name||'Tarjeta')} · ${cuotaAmtStr}/cuota ·
                     <span class="font-medium ${endsSoon?'text-income':heavyPlan?'text-expense':''}">Quedan ${rem}</span>
                     ${endDateStr?'· Termina '+fmtD(endDateStr):''}
                 </p>
                 <div class="progress-bar mt-1.5"><div class="progress-fill" style="width:${pct}%;background:${c.color}"></div></div>
                 <div class="flex justify-between text-[9px] text-muted mt-1">
                     <span>Pagadas ${paid}/${totalC} (${pct}%)</span>
-                    <span>Restante: ${fmt(remainingAmount)}</span>
+                    <span>Restante: ${remainingAmountStr}</span>
                 </div>
             </div>
             <div class="flex items-center gap-1">
@@ -2063,13 +2085,15 @@ function renderHome(){
 function txRow(t){
     const c=catById(t.category);
     const ii=t.type==='income';
+    const isUSD=t.currency==='USD';
+    const amtStr=isUSD?fmtUSD(Number(t.amount)):fmt(Number(t.amount));
     return`<div class="card p-3 flex items-center gap-3 cursor-pointer" onclick="openEditTx('${t.id}')">
         <div class="w-9 h-9 rounded-xl flex items-center justify-center text-xs" style="background:${c.color}12;color:${c.color}"><i class="fa-solid ${c.icon}"></i></div>
         <div class="flex-1 min-w-0">
-            <p class="text-xs font-semibold truncate">${escapeHtml(t.description||c.name)}${t.cuota_info?' <span class="text-muted font-normal">· '+escapeHtml(t.cuota_info)+'</span>':''}</p>
+            <p class="text-xs font-semibold truncate">${escapeHtml(t.description||c.name)}${t.cuota_info?' <span class="text-muted font-normal">· '+escapeHtml(t.cuota_info)+'</span>':''}${isUSD?' <span class="badge" style="color:#2563EB;background:rgba(37,99,235,0.1);font-size:9px;padding:2px 6px;border-radius:20px;font-weight:600"><i class="fa-solid fa-dollar-sign text-[8px]"></i> USD</span>':''}</p>
             <p class="text-[10px] text-muted">${fmtD(t.date)} · ${escapeHtml(t.user_name)}</p>
         </div>
-        <span class="text-xs font-bold ${ii?'text-income':'text-expense'} shrink-0">${ii?'+':'-'}${fmt(Number(t.amount))}</span>
+        <span class="text-xs font-bold ${ii?'text-income':'text-expense'} shrink-0">${ii?'+':'-'}${amtStr}</span>
     </div>`;
 }
 
