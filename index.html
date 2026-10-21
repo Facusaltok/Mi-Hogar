@@ -54,7 +54,7 @@
         .card:active{transform:scale(.985);transition:transform .1s}
         .card-flat{background:#fff;border-radius:14px;border:1px solid #E9ECF1}
         .tab-item{transition:all .2s ease;color:#6B7280}.tab-item.active{color:#0B1220}.tab-item.active i{color:#B07D2A}
-        .fab-center{width:56px;height:56px;border-radius:50%;background:linear-gradient(135deg,#0B1220,#1F2937);box-shadow:0 6px 20px rgba(11,18,32,.25),0 2px 4px rgba(11,18,32,.15);margin-top:-28px;transition:transform .15s ease}
+        .fab-center{width:56px;height:56px;border-radius:50%;background:linear-gradient(135deg,#0B1220,#1F2937);box-shadow:0 8px 24px rgba(11,18,32,.35),0 4px 8px rgba(11,18,32,.18);margin-top:-28px;transition:transform .15s ease}
         .fab-center:active{transform:scale(.9)}
         .fab-center i{color:#fff}
         .modal-bg{backdrop-filter:blur(8px);background:rgba(15,23,42,.45)}
@@ -114,6 +114,48 @@
         .nav-bar{background:rgba(255,255,255,.92);backdrop-filter:blur(20px);border-top:1px solid #E9ECF1}
         @media(max-width:380px){.grid-cols-4{grid-template-columns:repeat(3,1fr)}}
         @media(min-width:768px){.modal-sheet{max-width:480px;left:50%;transform:translateX(-50%);width:480px;border-radius:24px}}
+
+        /* === RESPONSIVE PARA MÓVIL === */
+        /* En pantallas chicas, reducir un poco el padding de las cards para evitar overflow */
+        @media(max-width:480px){
+            .card{padding:14px}
+            .card-flat{padding:12px}
+            .stat-card{padding:14px}
+            .hero-card{padding:18px}
+            .amount-input{font-size:1.6rem}
+            /* El patrimonio del hero en pantallas chicas baja a text-3xl para que entre */
+            .hero-card p.text-4xl{font-size:1.75rem}
+            /* Reducir paddings del modal en móvil */
+            .modal-sheet{padding:14px}
+            /* Las stat-cards en 3 columnas quedan muy apretadas en móvil pequeño;
+               bajamos su contenido para que respire */
+            .stat-card p.text-sm{font-size:0.95rem}
+            /* Account cards: mínimo width un poco más chico para que entren más */
+            .account-card{min-width:130px}
+            /* Ocultar el badge de tipo en móvil para que el nombre entre completo */
+            .account-type-badge{display:none}
+        }
+
+        /* En pantallas MUY chicas (max 360px), las stat-cards van en 2 columnas en vez de 3 */
+        @media(max-width:360px){
+            .grid.grid-cols-3:has(.stat-card){grid-template-columns:repeat(2,1fr)}
+            /* En grids de 4 columnas (categorías), bajar a 3 para que entren mejor */
+            .grid-cols-4{grid-template-columns:repeat(3,1fr)}
+            /* Reducir todavía más paddings */
+            .card{padding:12px}
+            .stat-card{padding:12px}
+            .hero-card{padding:14px}
+            .hero-card p.text-4xl{font-size:1.5rem}
+        }
+
+        /* Asegurar que el modal siempre respire dentro de la pantalla */
+        .modal-sheet{max-width:100vw;max-height:92vh}
+
+        /* Inputs en móvil: mínimo táctil de 44px de altura */
+        @media(max-width:480px){
+            input.input-elegant,select.input-elegant{min-height:42px;font-size:0.95rem}
+            textarea.input-elegant{font-size:0.95rem}
+        }
         .swipe-indicator{position:absolute;top:50%;transform:translateY(-50%);font-size:24px;opacity:.2;pointer-events:none}
         @keyframes ripple{to{transform:scale(2.5);opacity:0}}
     </style>
@@ -177,13 +219,13 @@
 
 <!-- APP CONTAINER -->
 <div id="app" class="hidden">
-<div id="content-area" class="pb-28 min-h-screen">
+<div id="content-area" class="pb-36 min-h-screen">
 
 <!-- VISTA: INICIO -->
 <div id="view-home" class="view active p-4 max-w-2xl mx-auto">
     <div class="flex items-center justify-between mb-5">
         <div><p class="text-xs text-muted" id="home-date-label"></p><h1 class="text-xl font-display font-bold tracking-tight" id="home-greeting"></h1></div>
-        <div class="flex items-center gap-2 bg-white border border-brd px-3 py-1.5 rounded-full"><span id="home-sync" class="w-2 h-2 rounded-full bg-income"></span><span class="text-[21px] text-muted font-medium" id="home-sync-label">Local</span></div>
+        <div class="flex items-center gap-2 bg-white border border-brd px-3 py-1.5 rounded-full"><span id="home-sync" class="w-2 h-2 rounded-full bg-income"></span><span class="text-xs text-muted font-medium" id="home-sync-label">Local</span></div>
     </div>
 
     <!-- HERO: Patrimonio -->
@@ -192,16 +234,16 @@
             <p class="text-xs text-white/60 mb-1 flex items-center gap-1.5"><i class="fa-solid fa-landmark"></i> Patrimonio total</p>
             <p id="home-patrimonio" class="text-4xl font-display font-bold tracking-tight">$0</p>
             <div class="flex items-center gap-2 mt-2">
-                <span id="home-patrimonio-change" class="chip" style="background:rgba(255,255,255,.1);color:#fff"><i class="fa-solid fa-chart-line text-[20px]"></i> <span id="home-patrimonio-change-label">—</span></span>
+                <span id="home-patrimonio-change" class="chip" style="background:rgba(255,255,255,.1);color:#fff"><i class="fa-solid fa-chart-line text-xs"></i> <span id="home-patrimonio-change-label">—</span></span>
             </div>
         </div>
     </div>
 
     <!-- Resumen mes -->
     <div class="grid grid-cols-3 gap-2.5 mb-5">
-        <div class="stat-card"><div class="flex items-center gap-1.5 mb-1"><span class="w-1.5 h-1.5 rounded-full bg-income"></span><p class="text-[21px] text-muted">Ingresos</p></div><p id="home-income" class="text-sm font-display font-bold text-income">$0</p></div>
-        <div class="stat-card"><div class="flex items-center gap-1.5 mb-1"><span class="w-1.5 h-1.5 rounded-full bg-expense"></span><p class="text-[21px] text-muted">Gastos</p></div><p id="home-expense" class="text-sm font-display font-bold text-expense">$0</p></div>
-        <div class="stat-card"><div class="flex items-center gap-1.5 mb-1"><span class="w-1.5 h-1.5 rounded-full bg-accent"></span><p class="text-[21px] text-muted">Ahorro</p></div><p id="home-savings" class="text-sm font-display font-bold text-accent">$0</p></div>
+        <div class="stat-card"><div class="flex items-center gap-1.5 mb-1"><span class="w-1.5 h-1.5 rounded-full bg-income"></span><p class="text-xs text-muted">Ingresos</p></div><p id="home-income" class="text-sm font-display font-bold text-income truncate whitespace-nowrap overflow-hidden">$0</p></div>
+        <div class="stat-card"><div class="flex items-center gap-1.5 mb-1"><span class="w-1.5 h-1.5 rounded-full bg-expense"></span><p class="text-xs text-muted">Gastos</p></div><p id="home-expense" class="text-sm font-display font-bold text-expense truncate whitespace-nowrap overflow-hidden">$0</p></div>
+        <div class="stat-card"><div class="flex items-center gap-1.5 mb-1"><span class="w-1.5 h-1.5 rounded-full bg-accent"></span><p class="text-xs text-muted">Ahorro</p></div><p id="home-savings" class="text-sm font-display font-bold text-accent truncate whitespace-nowrap overflow-hidden">$0</p></div>
     </div>
 
     <!-- Cuentas -->
@@ -228,7 +270,7 @@
         </div>
         <button onclick="openAIAnalysis()" class="card p-3.5 w-full flex items-center gap-3 mb-3 cursor-pointer">
             <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-[#0B1220] to-[#2C3E50] flex items-center justify-center"><i class="fa-solid fa-brain text-white"></i></div>
-            <div class="flex-1 text-left"><p class="text-sm font-semibold">Análisis Inteligente</p><p class="text-[21px] text-muted">Insights, alertas y recomendaciones</p></div>
+            <div class="flex-1 text-left"><p class="text-sm font-semibold">Análisis Inteligente</p><p class="text-xs text-muted">Insights, alertas y recomendaciones</p></div>
             <i class="fa-solid fa-chevron-right text-muted text-xs"></i>
         </button>
         <div id="home-installments" class="space-y-2"></div>
@@ -236,7 +278,7 @@
 
     <!-- Gráfico categorías -->
     <div class="card p-6 mb-5">
-        <div class="flex items-center justify-between mb-3"><h3 class="font-display font-semibold text-sm">Gastos del mes</h3><span class="text-[21px] text-muted">por categoría</span></div>
+        <div class="flex items-center justify-between mb-3"><h3 class="font-display font-semibold text-sm">Gastos del mes</h3><span class="text-xs text-muted">por categoría</span></div>
         <div class="flex items-center gap-5">
             <div class="chart-wrap" style="width:130px;height:130px;flex-shrink:0"><canvas id="chart-cat-home"></canvas></div>
             <div id="cat-legend" class="flex-1 space-y-2 text-xs"></div>
@@ -267,10 +309,10 @@
     <div class="flex items-center justify-between mb-4">
         <div><h1 class="text-xl font-display font-bold tracking-tight">Movimientos</h1><p class="text-xs text-muted" id="tx-count-label">0 registros</p></div>
     </div>
-    <div class="flex gap-2 mb-3 scroll-x pb-1">
-        <select id="f-type" onchange="renderTransactions()" class="input-elegant px-3 py-2 text-xs"><option value="all">Todos</option><option value="income">Ingresos</option><option value="expense">Gastos</option></select>
-        <select id="f-user" onchange="renderTransactions()" class="input-elegant px-3 py-2 text-xs"><option value="all">Ambos</option></select>
-        <select id="f-cat" onchange="renderTransactions()" class="input-elegant px-3 py-2 text-xs"><option value="all">Categorías</option></select>
+    <div class="grid grid-cols-3 gap-2 mb-3">
+        <select id="f-type" onchange="renderTransactions()" class="input-elegant px-2 py-2 text-xs"><option value="all">Tipo</option><option value="income">Ingresos</option><option value="expense">Gastos</option></select>
+        <select id="f-user" onchange="renderTransactions()" class="input-elegant px-2 py-2 text-xs"><option value="all">Persona</option></select>
+        <select id="f-cat" onchange="renderTransactions()" class="input-elegant px-2 py-2 text-xs"><option value="all">Cat.</option></select>
     </div>
     <div class="mb-4 relative">
         <i class="fa-solid fa-magnifying-glass absolute left-4 top-1/2 -translate-y-1/2 text-muted text-xs"></i>
@@ -283,9 +325,9 @@
 <!-- VISTA: ANALÍTICAS -->
 <div id="view-analytics" class="view p-4 max-w-2xl mx-auto">
     <h1 class="text-xl font-display font-bold tracking-tight mb-4">Analíticas</h1>
-    <div class="card p-6 mb-4"><div class="flex items-center justify-between mb-3"><h3 class="font-display font-semibold text-sm">Tendencia 6 meses</h3><span class="text-[21px] text-muted">Ingresos vs Gastos</span></div><div class="chart-wrap" style="height:200px"><canvas id="chart-trend"></canvas></div></div>
+    <div class="card p-6 mb-4"><div class="flex items-center justify-between mb-3"><h3 class="font-display font-semibold text-sm">Tendencia 6 meses</h3><span class="text-xs text-muted">Ingresos vs Gastos</span></div><div class="chart-wrap" style="height:200px"><canvas id="chart-trend"></canvas></div></div>
     <div class="card p-6 mb-4"><h3 class="font-display font-semibold text-sm mb-3">Comparativa por persona</h3><div class="chart-wrap" style="height:200px"><canvas id="chart-users"></canvas></div></div>
-    <div class="card p-6 mb-4"><div class="flex items-center justify-between mb-3"><h3 class="font-display font-semibold text-sm">Top gastos del mes</h3><span class="text-[21px] text-muted">Mayores movimientos</span></div><div id="analytics-top" class="space-y-3"></div></div>
+    <div class="card p-6 mb-4"><div class="flex items-center justify-between mb-3"><h3 class="font-display font-semibold text-sm">Top gastos del mes</h3><span class="text-xs text-muted">Mayores movimientos</span></div><div id="analytics-top" class="space-y-3"></div></div>
 </div>
 
 <!-- VISTA: CONFIG -->
@@ -327,11 +369,11 @@
 <!-- BARRA DE NAVEGACIÓN -->
 <nav class="nav-bar fixed bottom-0 left-0 right-0 z-40 bottom-safe">
     <div class="max-w-2xl mx-auto flex items-end justify-around px-2 pt-2 pb-2">
-        <button onclick="switchTab('home')" class="tab-item active flex flex-col items-center gap-1 py-1 px-3" data-tab="home"><i class="fa-solid fa-house text-lg"></i><span class="text-[21px] font-semibold">Inicio</span></button>
-        <button onclick="switchTab('transactions')" class="tab-item flex flex-col items-center gap-1 py-1 px-3" data-tab="transactions"><i class="fa-solid fa-list text-lg"></i><span class="text-[21px] font-semibold">Movimientos</span></button>
+        <button onclick="switchTab('home')" class="tab-item active flex flex-col items-center gap-1 py-1 px-3" data-tab="home"><i class="fa-solid fa-house text-lg"></i><span class="text-xs font-semibold">Inicio</span></button>
+        <button onclick="switchTab('transactions')" class="tab-item flex flex-col items-center gap-1 py-1 px-3" data-tab="transactions"><i class="fa-solid fa-list text-lg"></i><span class="text-xs font-semibold">Movimientos</span></button>
         <button onclick="openAddModal()" class="fab-center flex items-center justify-center shadow-lg"><i class="fa-solid fa-plus text-xl"></i></button>
-        <button onclick="switchTab('analytics')" class="tab-item flex flex-col items-center gap-1 py-1 px-3" data-tab="analytics"><i class="fa-solid fa-chart-line text-lg"></i><span class="text-[21px] font-semibold">Analíticas</span></button>
-        <button onclick="switchTab('settings')" class="tab-item flex flex-col items-center gap-1 py-1 px-3" data-tab="settings"><i class="fa-solid fa-gear text-lg"></i><span class="text-[21px] font-semibold">Config</span></button>
+        <button onclick="switchTab('analytics')" class="tab-item flex flex-col items-center gap-1 py-1 px-3" data-tab="analytics"><i class="fa-solid fa-chart-line text-lg"></i><span class="text-xs font-semibold">Analíticas</span></button>
+        <button onclick="switchTab('settings')" class="tab-item flex flex-col items-center gap-1 py-1 px-3" data-tab="settings"><i class="fa-solid fa-gear text-lg"></i><span class="text-xs font-semibold">Config</span></button>
     </div>
 </nav>
 </div>
@@ -500,7 +542,7 @@
             <div class="mb-4">
                 <label class="text-xs text-muted block mb-1.5">O cargá un archivo (PDF / TXT / CSV)</label>
                 <input type="file" id="card-file" accept=".pdf,.txt,.csv,application/pdf,text/plain,text/csv" onchange="loadStatementFile(event)" class="w-full text-xs text-muted file:mr-3 file:py-2 file:px-3 file:rounded-xl file:border-0 file:text-xs file:font-medium file:bg-bg file:text-accent file:cursor-pointer">
-                <p id="pdf-progress" class="hidden text-[21px] text-accent mt-1.5 flex items-center gap-2">
+                <p id="pdf-progress" class="hidden text-xs text-accent mt-1.5 flex items-center gap-2">
                     <span class="loader" style="width:14px;height:14px;border-top-color:#B07D2A;border-color:#E9ECF1;border-top-color:#B07D2A"></span>
                     <span id="pdf-progress-text">Procesando PDF...</span>
                 </p>
@@ -1637,24 +1679,24 @@ function renderParsedResult(){
     /* 4 tarjetas: Total $ (saldo a pagar), Total U$S (saldo a pagar), Gastos, Cuotas */
     document.getElementById('parsed-stats').innerHTML=`
         <div class="card-flat p-4 text-center">
-            <p class="text-[21px] text-muted mb-1 flex items-center justify-center gap-1"><i class="fa-solid fa-coins text-[20px] text-accent"></i> Total resumen $</p>
+            <p class="text-xs text-muted mb-1 flex items-center justify-center gap-1"><i class="fa-solid fa-coins text-xs text-accent"></i> Total resumen $</p>
             <p class="text-base font-display font-bold text-expense">${fmt(totalARS)}</p>
-            <p class="text-[20px] text-muted mt-0.5">${arsFromBank?'Saldo a pagar del banco':'Consumos en ARS'}${countARS?' · '+countARS+' gastos':''}</p>
+            <p class="text-xs text-muted mt-0.5">${arsFromBank?'Saldo a pagar del banco':'Consumos en ARS'}${countARS?' · '+countARS+' gastos':''}</p>
         </div>
         <div class="card-flat p-4 text-center">
-            <p class="text-[21px] text-muted mb-1 flex items-center justify-center gap-1"><i class="fa-solid fa-dollar-sign text-[20px] text-blue"></i> Total resumen U$S</p>
+            <p class="text-xs text-muted mb-1 flex items-center justify-center gap-1"><i class="fa-solid fa-dollar-sign text-xs text-blue"></i> Total resumen U$S</p>
             <p class="text-base font-display font-bold ${totalUSD>0?'text-blue':''}" style="${totalUSD>0?'':'opacity:0.4'}">${totalUSD>0?fmtUSD(totalUSD):'—'}</p>
-            <p class="text-[20px] text-muted mt-0.5">${usdFromBank?'Saldo a pagar del banco':'Consumos en USD'}${countUSD?' · '+countUSD+' gastos':''}</p>
+            <p class="text-xs text-muted mt-0.5">${usdFromBank?'Saldo a pagar del banco':'Consumos en USD'}${countUSD?' · '+countUSD+' gastos':''}</p>
         </div>
         <div class="card-flat p-4 text-center">
-            <p class="text-[21px] text-muted mb-1 flex items-center justify-center gap-1"><i class="fa-solid fa-receipt text-[20px]"></i> Gastos</p>
+            <p class="text-xs text-muted mb-1 flex items-center justify-center gap-1"><i class="fa-solid fa-receipt text-xs"></i> Gastos</p>
             <p class="text-base font-display font-bold">${expenses.length}</p>
-            <p class="text-[20px] text-muted mt-0.5">en un pago</p>
+            <p class="text-xs text-muted mt-0.5">en un pago</p>
         </div>
         <div class="card-flat p-4 text-center">
-            <p class="text-[21px] text-muted mb-1 flex items-center justify-center gap-1"><i class="fa-solid fa-layer-group text-[20px] text-violet"></i> Cuotas</p>
+            <p class="text-xs text-muted mb-1 flex items-center justify-center gap-1"><i class="fa-solid fa-layer-group text-xs text-violet"></i> Cuotas</p>
             <p class="text-base font-display font-bold">${installments.length}</p>
-            <p class="text-[20px] text-muted mt-0.5">planes activos</p>
+            <p class="text-xs text-muted mt-0.5">planes activos</p>
         </div>
     `;
 
@@ -1684,12 +1726,12 @@ function renderParsedResult(){
                 <div class="w-9 h-9 rounded-xl flex items-center justify-center" style="background:${c.color}12;color:${c.color}"><i class="fa-solid fa-repeat text-xs"></i></div>
                 <div class="flex-1">
                     <p class="text-xs font-semibold">${escapeHtml(e.subscription.subName)}</p>
-                    <p class="text-[21px] text-muted">Mensual recurrente · ${fmtD(e.date)}</p>
+                    <p class="text-xs text-muted">Mensual recurrente · ${fmtD(e.date)}</p>
                 </div>
                 <span class="text-xs font-bold text-violet">${fmt(e.amount)}</span>
             </div>`;
         }).join('');
-        document.getElementById('parsed-subs-total').innerHTML=`<div class="text-[21px] text-muted">Total mensual en suscripciones: <span class="font-bold text-violet">${fmt(subsMonthly)}</span></div>`;
+        document.getElementById('parsed-subs-total').innerHTML=`<div class="text-xs text-muted">Total mensual en suscripciones: <span class="font-bold text-violet">${fmt(subsMonthly)}</span></div>`;
     }else{
         subsSec.classList.add('hidden');
     }
@@ -1712,13 +1754,13 @@ function renderParsedResult(){
                 <div class="flex items-center gap-3 mb-2">
                     <div class="w-9 h-9 rounded-xl flex items-center justify-center" style="background:${c.color}12;color:${c.color}"><i class="fa-solid ${c.icon} text-xs"></i></div>
                     <div class="flex-1">
-                        <p class="text-xs font-semibold">${escapeHtml(inst.merchant)}${isUSD?' <span class="badge" style="color:#2563EB;background:rgba(37,99,235,0.1)"><i class="fa-solid fa-dollar-sign text-[20px]"></i> USD</span>':''}</p>
-                        <p class="text-[21px] text-muted">${cuotaAmtStr}/cuota · Cuota ${inst.cuotaCurrent}/${inst.cuotaTotal} · Termina ${endDate?fmtD(endDate):'-'}</p>
+                        <p class="text-xs font-semibold">${escapeHtml(inst.merchant)}${isUSD?' <span class="badge" style="color:#2563EB;background:rgba(37,99,235,0.1)"><i class="fa-solid fa-dollar-sign text-xs"></i> USD</span>':''}</p>
+                        <p class="text-xs text-muted">${cuotaAmtStr}/cuota · Cuota ${inst.cuotaCurrent}/${inst.cuotaTotal} · Termina ${endDate?fmtD(endDate):'-'}</p>
                     </div>
                     <span class="text-xs font-bold text-expense">${totalAmtStr}</span>
                 </div>
                 <div class="progress-bar"><div class="progress-fill" style="width:${pct}%;background:${c.color}"></div></div>
-                <div class="flex justify-between text-[20px] text-muted mt-1">
+                <div class="flex justify-between text-xs text-muted mt-1">
                     <span>Pagadas: ${inst.cuotaCurrent}/${inst.cuotaTotal}</span>
                     <span>Restan ${rem} ${rem===1?'cuota':'cuotas'} = ${remAmtStr}</span>
                 </div>
@@ -1726,7 +1768,7 @@ function renderParsedResult(){
         }).join('');
         /* Agregar resumen mensual de cuotas abajo */
         const summary=document.createElement('div');
-        summary.className='mt-2 text-[21px] text-muted';
+        summary.className='mt-2 text-xs text-muted';
         summary.innerHTML=`Comprometido mensual en cuotas: <span class="font-bold text-expense">${fmt(instMonthly)}</span>`;
         const existing=cuotaEl.parentNode.querySelector('.inst-summary');
         if(existing)existing.remove();
@@ -1743,12 +1785,12 @@ function renderParsedRow(e,i){
     const amtStr=isUSD?fmtUSD(e.amount):fmt(e.amount);
     return`<div class="parsed-row ${e.checked?'checked':''} card-flat p-4 flex items-center gap-3 cursor-pointer" onclick="toggleParsedRow(${i})">
         <div class="w-5 h-5 rounded-md border-2 flex items-center justify-center shrink-0 ${e.checked?'bg-accent border-accent':'border-brd'}">
-            ${e.checked?'<i class="fa-solid fa-check text-white text-[21px]"></i>':''}
+            ${e.checked?'<i class="fa-solid fa-check text-white text-xs"></i>':''}
         </div>
-        <div class="w-8 h-8 rounded-lg flex items-center justify-center shrink-0" style="background:${c.color}12;color:${c.color}"><i class="fa-solid ${c.icon} text-[21px]"></i></div>
+        <div class="w-8 h-8 rounded-lg flex items-center justify-center shrink-0" style="background:${c.color}12;color:${c.color}"><i class="fa-solid ${c.icon} text-xs"></i></div>
         <div class="flex-1 min-w-0">
-            <p class="text-xs font-semibold truncate">${escapeHtml(e.merchant)}${isUSD?' <span class="badge bg-blue/10 text-blue" style="color:#2563EB;background:rgba(37,99,235,0.1)"><i class="fa-solid fa-dollar-sign text-[20px]"></i> USD</span>':''}</p>
-            <p class="text-[21px] text-muted">${fmtD(e.date)} · ${c.name}</p>
+            <p class="text-xs font-semibold truncate">${escapeHtml(e.merchant)}${isUSD?' <span class="badge bg-blue/10 text-blue" style="color:#2563EB;background:rgba(37,99,235,0.1)"><i class="fa-solid fa-dollar-sign text-xs"></i> USD</span>':''}</p>
+            <p class="text-xs text-muted">${fmtD(e.date)} · ${c.name}</p>
         </div>
         <span class="text-xs font-bold text-expense shrink-0">${amtStr}</span>
     </div>`;
@@ -2104,9 +2146,11 @@ function renderHome(){
     document.getElementById('home-date-label').textContent=`${months[now.getMonth()]} ${now.getFullYear()}`;
     document.getElementById('home-greeting').textContent=`${S.u1} & ${S.u2}`;
     document.getElementById('home-patrimonio').textContent=fmt(pat);
-    document.getElementById('home-income').textContent=fmt(inc);
-    document.getElementById('home-expense').textContent=fmt(exp);
-    document.getElementById('home-savings').textContent=fmt(sav);
+    /* En las stat-cards usamos fmtShort para mostrar montos compactos (1,4M en vez de 1.380.992,01)
+       y que entren bien en pantallas chicas sin desbordarse */
+    document.getElementById('home-income').textContent=fmtShort(inc);
+    document.getElementById('home-expense').textContent=fmtShort(exp);
+    document.getElementById('home-savings').textContent=fmtShort(sav);
     document.getElementById('home-savings').className=`text-sm font-display font-bold ${sav>=0?'text-income':'text-expense'}`;
 
     /* Cambio patrimonio */
@@ -2130,8 +2174,8 @@ function renderHome(){
     }else{
         acEl.innerHTML=S.accts.map(a=>`<div class="account-card cursor-pointer" style="--accent-color:${a.color||ACCT_COLORS[a.type]||'#B07D2A'}" onclick="openEditAcct('${a.id}')">
             <div class="flex items-center justify-between mb-2">
-                <div class="flex items-center gap-2"><i class="fa-solid ${a.icon||ACCT_ICONS[a.type]||'fa-wallet'} text-xs" style="color:${a.color||ACCT_COLORS[a.type]||'#B07D2A'}"></i><span class="text-[21px] font-semibold truncate max-w-[70px]">${escapeHtml(a.name)}</span></div>
-                <span class="text-[20px] text-muted">${ACCT_LABELS[a.type]||''}</span>
+                <div class="flex items-center gap-2 min-w-0 flex-1"><i class="fa-solid ${a.icon||ACCT_ICONS[a.type]||'fa-wallet'} text-xs shrink-0" style="color:${a.color||ACCT_COLORS[a.type]||'#B07D2A'}"></i><span class="text-xs font-semibold truncate">${escapeHtml(a.name)}</span></div>
+                <span class="text-xs text-muted account-type-badge shrink-0 ml-2">${ACCT_LABELS[a.type]||''}</span>
             </div>
             <p class="text-sm font-display font-bold tracking-tight">${fmt(Number(a.balance))}</p>
         </div>`).join('');
@@ -2183,21 +2227,21 @@ function renderHome(){
         return`<div class="card p-6 flex items-center gap-3" style="border-left:3px solid ${alertColor};border-radius:0 14px 14px 0">
             <div class="w-9 h-9 rounded-xl flex items-center justify-center" style="background:${c.color}12;color:${c.color}"><i class="fa-solid ${c.icon} text-xs"></i></div>
             <div class="flex-1 min-w-0">
-                <p class="text-xs font-semibold truncate">${escapeHtml(i.merchant||i.description)}${isUSD?' <span class="badge" style="color:#2563EB;background:rgba(37,99,235,0.1);font-size:12px;padding:3px 8px;border-radius:20px;font-weight:600"><i class="fa-solid fa-dollar-sign text-[20px]"></i> USD</span>':''}</p>
-                <p class="text-[21px] text-muted">
+                <p class="text-xs font-semibold truncate">${escapeHtml(i.merchant||i.description)}${isUSD?' <span class="badge" style="color:#2563EB;background:rgba(37,99,235,0.1);font-size:12px;padding:3px 8px;border-radius:20px;font-weight:600"><i class="fa-solid fa-dollar-sign text-xs"></i> USD</span>':''}</p>
+                <p class="text-xs text-muted">
                     ${escapeHtml(i.card_name||'Tarjeta')} · ${cuotaAmtStr}/cuota ·
                     <span class="font-medium ${endsSoon?'text-income':heavyPlan?'text-expense':''}">Quedan ${rem}</span>
                     ${endDateStr?'· Termina '+fmtD(endDateStr):''}
                 </p>
                 <div class="progress-bar mt-1.5"><div class="progress-fill" style="width:${pct}%;background:${c.color}"></div></div>
-                <div class="flex justify-between text-[20px] text-muted mt-1">
+                <div class="flex justify-between text-xs text-muted mt-1">
                     <span>Pagadas ${paid}/${totalC} (${pct}%)</span>
                     <span>Restante: ${remainingAmountStr}</span>
                 </div>
             </div>
             <div class="flex items-center gap-1">
-                <button onclick="markCuotaPaid('${i.id}')" class="act-btn bg-income/10 text-income" title="Pagar cuota"><i class="fa-solid fa-check text-[21px]"></i></button>
-                <button onclick="doDelInst('${i.id}')" class="act-btn bg-expense/10 text-expense" title="Eliminar"><i class="fa-solid fa-trash text-[21px]"></i></button>
+                <button onclick="markCuotaPaid('${i.id}')" class="act-btn bg-income/10 text-income" title="Pagar cuota"><i class="fa-solid fa-check text-xs"></i></button>
+                <button onclick="doDelInst('${i.id}')" class="act-btn bg-expense/10 text-expense" title="Eliminar"><i class="fa-solid fa-trash text-xs"></i></button>
             </div>
         </div>`;
     }).join(''):'<p class="text-xs text-muted text-center py-3">Sin planes de cuotas activos</p>';
@@ -2222,14 +2266,27 @@ function txRow(t){
     const c=catById(t.category);
     const ii=t.type==='income';
     const isUSD=t.currency==='USD';
-    const amtStr=isUSD?fmtUSD(Number(t.amount)):fmt(Number(t.amount));
-    return`<div class="card p-6 flex items-center gap-3 cursor-pointer" onclick="openEditTx('${t.id}')">
-        <div class="w-9 h-9 rounded-xl flex items-center justify-center text-xs" style="background:${c.color}12;color:${c.color}"><i class="fa-solid ${c.icon}"></i></div>
-        <div class="flex-1 min-w-0">
-            <p class="text-xs font-semibold truncate">${escapeHtml(t.description||c.name)}${t.cuota_info?' <span class="text-muted font-normal">· '+escapeHtml(t.cuota_info)+'</span>':''}${isUSD?' <span class="badge" style="color:#2563EB;background:rgba(37,99,235,0.1);font-size:12px;padding:3px 8px;border-radius:20px;font-weight:600"><i class="fa-solid fa-dollar-sign text-[20px]"></i> USD</span>':''}</p>
-            <p class="text-[21px] text-muted">${fmtD(t.date)} · ${escapeHtml(t.user_name)}</p>
+    /* Para USD: incluir el signo +/- dentro del formato (sin espacio) */
+    const num=Math.abs(Number(t.amount));
+    let amtStr;
+    if(isUSD){
+        const f=num.toLocaleString('es-AR',{minimumFractionDigits:2,maximumFractionDigits:2});
+        amtStr=(ii?'+':'-')+'U$S '+f;
+    }else{
+        const s=CURR_MAP[S.curr]||'$';
+        const f=num.toLocaleString('es-AR',{minimumFractionDigits:2,maximumFractionDigits:2});
+        amtStr=(ii?'+':'-')+s+f;
+    }
+    return`<div class="card p-4 flex items-center gap-3 cursor-pointer" onclick="openEditTx('${t.id}')">
+        <div class="w-9 h-9 rounded-xl flex items-center justify-center text-xs shrink-0" style="background:${c.color}12;color:${c.color}"><i class="fa-solid ${c.icon}"></i></div>
+        <div class="flex-1 min-w-0 overflow-hidden">
+            <p class="text-xs font-semibold leading-snug" style="overflow:hidden;display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:2;word-break:break-word">${escapeHtml(t.description||c.name)}${t.cuota_info?' · '+escapeHtml(t.cuota_info):''}</p>
+            <p class="text-xs text-muted truncate mt-0.5">${fmtD(t.date)} · ${escapeHtml(t.user_name)}</p>
         </div>
-        <span class="text-xs font-bold ${ii?'text-income':'text-expense'} shrink-0">${ii?'+':'-'}${amtStr}</span>
+        <div class="flex flex-col items-end shrink-0 ml-1">
+            ${isUSD?`<span class="badge mb-0.5" style="color:#2563EB;background:rgba(37,99,235,0.1);padding:1px 6px;border-radius:20px;font-weight:600;font-size:10px;line-height:1.2">USD</span>`:''}
+            <span class="text-xs font-bold ${ii?'text-income':'text-expense'} whitespace-nowrap">${amtStr}</span>
+        </div>
     </div>`;
 }
 
@@ -2297,7 +2354,7 @@ function renderBudgets(mTx){
                 <span class="text-xs ${over?'text-expense font-bold':'text-muted'}">${fmt(spent)} / ${fmt(Number(limit))}</span>
             </div>
             <div class="progress-bar"><div class="progress-fill" style="width:${pct}%;background:${over?'#DC2626':c.color}"></div></div>
-            ${over?'<p class="text-[21px] text-expense mt-1.5 font-semibold flex items-center gap-1"><i class="fa-solid fa-triangle-exclamation"></i> Excedido por '+fmt(spent-Number(limit))+'</p>':''}
+            ${over?'<p class="text-xs text-expense mt-1.5 font-semibold flex items-center gap-1"><i class="fa-solid fa-triangle-exclamation"></i> Excedido por '+fmt(spent-Number(limit))+'</p>':''}
         </div>`;
     }).join('');
 }
@@ -2317,7 +2374,7 @@ function renderGoals(){
             <div class="w-10 h-10 rounded-xl flex items-center justify-center" style="background:${c}18;color:${c}"><i class="fa-solid fa-bullseye text-sm"></i></div>
             <div class="flex-1 min-w-0">
                 <p class="text-xs font-semibold truncate">${escapeHtml(g.name)}</p>
-                <p class="text-[21px] text-muted">${fmt(Number(g.current))} de ${fmt(Number(g.target))}${deadlineStr}</p>
+                <p class="text-xs text-muted">${fmt(Number(g.current))} de ${fmt(Number(g.target))}${deadlineStr}</p>
                 <div class="progress-bar mt-1.5"><div class="progress-fill" style="width:${pct}%;background:${c}"></div></div>
             </div>
             <span class="text-xs font-bold" style="color:${c}">${pct}%</span>
@@ -2457,7 +2514,7 @@ function renderModalCats(){
     const cats=S.mType==='expense'?EXPENSE_CATS:INCOME_CATS;
     document.getElementById('m-cats').innerHTML=cats.map(c=>{
         const sel=c.id===S.mCat;
-        return`<button onclick="S.mCat='${c.id}';renderModalCats()" class="cat-btn flex flex-col items-center gap-1 p-2 rounded-xl ${sel?'selected':''}"><i class="fa-solid ${c.icon} text-sm" style="color:${c.color}"></i><span class="text-[20px] ${sel?'font-bold':'text-muted'}">${c.name}</span></button>`;
+        return`<button onclick="S.mCat='${c.id}';renderModalCats()" class="cat-btn flex flex-col items-center gap-1 p-2 rounded-xl ${sel?'selected':''}"><i class="fa-solid ${c.icon} text-sm" style="color:${c.color}"></i><span class="text-xs ${sel?'font-bold':'text-muted'}">${c.name}</span></button>`;
     }).join('');
 }
 
@@ -2538,7 +2595,7 @@ function renderEditCats(){
     const cats=S.editType==='expense'?EXPENSE_CATS:INCOME_CATS;
     document.getElementById('et-cats').innerHTML=cats.map(c=>{
         const sel=c.id===S.editCat;
-        return`<button onclick="S.editCat='${c.id}';renderEditCats()" class="cat-btn flex flex-col items-center gap-1 p-2 rounded-xl ${sel?'selected':''}"><i class="fa-solid ${c.icon} text-xs" style="color:${c.color}"></i><span class="text-[20px] ${sel?'font-bold':'text-muted'}">${c.name}</span></button>`;
+        return`<button onclick="S.editCat='${c.id}';renderEditCats()" class="cat-btn flex flex-col items-center gap-1 p-2 rounded-xl ${sel?'selected':''}"><i class="fa-solid ${c.icon} text-xs" style="color:${c.color}"></i><span class="text-xs ${sel?'font-bold':'text-muted'}">${c.name}</span></button>`;
     }).join('');
 }
 
