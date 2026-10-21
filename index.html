@@ -30,10 +30,14 @@
     },fontFamily:{display:['Plus Jakarta Sans','sans-serif'],body:['Inter','sans-serif']}}}}
     </script>
     <style>
+        /* Escala base: aumentamos el font-size del html de 16px a 18px.
+           Esto escala automáticamente todos los text-xs/sm/base/lg de Tailwind
+           (que están en rem) y hace la app más legible. */
+        html{font-size:18px}
         *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
-        body{font-family:'Inter',sans-serif;background:#F7F8FA;color:#0B1220;overscroll-behavior:none;-webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility}
+        body{font-family:'Inter',sans-serif;background:#F7F8FA;color:#0B1220;overscroll-behavior:none;-webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility;font-size:1rem}
         h1,h2,h3,h4{font-family:'Plus Jakarta Sans',sans-serif;letter-spacing:-0.015em}
-        ::-webkit-scrollbar{width:5px;height:5px}::-webkit-scrollbar-thumb{background:#d4d7dd;border-radius:3px}::-webkit-scrollbar-track{background:transparent}
+        ::-webkit-scrollbar{width:6px;height:6px}::-webkit-scrollbar-thumb{background:#d4d7dd;border-radius:3px}::-webkit-scrollbar-track{background:transparent}
         .view{display:none}.view.active{display:block;animation:fadeIn .25s ease-out}
         @keyframes slideUp{from{transform:translateY(30px);opacity:0}to{transform:translateY(0);opacity:1}}
         @keyframes fadeIn{from{opacity:0}to{opacity:1}}
@@ -62,14 +66,17 @@
         input::placeholder,textarea::placeholder{color:#9CA3AF}
         input[type=number]::-webkit-inner-spin-button,input[type=number]::-webkit-outer-spin-button{-webkit-appearance:none}
         input[type=number]{-moz-appearance:textfield}
-        .input-elegant{background:#F7F8FA;border:1px solid #E9ECF1;border-radius:14px;transition:all .15s ease}
+        .input-elegant{background:#F7F8FA;border:1px solid #E9ECF1;border-radius:14px;transition:all .15s ease;font-size:1rem}
+        input.input-elegant,select.input-elegant,textarea.input-elegant{font-size:1rem}
+        /* Asegurar que text-xs en inputs se vea más legible */
+        select.input-elegant,input.input-elegant{min-height:44px}
         .input-elegant:focus{border-color:#0B1220;background:#fff;box-shadow:0 0 0 3px rgba(11,18,32,.06);outline:none}
         .progress-bar{height:6px;border-radius:3px;overflow:hidden;background:#EEF1F5}
         .progress-fill{height:100%;border-radius:3px;transition:width .6s cubic-bezier(0.16,1,0.3,1)}
         .bottom-safe{padding-bottom:env(safe-area-inset-bottom,0px)}
         .scroll-x{overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none}.scroll-x::-webkit-scrollbar{display:none}
         .parsed-row{transition:all .15s ease}.parsed-row.checked{background:rgba(14,159,110,.06);border-color:rgba(14,159,110,.3)}
-        .badge{display:inline-flex;align-items:center;padding:2px 8px;border-radius:20px;font-size:10px;font-weight:600;letter-spacing:.02em}
+        .badge{display:inline-flex;align-items:center;padding:3px 10px;border-radius:20px;font-size:13px;font-weight:600;letter-spacing:.02em}
         .chart-wrap{position:relative;width:100%}
         .act-btn{width:34px;height:34px;border-radius:11px;display:flex;align-items:center;justify-content:center;transition:all .15s ease}
         .act-btn:active{transform:scale(.85)}
@@ -83,7 +90,7 @@
         .hero-card{background:linear-gradient(135deg,#0B1220 0%,#1F2937 60%,#2C3E50 100%);color:#fff;border-radius:22px;box-shadow:0 8px 30px rgba(11,18,32,.18);position:relative;overflow:hidden}
         .hero-card::before{content:'';position:absolute;top:-40px;right:-40px;width:200px;height:200px;background:radial-gradient(circle,rgba(232,168,56,.18) 0%,transparent 70%);pointer-events:none}
         .hero-card::after{content:'';position:absolute;bottom:-60px;left:-60px;width:180px;height:180px;background:radial-gradient(circle,rgba(37,99,235,.12) 0%,transparent 70%);pointer-events:none}
-        .stat-card{background:#fff;border-radius:16px;border:1px solid #E9ECF1;padding:14px;transition:all .2s ease}
+        .stat-card{background:#fff;border-radius:16px;border:1px solid #E9ECF1;padding:18px;transition:all .2s ease}
         .stat-card:hover{box-shadow:0 4px 12px rgba(15,23,42,.06)}
         .btn-primary{background:#0B1220;color:#fff;font-weight:600;transition:all .15s ease;border-radius:14px}
         .btn-primary:hover{background:#1F2937;transform:translateY(-1px);box-shadow:0 4px 12px rgba(11,18,32,.15)}
@@ -95,13 +102,13 @@
         .btn-danger{background:rgba(220,38,38,.08);color:#DC2626;font-weight:600;transition:all .15s ease;border-radius:14px}
         .btn-danger:hover{background:rgba(220,38,38,.14)}
         .divider{height:1px;background:#E9ECF1;margin:14px 0}
-        .pill-tab{padding:6px 14px;border-radius:99px;font-size:12px;font-weight:600;transition:all .15s ease;border:1px solid #E9ECF1;background:#fff;color:#6B7280;cursor:pointer;white-space:nowrap}
+        .pill-tab{padding:8px 18px;border-radius:99px;font-size:14px;font-weight:600;transition:all .15s ease;border:1px solid #E9ECF1;background:#fff;color:#6B7280;cursor:pointer;white-space:nowrap}
         .pill-tab.active{background:#0B1220;color:#fff;border-color:#0B1220}
         .pill-tab:hover:not(.active){background:#F0F2F6}
         .account-card{background:#fff;border-radius:16px;border:1px solid #E9ECF1;padding:14px;min-width:140px;transition:all .2s ease;position:relative;overflow:hidden}
         .account-card:hover{box-shadow:0 4px 14px rgba(15,23,42,.08);transform:translateY(-1px)}
         .account-card::before{content:'';position:absolute;top:0;left:0;width:4px;height:100%;background:var(--accent-color,#B07D2A)}
-        .chip{display:inline-flex;align-items:center;gap:4px;padding:3px 9px;border-radius:99px;font-size:10px;font-weight:600;background:#F0F2F6;color:#3B4252}
+        .chip{display:inline-flex;align-items:center;gap:5px;padding:4px 11px;border-radius:99px;font-size:13px;font-weight:600;background:#F0F2F6;color:#3B4252}
         .text-display{font-family:'Plus Jakarta Sans',sans-serif;letter-spacing:-0.02em}
         .skeleton-card{background:linear-gradient(90deg,#f0f0f0 25%,#e0e0e0 50%,#f0f0f0 75%);background-size:200% 100%;animation:shimmer 1.5s ease infinite;border-radius:16px;height:80px}
         .nav-bar{background:rgba(255,255,255,.92);backdrop-filter:blur(20px);border-top:1px solid #E9ECF1}
@@ -123,7 +130,7 @@
             <h1 class="text-2xl font-display font-bold tracking-tight">HogarFin</h1>
             <p class="text-muted text-sm mt-1.5">Finanzas compartidas, elegantes y sencillas</p>
         </div>
-        <div class="card p-5 mb-3">
+        <div class="card p-6 mb-3">
             <h3 class="font-display font-semibold text-sm mb-3 flex items-center gap-2">
                 <i class="fa-solid fa-users text-accent"></i> Nombres del hogar
             </h3>
@@ -138,7 +145,7 @@
                 </div>
             </div>
         </div>
-        <div class="card p-5 mb-3">
+        <div class="card p-6 mb-3">
             <h3 class="font-display font-semibold text-sm mb-3 flex items-center gap-2">
                 <i class="fa-solid fa-coins text-accent"></i> Moneda principal
             </h3>
@@ -153,7 +160,7 @@
                 <option value="CLP">CLP - Peso chileno</option>
             </select>
         </div>
-        <div class="card p-5 mb-4">
+        <div class="card p-6 mb-4">
             <h3 class="font-display font-semibold text-sm mb-2 flex items-center gap-2">
                 <i class="fa-solid fa-cloud text-accent"></i> Sincronización en la nube
             </h3>
@@ -176,25 +183,25 @@
 <div id="view-home" class="view active p-4 max-w-2xl mx-auto">
     <div class="flex items-center justify-between mb-5">
         <div><p class="text-xs text-muted" id="home-date-label"></p><h1 class="text-xl font-display font-bold tracking-tight" id="home-greeting"></h1></div>
-        <div class="flex items-center gap-2 bg-white border border-brd px-3 py-1.5 rounded-full"><span id="home-sync" class="w-2 h-2 rounded-full bg-income"></span><span class="text-[11px] text-muted font-medium" id="home-sync-label">Local</span></div>
+        <div class="flex items-center gap-2 bg-white border border-brd px-3 py-1.5 rounded-full"><span id="home-sync" class="w-2 h-2 rounded-full bg-income"></span><span class="text-[21px] text-muted font-medium" id="home-sync-label">Local</span></div>
     </div>
 
     <!-- HERO: Patrimonio -->
-    <div class="hero-card p-5 mb-4">
+    <div class="hero-card p-6 mb-4">
         <div class="relative z-10">
             <p class="text-xs text-white/60 mb-1 flex items-center gap-1.5"><i class="fa-solid fa-landmark"></i> Patrimonio total</p>
             <p id="home-patrimonio" class="text-4xl font-display font-bold tracking-tight">$0</p>
             <div class="flex items-center gap-2 mt-2">
-                <span id="home-patrimonio-change" class="chip" style="background:rgba(255,255,255,.1);color:#fff"><i class="fa-solid fa-chart-line text-[9px]"></i> <span id="home-patrimonio-change-label">—</span></span>
+                <span id="home-patrimonio-change" class="chip" style="background:rgba(255,255,255,.1);color:#fff"><i class="fa-solid fa-chart-line text-[20px]"></i> <span id="home-patrimonio-change-label">—</span></span>
             </div>
         </div>
     </div>
 
     <!-- Resumen mes -->
     <div class="grid grid-cols-3 gap-2.5 mb-5">
-        <div class="stat-card"><div class="flex items-center gap-1.5 mb-1"><span class="w-1.5 h-1.5 rounded-full bg-income"></span><p class="text-[10px] text-muted">Ingresos</p></div><p id="home-income" class="text-sm font-display font-bold text-income">$0</p></div>
-        <div class="stat-card"><div class="flex items-center gap-1.5 mb-1"><span class="w-1.5 h-1.5 rounded-full bg-expense"></span><p class="text-[10px] text-muted">Gastos</p></div><p id="home-expense" class="text-sm font-display font-bold text-expense">$0</p></div>
-        <div class="stat-card"><div class="flex items-center gap-1.5 mb-1"><span class="w-1.5 h-1.5 rounded-full bg-accent"></span><p class="text-[10px] text-muted">Ahorro</p></div><p id="home-savings" class="text-sm font-display font-bold text-accent">$0</p></div>
+        <div class="stat-card"><div class="flex items-center gap-1.5 mb-1"><span class="w-1.5 h-1.5 rounded-full bg-income"></span><p class="text-[21px] text-muted">Ingresos</p></div><p id="home-income" class="text-sm font-display font-bold text-income">$0</p></div>
+        <div class="stat-card"><div class="flex items-center gap-1.5 mb-1"><span class="w-1.5 h-1.5 rounded-full bg-expense"></span><p class="text-[21px] text-muted">Gastos</p></div><p id="home-expense" class="text-sm font-display font-bold text-expense">$0</p></div>
+        <div class="stat-card"><div class="flex items-center gap-1.5 mb-1"><span class="w-1.5 h-1.5 rounded-full bg-accent"></span><p class="text-[21px] text-muted">Ahorro</p></div><p id="home-savings" class="text-sm font-display font-bold text-accent">$0</p></div>
     </div>
 
     <!-- Cuentas -->
@@ -209,7 +216,7 @@
             <h3 class="font-display font-semibold text-sm flex items-center gap-2"><i class="fa-solid fa-credit-card text-accent"></i> Tarjetas de Crédito</h3>
             <button onclick="openCardModal()" class="text-xs text-accent font-semibold flex items-center gap-1"><i class="fa-solid fa-file-import"></i>Cargar resumen</button>
         </div>
-        <div id="home-cuotas-summary" class="card p-4 mb-3">
+        <div id="home-cuotas-summary" class="card p-6 mb-3">
             <div class="flex items-center gap-3 mb-2">
                 <div class="w-10 h-10 rounded-xl bg-expense/10 flex items-center justify-center"><i class="fa-solid fa-calendar-check text-expense"></i></div>
                 <div><p class="text-xs text-muted">Comprometido en cuotas</p><p id="cuotas-total" class="text-lg font-display font-bold text-expense">$0</p></div>
@@ -221,15 +228,15 @@
         </div>
         <button onclick="openAIAnalysis()" class="card p-3.5 w-full flex items-center gap-3 mb-3 cursor-pointer">
             <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-[#0B1220] to-[#2C3E50] flex items-center justify-center"><i class="fa-solid fa-brain text-white"></i></div>
-            <div class="flex-1 text-left"><p class="text-sm font-semibold">Análisis Inteligente</p><p class="text-[11px] text-muted">Insights, alertas y recomendaciones</p></div>
+            <div class="flex-1 text-left"><p class="text-sm font-semibold">Análisis Inteligente</p><p class="text-[21px] text-muted">Insights, alertas y recomendaciones</p></div>
             <i class="fa-solid fa-chevron-right text-muted text-xs"></i>
         </button>
         <div id="home-installments" class="space-y-2"></div>
     </div>
 
     <!-- Gráfico categorías -->
-    <div class="card p-4 mb-5">
-        <div class="flex items-center justify-between mb-3"><h3 class="font-display font-semibold text-sm">Gastos del mes</h3><span class="text-[10px] text-muted">por categoría</span></div>
+    <div class="card p-6 mb-5">
+        <div class="flex items-center justify-between mb-3"><h3 class="font-display font-semibold text-sm">Gastos del mes</h3><span class="text-[21px] text-muted">por categoría</span></div>
         <div class="flex items-center gap-5">
             <div class="chart-wrap" style="width:130px;height:130px;flex-shrink:0"><canvas id="chart-cat-home"></canvas></div>
             <div id="cat-legend" class="flex-1 space-y-2 text-xs"></div>
@@ -276,15 +283,15 @@
 <!-- VISTA: ANALÍTICAS -->
 <div id="view-analytics" class="view p-4 max-w-2xl mx-auto">
     <h1 class="text-xl font-display font-bold tracking-tight mb-4">Analíticas</h1>
-    <div class="card p-4 mb-4"><div class="flex items-center justify-between mb-3"><h3 class="font-display font-semibold text-sm">Tendencia 6 meses</h3><span class="text-[10px] text-muted">Ingresos vs Gastos</span></div><div class="chart-wrap" style="height:200px"><canvas id="chart-trend"></canvas></div></div>
-    <div class="card p-4 mb-4"><h3 class="font-display font-semibold text-sm mb-3">Comparativa por persona</h3><div class="chart-wrap" style="height:200px"><canvas id="chart-users"></canvas></div></div>
-    <div class="card p-4 mb-4"><div class="flex items-center justify-between mb-3"><h3 class="font-display font-semibold text-sm">Top gastos del mes</h3><span class="text-[10px] text-muted">Mayores movimientos</span></div><div id="analytics-top" class="space-y-3"></div></div>
+    <div class="card p-6 mb-4"><div class="flex items-center justify-between mb-3"><h3 class="font-display font-semibold text-sm">Tendencia 6 meses</h3><span class="text-[21px] text-muted">Ingresos vs Gastos</span></div><div class="chart-wrap" style="height:200px"><canvas id="chart-trend"></canvas></div></div>
+    <div class="card p-6 mb-4"><h3 class="font-display font-semibold text-sm mb-3">Comparativa por persona</h3><div class="chart-wrap" style="height:200px"><canvas id="chart-users"></canvas></div></div>
+    <div class="card p-6 mb-4"><div class="flex items-center justify-between mb-3"><h3 class="font-display font-semibold text-sm">Top gastos del mes</h3><span class="text-[21px] text-muted">Mayores movimientos</span></div><div id="analytics-top" class="space-y-3"></div></div>
 </div>
 
 <!-- VISTA: CONFIG -->
 <div id="view-settings" class="view p-4 max-w-2xl mx-auto">
     <h1 class="text-xl font-display font-bold tracking-tight mb-4">Configuración</h1>
-    <div class="card p-4 mb-3">
+    <div class="card p-6 mb-3">
         <h3 class="font-display font-semibold text-sm mb-3">Nombres del hogar</h3>
         <div class="grid grid-cols-2 gap-3">
             <input id="s-u1" type="text" class="input-elegant px-3 py-2.5 text-sm">
@@ -292,7 +299,7 @@
         </div>
         <button onclick="saveNames()" class="btn-primary mt-3 text-xs py-2.5 px-4">Guardar</button>
     </div>
-    <div class="card p-4 mb-3">
+    <div class="card p-6 mb-3">
         <h3 class="font-display font-semibold text-sm mb-3">Moneda</h3>
         <select id="s-curr" onchange="saveCurr()" class="input-elegant px-3 py-2.5 text-sm w-48">
             <option value="ARS">ARS ($)</option><option value="USD">USD ($)</option><option value="EUR">EUR (€)</option>
@@ -300,7 +307,7 @@
             <option value="BRL">BRL (R$)</option><option value="CLP">CLP ($)</option>
         </select>
     </div>
-    <div class="card p-4 mb-3">
+    <div class="card p-6 mb-3">
         <h3 class="font-display font-semibold text-sm mb-3">Sincronización en la nube</h3>
         <div id="s-sb-status" class="text-xs mb-3"></div>
         <input id="s-sb-url" type="text" placeholder="URL de Supabase" class="input-elegant w-full px-3 py-2.5 text-xs mb-2 font-mono">
@@ -320,11 +327,11 @@
 <!-- BARRA DE NAVEGACIÓN -->
 <nav class="nav-bar fixed bottom-0 left-0 right-0 z-40 bottom-safe">
     <div class="max-w-2xl mx-auto flex items-end justify-around px-2 pt-2 pb-2">
-        <button onclick="switchTab('home')" class="tab-item active flex flex-col items-center gap-1 py-1 px-3" data-tab="home"><i class="fa-solid fa-house text-lg"></i><span class="text-[10px] font-semibold">Inicio</span></button>
-        <button onclick="switchTab('transactions')" class="tab-item flex flex-col items-center gap-1 py-1 px-3" data-tab="transactions"><i class="fa-solid fa-list text-lg"></i><span class="text-[10px] font-semibold">Movimientos</span></button>
+        <button onclick="switchTab('home')" class="tab-item active flex flex-col items-center gap-1 py-1 px-3" data-tab="home"><i class="fa-solid fa-house text-lg"></i><span class="text-[21px] font-semibold">Inicio</span></button>
+        <button onclick="switchTab('transactions')" class="tab-item flex flex-col items-center gap-1 py-1 px-3" data-tab="transactions"><i class="fa-solid fa-list text-lg"></i><span class="text-[21px] font-semibold">Movimientos</span></button>
         <button onclick="openAddModal()" class="fab-center flex items-center justify-center shadow-lg"><i class="fa-solid fa-plus text-xl"></i></button>
-        <button onclick="switchTab('analytics')" class="tab-item flex flex-col items-center gap-1 py-1 px-3" data-tab="analytics"><i class="fa-solid fa-chart-line text-lg"></i><span class="text-[10px] font-semibold">Analíticas</span></button>
-        <button onclick="switchTab('settings')" class="tab-item flex flex-col items-center gap-1 py-1 px-3" data-tab="settings"><i class="fa-solid fa-gear text-lg"></i><span class="text-[10px] font-semibold">Config</span></button>
+        <button onclick="switchTab('analytics')" class="tab-item flex flex-col items-center gap-1 py-1 px-3" data-tab="analytics"><i class="fa-solid fa-chart-line text-lg"></i><span class="text-[21px] font-semibold">Analíticas</span></button>
+        <button onclick="switchTab('settings')" class="tab-item flex flex-col items-center gap-1 py-1 px-3" data-tab="settings"><i class="fa-solid fa-gear text-lg"></i><span class="text-[21px] font-semibold">Config</span></button>
     </div>
 </nav>
 </div>
@@ -493,7 +500,7 @@
             <div class="mb-4">
                 <label class="text-xs text-muted block mb-1.5">O cargá un archivo (PDF / TXT / CSV)</label>
                 <input type="file" id="card-file" accept=".pdf,.txt,.csv,application/pdf,text/plain,text/csv" onchange="loadStatementFile(event)" class="w-full text-xs text-muted file:mr-3 file:py-2 file:px-3 file:rounded-xl file:border-0 file:text-xs file:font-medium file:bg-bg file:text-accent file:cursor-pointer">
-                <p id="pdf-progress" class="hidden text-[11px] text-accent mt-1.5 flex items-center gap-2">
+                <p id="pdf-progress" class="hidden text-[21px] text-accent mt-1.5 flex items-center gap-2">
                     <span class="loader" style="width:14px;height:14px;border-top-color:#B07D2A;border-color:#E9ECF1;border-top-color:#B07D2A"></span>
                     <span id="pdf-progress-text">Procesando PDF...</span>
                 </p>
@@ -1629,25 +1636,25 @@ function renderParsedResult(){
     document.getElementById('parsed-summary').textContent=`${count} movimientos detectados · ${parsedResult.cardName}`;
     /* 4 tarjetas: Total $ (saldo a pagar), Total U$S (saldo a pagar), Gastos, Cuotas */
     document.getElementById('parsed-stats').innerHTML=`
-        <div class="card-flat p-3 text-center">
-            <p class="text-[10px] text-muted mb-1 flex items-center justify-center gap-1"><i class="fa-solid fa-coins text-[8px] text-accent"></i> Total resumen $</p>
+        <div class="card-flat p-4 text-center">
+            <p class="text-[21px] text-muted mb-1 flex items-center justify-center gap-1"><i class="fa-solid fa-coins text-[20px] text-accent"></i> Total resumen $</p>
             <p class="text-base font-display font-bold text-expense">${fmt(totalARS)}</p>
-            <p class="text-[9px] text-muted mt-0.5">${arsFromBank?'Saldo a pagar del banco':'Consumos en ARS'}${countARS?' · '+countARS+' gastos':''}</p>
+            <p class="text-[20px] text-muted mt-0.5">${arsFromBank?'Saldo a pagar del banco':'Consumos en ARS'}${countARS?' · '+countARS+' gastos':''}</p>
         </div>
-        <div class="card-flat p-3 text-center">
-            <p class="text-[10px] text-muted mb-1 flex items-center justify-center gap-1"><i class="fa-solid fa-dollar-sign text-[8px] text-blue"></i> Total resumen U$S</p>
+        <div class="card-flat p-4 text-center">
+            <p class="text-[21px] text-muted mb-1 flex items-center justify-center gap-1"><i class="fa-solid fa-dollar-sign text-[20px] text-blue"></i> Total resumen U$S</p>
             <p class="text-base font-display font-bold ${totalUSD>0?'text-blue':''}" style="${totalUSD>0?'':'opacity:0.4'}">${totalUSD>0?fmtUSD(totalUSD):'—'}</p>
-            <p class="text-[9px] text-muted mt-0.5">${usdFromBank?'Saldo a pagar del banco':'Consumos en USD'}${countUSD?' · '+countUSD+' gastos':''}</p>
+            <p class="text-[20px] text-muted mt-0.5">${usdFromBank?'Saldo a pagar del banco':'Consumos en USD'}${countUSD?' · '+countUSD+' gastos':''}</p>
         </div>
-        <div class="card-flat p-3 text-center">
-            <p class="text-[10px] text-muted mb-1 flex items-center justify-center gap-1"><i class="fa-solid fa-receipt text-[8px]"></i> Gastos</p>
+        <div class="card-flat p-4 text-center">
+            <p class="text-[21px] text-muted mb-1 flex items-center justify-center gap-1"><i class="fa-solid fa-receipt text-[20px]"></i> Gastos</p>
             <p class="text-base font-display font-bold">${expenses.length}</p>
-            <p class="text-[9px] text-muted mt-0.5">en un pago</p>
+            <p class="text-[20px] text-muted mt-0.5">en un pago</p>
         </div>
-        <div class="card-flat p-3 text-center">
-            <p class="text-[10px] text-muted mb-1 flex items-center justify-center gap-1"><i class="fa-solid fa-layer-group text-[8px] text-violet"></i> Cuotas</p>
+        <div class="card-flat p-4 text-center">
+            <p class="text-[21px] text-muted mb-1 flex items-center justify-center gap-1"><i class="fa-solid fa-layer-group text-[20px] text-violet"></i> Cuotas</p>
             <p class="text-base font-display font-bold">${installments.length}</p>
-            <p class="text-[9px] text-muted mt-0.5">planes activos</p>
+            <p class="text-[20px] text-muted mt-0.5">planes activos</p>
         </div>
     `;
 
@@ -1673,16 +1680,16 @@ function renderParsedResult(){
         subsSec.classList.remove('hidden');
         document.getElementById('parsed-subs').innerHTML=subs.map(e=>{
             const c=catById(e.subscription.subCat||e.category);
-            return`<div class="card-flat p-3 flex items-center gap-3">
+            return`<div class="card-flat p-4 flex items-center gap-3">
                 <div class="w-9 h-9 rounded-xl flex items-center justify-center" style="background:${c.color}12;color:${c.color}"><i class="fa-solid fa-repeat text-xs"></i></div>
                 <div class="flex-1">
                     <p class="text-xs font-semibold">${escapeHtml(e.subscription.subName)}</p>
-                    <p class="text-[10px] text-muted">Mensual recurrente · ${fmtD(e.date)}</p>
+                    <p class="text-[21px] text-muted">Mensual recurrente · ${fmtD(e.date)}</p>
                 </div>
                 <span class="text-xs font-bold text-violet">${fmt(e.amount)}</span>
             </div>`;
         }).join('');
-        document.getElementById('parsed-subs-total').innerHTML=`<div class="text-[11px] text-muted">Total mensual en suscripciones: <span class="font-bold text-violet">${fmt(subsMonthly)}</span></div>`;
+        document.getElementById('parsed-subs-total').innerHTML=`<div class="text-[21px] text-muted">Total mensual en suscripciones: <span class="font-bold text-violet">${fmt(subsMonthly)}</span></div>`;
     }else{
         subsSec.classList.add('hidden');
     }
@@ -1705,13 +1712,13 @@ function renderParsedResult(){
                 <div class="flex items-center gap-3 mb-2">
                     <div class="w-9 h-9 rounded-xl flex items-center justify-center" style="background:${c.color}12;color:${c.color}"><i class="fa-solid ${c.icon} text-xs"></i></div>
                     <div class="flex-1">
-                        <p class="text-xs font-semibold">${escapeHtml(inst.merchant)}${isUSD?' <span class="badge" style="color:#2563EB;background:rgba(37,99,235,0.1)"><i class="fa-solid fa-dollar-sign text-[8px]"></i> USD</span>':''}</p>
-                        <p class="text-[10px] text-muted">${cuotaAmtStr}/cuota · Cuota ${inst.cuotaCurrent}/${inst.cuotaTotal} · Termina ${endDate?fmtD(endDate):'-'}</p>
+                        <p class="text-xs font-semibold">${escapeHtml(inst.merchant)}${isUSD?' <span class="badge" style="color:#2563EB;background:rgba(37,99,235,0.1)"><i class="fa-solid fa-dollar-sign text-[20px]"></i> USD</span>':''}</p>
+                        <p class="text-[21px] text-muted">${cuotaAmtStr}/cuota · Cuota ${inst.cuotaCurrent}/${inst.cuotaTotal} · Termina ${endDate?fmtD(endDate):'-'}</p>
                     </div>
                     <span class="text-xs font-bold text-expense">${totalAmtStr}</span>
                 </div>
                 <div class="progress-bar"><div class="progress-fill" style="width:${pct}%;background:${c.color}"></div></div>
-                <div class="flex justify-between text-[9px] text-muted mt-1">
+                <div class="flex justify-between text-[20px] text-muted mt-1">
                     <span>Pagadas: ${inst.cuotaCurrent}/${inst.cuotaTotal}</span>
                     <span>Restan ${rem} ${rem===1?'cuota':'cuotas'} = ${remAmtStr}</span>
                 </div>
@@ -1719,7 +1726,7 @@ function renderParsedResult(){
         }).join('');
         /* Agregar resumen mensual de cuotas abajo */
         const summary=document.createElement('div');
-        summary.className='mt-2 text-[11px] text-muted';
+        summary.className='mt-2 text-[21px] text-muted';
         summary.innerHTML=`Comprometido mensual en cuotas: <span class="font-bold text-expense">${fmt(instMonthly)}</span>`;
         const existing=cuotaEl.parentNode.querySelector('.inst-summary');
         if(existing)existing.remove();
@@ -1734,14 +1741,14 @@ function renderParsedRow(e,i){
     const c=catById(e.category);
     const isUSD=e.currency==='USD';
     const amtStr=isUSD?fmtUSD(e.amount):fmt(e.amount);
-    return`<div class="parsed-row ${e.checked?'checked':''} card-flat p-3 flex items-center gap-3 cursor-pointer" onclick="toggleParsedRow(${i})">
+    return`<div class="parsed-row ${e.checked?'checked':''} card-flat p-4 flex items-center gap-3 cursor-pointer" onclick="toggleParsedRow(${i})">
         <div class="w-5 h-5 rounded-md border-2 flex items-center justify-center shrink-0 ${e.checked?'bg-accent border-accent':'border-brd'}">
-            ${e.checked?'<i class="fa-solid fa-check text-white text-[10px]"></i>':''}
+            ${e.checked?'<i class="fa-solid fa-check text-white text-[21px]"></i>':''}
         </div>
-        <div class="w-8 h-8 rounded-lg flex items-center justify-center shrink-0" style="background:${c.color}12;color:${c.color}"><i class="fa-solid ${c.icon} text-[10px]"></i></div>
+        <div class="w-8 h-8 rounded-lg flex items-center justify-center shrink-0" style="background:${c.color}12;color:${c.color}"><i class="fa-solid ${c.icon} text-[21px]"></i></div>
         <div class="flex-1 min-w-0">
-            <p class="text-xs font-semibold truncate">${escapeHtml(e.merchant)}${isUSD?' <span class="badge bg-blue/10 text-blue" style="color:#2563EB;background:rgba(37,99,235,0.1)"><i class="fa-solid fa-dollar-sign text-[8px]"></i> USD</span>':''}</p>
-            <p class="text-[10px] text-muted">${fmtD(e.date)} · ${c.name}</p>
+            <p class="text-xs font-semibold truncate">${escapeHtml(e.merchant)}${isUSD?' <span class="badge bg-blue/10 text-blue" style="color:#2563EB;background:rgba(37,99,235,0.1)"><i class="fa-solid fa-dollar-sign text-[20px]"></i> USD</span>':''}</p>
+            <p class="text-[21px] text-muted">${fmtD(e.date)} · ${c.name}</p>
         </div>
         <span class="text-xs font-bold text-expense shrink-0">${amtStr}</span>
     </div>`;
@@ -2123,8 +2130,8 @@ function renderHome(){
     }else{
         acEl.innerHTML=S.accts.map(a=>`<div class="account-card cursor-pointer" style="--accent-color:${a.color||ACCT_COLORS[a.type]||'#B07D2A'}" onclick="openEditAcct('${a.id}')">
             <div class="flex items-center justify-between mb-2">
-                <div class="flex items-center gap-2"><i class="fa-solid ${a.icon||ACCT_ICONS[a.type]||'fa-wallet'} text-xs" style="color:${a.color||ACCT_COLORS[a.type]||'#B07D2A'}"></i><span class="text-[11px] font-semibold truncate max-w-[70px]">${escapeHtml(a.name)}</span></div>
-                <span class="text-[9px] text-muted">${ACCT_LABELS[a.type]||''}</span>
+                <div class="flex items-center gap-2"><i class="fa-solid ${a.icon||ACCT_ICONS[a.type]||'fa-wallet'} text-xs" style="color:${a.color||ACCT_COLORS[a.type]||'#B07D2A'}"></i><span class="text-[21px] font-semibold truncate max-w-[70px]">${escapeHtml(a.name)}</span></div>
+                <span class="text-[20px] text-muted">${ACCT_LABELS[a.type]||''}</span>
             </div>
             <p class="text-sm font-display font-bold tracking-tight">${fmt(Number(a.balance))}</p>
         </div>`).join('');
@@ -2173,24 +2180,24 @@ function renderHome(){
         /* Alerta si el plan tiene muchas cuotas restantes */
         const heavyPlan=rem>=12;
         const alertColor=endsSoon?'#0E9F6E':heavyPlan?'#DC2626':c.color;
-        return`<div class="card p-3 flex items-center gap-3" style="border-left:3px solid ${alertColor};border-radius:0 14px 14px 0">
+        return`<div class="card p-6 flex items-center gap-3" style="border-left:3px solid ${alertColor};border-radius:0 14px 14px 0">
             <div class="w-9 h-9 rounded-xl flex items-center justify-center" style="background:${c.color}12;color:${c.color}"><i class="fa-solid ${c.icon} text-xs"></i></div>
             <div class="flex-1 min-w-0">
-                <p class="text-xs font-semibold truncate">${escapeHtml(i.merchant||i.description)}${isUSD?' <span class="badge" style="color:#2563EB;background:rgba(37,99,235,0.1);font-size:9px;padding:2px 6px;border-radius:20px;font-weight:600"><i class="fa-solid fa-dollar-sign text-[8px]"></i> USD</span>':''}</p>
-                <p class="text-[10px] text-muted">
+                <p class="text-xs font-semibold truncate">${escapeHtml(i.merchant||i.description)}${isUSD?' <span class="badge" style="color:#2563EB;background:rgba(37,99,235,0.1);font-size:12px;padding:3px 8px;border-radius:20px;font-weight:600"><i class="fa-solid fa-dollar-sign text-[20px]"></i> USD</span>':''}</p>
+                <p class="text-[21px] text-muted">
                     ${escapeHtml(i.card_name||'Tarjeta')} · ${cuotaAmtStr}/cuota ·
                     <span class="font-medium ${endsSoon?'text-income':heavyPlan?'text-expense':''}">Quedan ${rem}</span>
                     ${endDateStr?'· Termina '+fmtD(endDateStr):''}
                 </p>
                 <div class="progress-bar mt-1.5"><div class="progress-fill" style="width:${pct}%;background:${c.color}"></div></div>
-                <div class="flex justify-between text-[9px] text-muted mt-1">
+                <div class="flex justify-between text-[20px] text-muted mt-1">
                     <span>Pagadas ${paid}/${totalC} (${pct}%)</span>
                     <span>Restante: ${remainingAmountStr}</span>
                 </div>
             </div>
             <div class="flex items-center gap-1">
-                <button onclick="markCuotaPaid('${i.id}')" class="act-btn bg-income/10 text-income" title="Pagar cuota"><i class="fa-solid fa-check text-[10px]"></i></button>
-                <button onclick="doDelInst('${i.id}')" class="act-btn bg-expense/10 text-expense" title="Eliminar"><i class="fa-solid fa-trash text-[10px]"></i></button>
+                <button onclick="markCuotaPaid('${i.id}')" class="act-btn bg-income/10 text-income" title="Pagar cuota"><i class="fa-solid fa-check text-[21px]"></i></button>
+                <button onclick="doDelInst('${i.id}')" class="act-btn bg-expense/10 text-expense" title="Eliminar"><i class="fa-solid fa-trash text-[21px]"></i></button>
             </div>
         </div>`;
     }).join(''):'<p class="text-xs text-muted text-center py-3">Sin planes de cuotas activos</p>';
@@ -2216,11 +2223,11 @@ function txRow(t){
     const ii=t.type==='income';
     const isUSD=t.currency==='USD';
     const amtStr=isUSD?fmtUSD(Number(t.amount)):fmt(Number(t.amount));
-    return`<div class="card p-3 flex items-center gap-3 cursor-pointer" onclick="openEditTx('${t.id}')">
+    return`<div class="card p-6 flex items-center gap-3 cursor-pointer" onclick="openEditTx('${t.id}')">
         <div class="w-9 h-9 rounded-xl flex items-center justify-center text-xs" style="background:${c.color}12;color:${c.color}"><i class="fa-solid ${c.icon}"></i></div>
         <div class="flex-1 min-w-0">
-            <p class="text-xs font-semibold truncate">${escapeHtml(t.description||c.name)}${t.cuota_info?' <span class="text-muted font-normal">· '+escapeHtml(t.cuota_info)+'</span>':''}${isUSD?' <span class="badge" style="color:#2563EB;background:rgba(37,99,235,0.1);font-size:9px;padding:2px 6px;border-radius:20px;font-weight:600"><i class="fa-solid fa-dollar-sign text-[8px]"></i> USD</span>':''}</p>
-            <p class="text-[10px] text-muted">${fmtD(t.date)} · ${escapeHtml(t.user_name)}</p>
+            <p class="text-xs font-semibold truncate">${escapeHtml(t.description||c.name)}${t.cuota_info?' <span class="text-muted font-normal">· '+escapeHtml(t.cuota_info)+'</span>':''}${isUSD?' <span class="badge" style="color:#2563EB;background:rgba(37,99,235,0.1);font-size:12px;padding:3px 8px;border-radius:20px;font-weight:600"><i class="fa-solid fa-dollar-sign text-[20px]"></i> USD</span>':''}</p>
+            <p class="text-[21px] text-muted">${fmtD(t.date)} · ${escapeHtml(t.user_name)}</p>
         </div>
         <span class="text-xs font-bold ${ii?'text-income':'text-expense'} shrink-0">${ii?'+':'-'}${amtStr}</span>
     </div>`;
@@ -2290,7 +2297,7 @@ function renderBudgets(mTx){
                 <span class="text-xs ${over?'text-expense font-bold':'text-muted'}">${fmt(spent)} / ${fmt(Number(limit))}</span>
             </div>
             <div class="progress-bar"><div class="progress-fill" style="width:${pct}%;background:${over?'#DC2626':c.color}"></div></div>
-            ${over?'<p class="text-[10px] text-expense mt-1.5 font-semibold flex items-center gap-1"><i class="fa-solid fa-triangle-exclamation"></i> Excedido por '+fmt(spent-Number(limit))+'</p>':''}
+            ${over?'<p class="text-[21px] text-expense mt-1.5 font-semibold flex items-center gap-1"><i class="fa-solid fa-triangle-exclamation"></i> Excedido por '+fmt(spent-Number(limit))+'</p>':''}
         </div>`;
     }).join('');
 }
@@ -2306,11 +2313,11 @@ function renderGoals(){
         const c=g.color||'#B07D2A';
         const remaining=Number(g.target)-Number(g.current);
         const deadlineStr=g.deadline?` · ${fmtD(g.deadline)}`:'';
-        return`<div class="card p-3 flex items-center gap-3 cursor-pointer" onclick="openEditGoal('${g.id}')">
+        return`<div class="card p-6 flex items-center gap-3 cursor-pointer" onclick="openEditGoal('${g.id}')">
             <div class="w-10 h-10 rounded-xl flex items-center justify-center" style="background:${c}18;color:${c}"><i class="fa-solid fa-bullseye text-sm"></i></div>
             <div class="flex-1 min-w-0">
                 <p class="text-xs font-semibold truncate">${escapeHtml(g.name)}</p>
-                <p class="text-[10px] text-muted">${fmt(Number(g.current))} de ${fmt(Number(g.target))}${deadlineStr}</p>
+                <p class="text-[21px] text-muted">${fmt(Number(g.current))} de ${fmt(Number(g.target))}${deadlineStr}</p>
                 <div class="progress-bar mt-1.5"><div class="progress-fill" style="width:${pct}%;background:${c}"></div></div>
             </div>
             <span class="text-xs font-bold" style="color:${c}">${pct}%</span>
@@ -2450,7 +2457,7 @@ function renderModalCats(){
     const cats=S.mType==='expense'?EXPENSE_CATS:INCOME_CATS;
     document.getElementById('m-cats').innerHTML=cats.map(c=>{
         const sel=c.id===S.mCat;
-        return`<button onclick="S.mCat='${c.id}';renderModalCats()" class="cat-btn flex flex-col items-center gap-1 p-2 rounded-xl ${sel?'selected':''}"><i class="fa-solid ${c.icon} text-sm" style="color:${c.color}"></i><span class="text-[9px] ${sel?'font-bold':'text-muted'}">${c.name}</span></button>`;
+        return`<button onclick="S.mCat='${c.id}';renderModalCats()" class="cat-btn flex flex-col items-center gap-1 p-2 rounded-xl ${sel?'selected':''}"><i class="fa-solid ${c.icon} text-sm" style="color:${c.color}"></i><span class="text-[20px] ${sel?'font-bold':'text-muted'}">${c.name}</span></button>`;
     }).join('');
 }
 
@@ -2531,7 +2538,7 @@ function renderEditCats(){
     const cats=S.editType==='expense'?EXPENSE_CATS:INCOME_CATS;
     document.getElementById('et-cats').innerHTML=cats.map(c=>{
         const sel=c.id===S.editCat;
-        return`<button onclick="S.editCat='${c.id}';renderEditCats()" class="cat-btn flex flex-col items-center gap-1 p-2 rounded-xl ${sel?'selected':''}"><i class="fa-solid ${c.icon} text-xs" style="color:${c.color}"></i><span class="text-[9px] ${sel?'font-bold':'text-muted'}">${c.name}</span></button>`;
+        return`<button onclick="S.editCat='${c.id}';renderEditCats()" class="cat-btn flex flex-col items-center gap-1 p-2 rounded-xl ${sel?'selected':''}"><i class="fa-solid ${c.icon} text-xs" style="color:${c.color}"></i><span class="text-[20px] ${sel?'font-bold':'text-muted'}">${c.name}</span></button>`;
     }).join('');
 }
 
