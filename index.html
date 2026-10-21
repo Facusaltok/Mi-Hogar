@@ -285,9 +285,9 @@
         </div>
     </div>
 
-    <!-- Presupuestos -->
+    <!-- Gastos Fijos -->
     <div class="mb-5">
-        <div class="flex items-center justify-between mb-3"><h3 class="font-display font-semibold text-sm">Presupuestos</h3><button onclick="openBudgetModal()" class="text-xs text-accent font-semibold flex items-center gap-1"><i class="fa-solid fa-sliders"></i>Configurar</button></div>
+        <div class="flex items-center justify-between mb-3"><h3 class="font-display font-semibold text-sm">Gastos Fijos</h3><button onclick="openBudgetModal()" class="text-xs text-accent font-semibold flex items-center gap-1"><i class="fa-solid fa-sliders"></i>Configurar</button></div>
         <div id="home-budgets" class="space-y-2.5"></div>
     </div>
 
@@ -632,15 +632,32 @@
 <!-- MODAL: PRESUPUESTOS -->
 <div id="modal-budget" class="fixed inset-0 z-50 hidden">
     <div class="modal-bg absolute inset-0" onclick="closeBudgetModal()"></div>
-    <div class="modal-sheet absolute bottom-0 w-full bg-white anim-up max-h-[85vh] overflow-y-auto">
+    <div class="modal-sheet absolute bottom-0 w-full bg-white anim-up max-h-[92vh] overflow-y-auto">
         <div class="w-10 h-1.5 bg-brdsoft rounded-full mx-auto mt-3 mb-2"></div>
         <div class="p-5">
-            <div class="flex items-center justify-between mb-4">
-                <div><h2 class="font-display font-bold text-lg">Presupuestos</h2><p class="text-xs text-muted">Límites mensuales por categoría</p></div>
-                <button onclick="closeBudgetModal()" class="w-9 h-9 rounded-full bg-bg flex items-center justify-center hover:bg-brdsoft transition"><i class="fa-solid fa-xmark text-sm text-muted"></i></button>
+            <div class="flex items-center justify-between mb-1">
+                <div><h2 class="font-display font-bold text-lg">Gastos Fijos</h2><p class="text-xs text-muted">Editá, agregá o eliminá tus gastos mensuales fijos</p></div>
+                <button onclick="closeBudgetModal()" class="w-9 h-9 rounded-full bg-bg flex items-center justify-center hover:bg-brdsoft transition shrink-0"><i class="fa-solid fa-xmark text-sm text-muted"></i></button>
             </div>
-            <div id="budget-list" class="space-y-2.5 mb-5"></div>
-            <button onclick="saveBudgets()" class="btn-primary w-full py-3.5 text-sm">Guardar presupuestos</button>
+            <!-- Resumen total -->
+            <div id="fixed-total-summary" class="bg-accent/10 rounded-2xl p-3 mb-4 text-center"></div>
+            <div class="mb-4">
+                <h3 class="font-display font-semibold text-sm mb-2">Lista de gastos fijos</h3>
+                <div id="budget-list" class="space-y-2 max-h-[45vh] overflow-y-auto"></div>
+            </div>
+            <!-- Formulario para agregar nuevo -->
+            <div class="card-flat p-3 mb-4">
+                <h4 class="text-xs font-semibold mb-2 text-accent flex items-center gap-2"><i class="fa-solid fa-plus"></i> Agregar nuevo gasto fijo</h4>
+                <div class="flex gap-2 mb-2">
+                    <input id="fixed-new-name" type="text" placeholder="Nombre (ej: Gas natural)" class="input-elegant flex-1 px-3 py-2 text-xs">
+                </div>
+                <div class="flex gap-2 mb-2">
+                    <input id="fixed-new-amount" type="text" inputmode="decimal" placeholder="Monto ($)" oninput="formatAmountOnInput(event)" class="input-elegant flex-1 px-3 py-2 text-xs">
+                    <select id="fixed-new-user" class="input-elegant px-3 py-2 text-xs"></select>
+                </div>
+                <button onclick="addFixedExpense()" class="btn-accent w-full py-2.5 text-xs flex items-center justify-center gap-2"><i class="fa-solid fa-plus"></i>Agregar</button>
+            </div>
+            <button onclick="saveBudgets()" class="btn-primary w-full py-3.5 text-sm">Guardar cambios</button>
         </div>
     </div>
 </div>
@@ -858,6 +875,7 @@ const S={
     u1:'',u2:'',curr:'ARS',
     tx:[],accts:[],goals:[],inst:[],
     budgets:{},
+    fixedExpenses:[],  /* Lista de gastos fijos: {id, name, amount, user_name, paid} */
     mType:'expense',mCat:'alimentacion',mUser:'',mAcct:'none',
     editType:'expense',editCat:'alimentacion',editUser:''
 };
@@ -2247,7 +2265,81 @@ async function loadAll(){
     S.tx=lLoad('hf_tx');S.accts=lLoad('hf_accts');S.goals=lLoad('hf_goals');S.inst=lLoad('hf_inst');
 }
 
-function loadBudgets(){S.budgets=JSON.parse(localStorage.getItem('hf_budgets')||'{}')}
+function loadBudgets(){
+    /* Cargar gastos fijos. Si no existen, inicializar con items por defecto. */
+    const stored=localStorage.getItem('hf_fixed_expenses');
+    if(stored){
+        try{S.fixedExpenses=JSON.parse(stored)}
+        catch{S.fixedExpenses=getDefaultFixedExpenses()}
+    }else{
+        S.fixedExpenses=getDefaultFixedExpenses();
+        saveFixedExpensesLocal();
+    }
+}
+
+/* Lista de gastos fijos por defecto (basada en el control de gastos del usuario).
+   Permanecen fijos aunque cierres la app, pero el usuario puede editar monto,
+   agregar o eliminar items. */
+function getDefaultFixedExpenses(){
+    const todayStr=new Date().toISOString().slice(0,7); /* YYYY-MM del mes actual para resetear "paid" */
+    return [
+        {id:'fx1',name:'Crédito Macro (Amor)',amount:510327,user_name:'Facu',paid:false},
+        {id:'fx2',name:'Visa Nación',amount:3884037,user_name:'Facu',paid:false},
+        {id:'fx3',name:'Master Nación',amount:871142,user_name:'Facu',paid:false},
+        {id:'fx4',name:'Visa Macro',amount:1114179,user_name:'Facu',paid:false},
+        {id:'fx5',name:'Garage (casa)',amount:0,user_name:'Facu',paid:false},
+        {id:'fx6',name:'Garage (oficina)',amount:0,user_name:'Facu',paid:false},
+        {id:'fx7',name:'Expensas',amount:0,user_name:'Facu',paid:false},
+        {id:'fx8',name:'Teléfono',amount:0,user_name:'Facu',paid:false},
+        {id:'fx9',name:'Mercado Pago',amount:350637,user_name:'Facu',paid:false},
+        {id:'fx10',name:'IPEF',amount:85000,user_name:'Marie',paid:false},
+        {id:'fx11',name:'ROMI',amount:0,user_name:'Marie',paid:false},
+        {id:'fx12',name:'Mane',amount:0,user_name:'Marie',paid:false}
+    ];
+}
+
+function saveFixedExpensesLocal(){
+    localStorage.setItem('hf_fixed_expenses',JSON.stringify(S.fixedExpenses));
+}
+
+/* Cargar/guardar en Supabase también */
+async function loadFixedExpensesRemote(){
+    if(!S.sb)return;
+    try{
+        const{data,error}=await S.sb.from('fixed_expenses').select('*').order('created_at');
+        if(error){
+            if(error.code==='42P01'||error.code==='PGRST205'||error.code==='PGRST204'){
+                sbWarnOnce('fx_table_missing','Falta crear la tabla fixed_expenses en Supabase. Cargá el SQL actualizado.');
+            }
+            return;
+        }
+        if(data&&data.length>0){
+            /* Merge con localStorage por id (similar a loadAll) */
+            const map=new Map();
+            for(const item of S.fixedExpenses)map.set(item.id,item);
+            for(const item of data)map.set(item.id,item);
+            S.fixedExpenses=Array.from(map.values());
+            saveFixedExpensesLocal();
+        }
+    }catch(e){console.warn('loadFixedExpensesRemote falló:',e.message)}
+}
+
+async function saveFixedExpenseRemote(item){
+    if(!S.sb)return;
+    try{
+        const{data,error}=await S.sb.from('fixed_expenses').upsert(item).select();
+        if(error){
+            if(error.code==='42P01'||error.code==='PGRST205'||error.code==='PGRST204'){
+                sbWarnOnce('fx_table_missing','Falta crear la tabla fixed_expenses en Supabase. Cargá el SQL actualizado.');
+            }
+        }
+    }catch(e){console.warn('saveFixedExpenseRemote falló:',e.message)}
+}
+
+async function delFixedExpenseRemote(id){
+    if(!S.sb)return;
+    try{await S.sb.from('fixed_expenses').delete().eq('id',id)}catch(e){}
+}
 
 /* Helper: guarda SIEMPRE en localStorage, e intenta también en Supabase si está conectado */
 function persistTxLocal(t){
@@ -2666,26 +2758,51 @@ function renderCatChart(mTx){
 }
 
 /* ============================================================
-   PRESUPUESTOS
+   GASTOS FIJOS (antes "Presupuestos")
    ============================================================ */
 function renderBudgets(mTx){
     const el=document.getElementById('home-budgets');
-    const entries=Object.entries(S.budgets).filter(([,v])=>Number(v)>0);
-    if(!entries.length){el.innerHTML='<p class="text-xs text-muted text-center py-3">Configurá tus presupuestos mensuales</p>';return}
-    el.innerHTML=entries.map(([cid,limit])=>{
-        const c=catById(cid);
-        const spent=mTx.filter(t=>t.type==='expense'&&t.category===cid).reduce((s,t)=>s+Number(t.amount),0);
-        const pct=Math.min(100,Math.round((spent/Number(limit))*100));
-        const over=spent>Number(limit);
-        return`<div class="card p-3">
-            <div class="flex items-center justify-between mb-2">
-                <div class="flex items-center gap-2"><i class="fa-solid ${c.icon} text-xs" style="color:${c.color}"></i><span class="text-xs font-semibold">${c.name}</span></div>
-                <span class="text-xs ${over?'text-expense font-bold':'text-muted'}">${fmt(spent)} / ${fmt(Number(limit))}</span>
+    if(!S.fixedExpenses.length){
+        el.innerHTML='<p class="text-xs text-muted text-center py-3">Configurá tus gastos fijos mensuales</p>';
+        return;
+    }
+    /* Calcular totales */
+    const total=S.fixedExpenses.reduce((s,fx)=>s+(Number(fx.amount)||0),0);
+    const paidTotal=S.fixedExpenses.filter(fx=>fx.paid).reduce((s,fx)=>s+(Number(fx.amount)||0),0);
+    const pending=total-paidTotal;
+    const paidCount=S.fixedExpenses.filter(fx=>fx.paid).length;
+
+    /* Render de cada item como una card con checkbox de pagado */
+    const itemsHtml=S.fixedExpenses.map(fx=>{
+        const amtStr=fmt(Number(fx.amount)||0);
+        const isPaid=fx.paid;
+        return`<div class="card p-3 flex items-center gap-3 ${isPaid?'opacity-60':''}">
+            <button onclick="toggleFixedPaid('${fx.id}')" class="w-6 h-6 rounded-md border-2 flex items-center justify-center shrink-0 ${isPaid?'bg-income border-income':'border-brd'}" title="${isPaid?'Marcar como pendiente':'Marcar como pagado'}">
+                ${isPaid?'<i class="fa-solid fa-check text-white text-xs"></i>':''}
+            </button>
+            <div class="flex-1 min-w-0">
+                <p class="text-xs font-semibold truncate ${isPaid?'line-through':''}">${escapeHtml(fx.name)}</p>
+                <p class="text-xs text-muted truncate">${escapeHtml(fx.user_name||'')}</p>
             </div>
-            <div class="progress-bar"><div class="progress-fill" style="width:${pct}%;background:${over?'#DC2626':c.color}"></div></div>
-            ${over?'<p class="text-xs text-expense mt-1.5 font-semibold flex items-center gap-1"><i class="fa-solid fa-triangle-exclamation"></i> Excedido por '+fmt(spent-Number(limit))+'</p>':''}
+            <span class="text-xs font-bold ${isPaid?'text-income':'text-expense'} shrink-0 whitespace-nowrap">${amtStr}</span>
         </div>`;
     }).join('');
+
+    /* Agregar card de resumen total al final */
+    const summaryHtml=`
+        <div class="card p-3" style="border-left:3px solid #B07D2A;border-radius:0 14px 14px 0">
+            <div class="flex items-center justify-between mb-1">
+                <span class="text-xs font-semibold text-muted">Total mensual fijo</span>
+                <span class="text-sm font-display font-bold text-accent">${fmt(total)}</span>
+            </div>
+            <div class="flex items-center justify-between">
+                <span class="text-xs text-muted">${paidCount}/${S.fixedExpenses.length} pagados</span>
+                <span class="text-xs font-semibold ${pending>0?'text-expense':'text-income'}">Pendiente: ${fmt(pending)}</span>
+            </div>
+        </div>
+    `;
+
+    el.innerHTML=itemsHtml+summaryHtml;
 }
 
 /* ============================================================
@@ -3056,26 +3173,138 @@ async function doDeleteGoal(){
    MODALES: PRESUPUESTOS
    ============================================================ */
 function openBudgetModal(){
-    const el=document.getElementById('budget-list');
-    el.innerHTML=EXPENSE_CATS.map(c=>{
-        const val=S.budgets[c.id]||0;
-        return`<div class="flex items-center gap-3 p-2 rounded-xl hover:bg-bg transition">
-            <div class="w-9 h-9 rounded-lg flex items-center justify-center shrink-0" style="background:${c.color}12;color:${c.color}"><i class="fa-solid ${c.icon} text-xs"></i></div>
-            <span class="text-xs font-semibold flex-1">${c.name}</span>
-            <input type="text" inputmode="decimal" data-cat="${c.id}" value="${val?fmtEditable(val):''}" placeholder="0,00" class="input-elegant w-28 px-3 py-2 text-xs text-right">
-        </div>`;
-    }).join('');
+    /* Llenar select de personas para el formulario de agregar */
+    const us=users();
+    document.getElementById('fixed-new-user').innerHTML=us.map(u=>`<option value="${u}">${escapeHtml(u)}</option>`).join('');
+    /* Limpiar form */
+    document.getElementById('fixed-new-name').value='';
+    document.getElementById('fixed-new-amount').value='';
+    renderBudgetList();
+    renderFixedTotalSummary();
     showModal('modal-budget');
 }
 function closeBudgetModal(){hideModal('modal-budget')}
 
+/* Renderiza la lista de gastos fijos dentro del modal (editable) */
+function renderBudgetList(){
+    const el=document.getElementById('budget-list');
+    if(!S.fixedExpenses.length){
+        el.innerHTML='<p class="text-xs text-muted text-center py-4">Sin gastos fijos. Agregá uno abajo.</p>';
+        return;
+    }
+    el.innerHTML=S.fixedExpenses.map((fx,i)=>{
+        const amt=fx.amount?fmtEditable(fx.amount):'';
+        return`<div class="card-flat p-3 flex items-center gap-2">
+            <button onclick="deleteFixedExpense('${fx.id}')" class="w-7 h-7 rounded-lg bg-expense/10 text-expense flex items-center justify-center shrink-0" title="Eliminar"><i class="fa-solid fa-trash text-xs"></i></button>
+            <input type="text" data-fx-id="${fx.id}" data-field="name" value="${escapeHtml(fx.name)}" placeholder="Nombre" class="input-elegant flex-1 min-w-0 px-2 py-1.5 text-xs">
+            <input type="text" inputmode="decimal" data-fx-id="${fx.id}" data-field="amount" value="${amt}" placeholder="0,00" oninput="formatAmountOnInput(event)" onblur="saveFixedExpenseField('${fx.id}','amount',this.value)" class="input-elegant w-28 px-2 py-1.5 text-xs text-right">
+            <select data-fx-id="${fx.id}" data-field="user_name" onchange="saveFixedExpenseField('${fx.id}','user_name',this.value)" class="input-elegant px-2 py-1.5 text-xs">
+                ${users().map(u=>`<option value="${u}" ${fx.user_name===u?'selected':''}>${escapeHtml(u)}</option>`).join('')}
+            </select>
+        </div>`;
+    }).join('');
+    /* Inputs de nombre: guardar al perder foco */
+    el.querySelectorAll('input[data-field="name"]').forEach(inp=>{
+        inp.addEventListener('blur',()=>{
+            saveFixedExpenseField(inp.dataset.fxId,'name',inp.value);
+            renderBudgetList();
+        });
+    });
+}
+
+/* Render del resumen total arriba del modal */
+function renderFixedTotalSummary(){
+    const el=document.getElementById('fixed-total-summary');
+    const total=S.fixedExpenses.reduce((s,fx)=>s+(Number(fx.amount)||0),0);
+    const paidTotal=S.fixedExpenses.filter(fx=>fx.paid).reduce((s,fx)=>s+(Number(fx.amount)||0),0);
+    const pending=total-paidTotal;
+    el.innerHTML=`
+        <p class="text-xs text-muted mb-0.5">Total mensual fijo</p>
+        <p class="text-lg font-display font-bold text-accent">${fmt(total)}</p>
+        <p class="text-xs text-muted mt-1">${S.fixedExpenses.length} items · ${S.fixedExpenses.filter(fx=>fx.paid).length} pagados · ${fmt(pending)} pendientes</p>
+    `;
+}
+
+/* Actualiza un campo de un gasto fijo en memoria + localStorage */
+function saveFixedExpenseField(id,field,value){
+    const fx=S.fixedExpenses.find(x=>x.id===id);
+    if(!fx)return;
+    if(field==='amount'){
+        fx.amount=parseAmtStr(value);
+    }else{
+        fx[field]=value;
+    }
+    saveFixedExpensesLocal();
+    saveFixedExpenseRemote(fx);
+    renderFixedTotalSummary();
+}
+
+/* Agrega un nuevo gasto fijo a la lista */
+function addFixedExpense(){
+    const name=document.getElementById('fixed-new-name').value.trim();
+    const amount=parseAmtStr(document.getElementById('fixed-new-amount').value);
+    const user_name=document.getElementById('fixed-new-user').value;
+    if(!name){toast('Ingresá un nombre','warn');return}
+    const fx={
+        id:'fx-'+crypto.randomUUID(),
+        name,
+        amount:amount||0,
+        user_name,
+        paid:false
+    };
+    S.fixedExpenses.push(fx);
+    saveFixedExpensesLocal();
+    saveFixedExpenseRemote(fx);
+    document.getElementById('fixed-new-name').value='';
+    document.getElementById('fixed-new-amount').value='';
+    renderBudgetList();
+    renderFixedTotalSummary();
+    toast(`"${name}" agregado a gastos fijos`,'success');
+}
+
+/* Elimina un gasto fijo */
+async function deleteFixedExpense(id){
+    if(!confirm('¿Eliminar este gasto fijo?'))return;
+    const idx=S.fixedExpenses.findIndex(x=>x.id===id);
+    if(idx<0)return;
+    const name=S.fixedExpenses[idx].name;
+    S.fixedExpenses.splice(idx,1);
+    saveFixedExpensesLocal();
+    delFixedExpenseRemote(id);
+    renderBudgetList();
+    renderFixedTotalSummary();
+    toast(`"${name}" eliminado`,'success');
+}
+
+/* Guardar todos los cambios (cuando se toca "Guardar cambios") */
 function saveBudgets(){
-    const inputs=document.querySelectorAll('#budget-list input[data-cat]');
-    const b={};
-    inputs.forEach(inp=>{const v=parseAmtStr(inp.value);if(v>0)b[inp.dataset.cat]=v});
-    S.budgets=b;localStorage.setItem('hf_budgets',JSON.stringify(b));
-    renderAll();closeBudgetModal();
-    toast('Presupuestos guardados','success');
+    /* Validar que todos los items tengan nombre */
+    let valid=true;
+    const listEl=document.getElementById('budget-list');
+    listEl.querySelectorAll('input[data-field="name"]').forEach(inp=>{
+        const fx=S.fixedExpenses.find(x=>x.id===inp.dataset.fxId);
+        if(fx){
+            fx.name=inp.value.trim()||'Sin nombre';
+            saveFixedExpenseRemote(fx);
+        }
+    });
+    saveFixedExpensesLocal();
+    renderAll();
+    closeBudgetModal();
+    toast('Gastos fijos guardados','success');
+}
+
+/* Marcar/desmarcar un gasto fijo como pagado */
+async function toggleFixedPaid(id){
+    const fx=S.fixedExpenses.find(x=>x.id===id);
+    if(!fx)return;
+    fx.paid=!fx.paid;
+    saveFixedExpensesLocal();
+    saveFixedExpenseRemote(fx);
+    renderBudgets(S.tx);
+    if(fx.paid){
+        toast(`"${fx.name}" marcado como pagado`,'success');
+    }
 }
 
 /* ============================================================
@@ -3379,9 +3608,9 @@ function exportCSV(){
 
 function clearAllData(){
     if(!confirm('¿Borrar TODOS los datos locales? Esta acción no se puede deshacer.'))return;
-    if(!confirm('Estás seguro? Se borrarán todas las transacciones, cuentas, metas y cuotas.'))return;
-    ['hf_tx','hf_accts','hf_goals','hf_inst','hf_budgets'].forEach(k=>localStorage.removeItem(k));
-    S.tx=[];S.accts=[];S.goals=[];S.inst=[];S.budgets={};
+    if(!confirm('Estás seguro? Se borrarán todas las transacciones, cuentas, metas, cuotas y gastos fijos.'))return;
+    ['hf_tx','hf_accts','hf_goals','hf_inst','hf_budgets','hf_fixed_expenses'].forEach(k=>localStorage.removeItem(k));
+    S.tx=[];S.accts=[];S.goals=[];S.inst=[];S.budgets={};S.fixedExpenses=[];
     renderAll();toast('Datos borrados','success');
 }
 
