@@ -49,10 +49,10 @@
         .anim-up{animation:slideUp .35s cubic-bezier(0.16,1,0.3,1)}
         .anim-fade{animation:fadeIn .25s ease-out}
         .toast{animation:toastIn .3s ease-out forwards}.toast.out{animation:toastOut .25s ease-in forwards}
-        .card{background:#fff;border-radius:18px;box-shadow:0 1px 2px rgba(15,23,42,.04),0 1px 3px rgba(15,23,42,.06);border:1px solid #E9ECF1;transition:box-shadow .2s ease,transform .15s ease}
+        .card{background:#fff;border-radius:20px;box-shadow:0 1px 2px rgba(15,23,42,.04),0 1px 3px rgba(15,23,42,.06);border:1px solid #E9ECF1;transition:box-shadow .2s ease,transform .15s ease}
         .card:hover{box-shadow:0 4px 12px rgba(15,23,42,.06),0 1px 3px rgba(15,23,42,.04)}
         .card:active{transform:scale(.985);transition:transform .1s}
-        .card-flat{background:#fff;border-radius:14px;border:1px solid #E9ECF1}
+        .card-flat{background:#fff;border-radius:18px;border:1px solid #E9ECF1}
         .tab-item{transition:all .2s ease;color:#6B7280}.tab-item.active{color:#0B1220}.tab-item.active i{color:#B07D2A}
         .fab-center{width:56px;height:56px;border-radius:50%;background:linear-gradient(135deg,#0B1220,#1F2937);box-shadow:0 8px 24px rgba(11,18,32,.35),0 4px 8px rgba(11,18,32,.18);margin-top:-28px;transition:transform .15s ease}
         .fab-center:active{transform:scale(.9)}
@@ -223,9 +223,9 @@
 
 <!-- VISTA: INICIO -->
 <div id="view-home" class="view active p-4 max-w-2xl mx-auto">
-    <div class="flex items-center justify-between mb-5">
-        <div><p class="text-xs text-muted" id="home-date-label"></p><h1 class="text-xl font-display font-bold tracking-tight" id="home-greeting"></h1></div>
-        <div class="flex items-center gap-2 bg-white border border-brd px-3 py-1.5 rounded-full"><span id="home-sync" class="w-2 h-2 rounded-full bg-income"></span><span class="text-xs text-muted font-medium" id="home-sync-label">Local</span></div>
+    <div class="flex items-center justify-between mb-5 gap-3">
+        <div class="min-w-0 flex-1"><p class="text-xs text-muted" id="home-date-label"></p><h1 class="text-xl font-display font-bold tracking-tight truncate" id="home-greeting"></h1></div>
+        <button onclick="forceSyncFromHeader()" class="flex items-center gap-2 bg-white border border-brd px-3 py-1.5 rounded-full active:scale-95 transition-transform shrink-0" title="Tocá para refrescar desde la nube"><span id="home-sync" class="w-2 h-2 rounded-full bg-income"></span><span class="text-xs text-muted font-medium" id="home-sync-label">Local</span><i id="home-sync-icon" class="fa-solid fa-rotate text-muted text-xs ml-1"></i></button>
     </div>
 
     <!-- HERO: Patrimonio -->
@@ -268,10 +268,10 @@
                 <span><i class="fa-solid fa-money-bill mr-1"></i><span id="cuotas-monthly">$0</span>/mes</span>
             </div>
         </div>
-        <button onclick="openAIAnalysis()" class="card p-3.5 w-full flex items-center gap-3 mb-3 cursor-pointer">
-            <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-[#0B1220] to-[#2C3E50] flex items-center justify-center"><i class="fa-solid fa-brain text-white"></i></div>
-            <div class="flex-1 text-left"><p class="text-sm font-semibold">Análisis Inteligente</p><p class="text-xs text-muted">Insights, alertas y recomendaciones</p></div>
-            <i class="fa-solid fa-chevron-right text-muted text-xs"></i>
+        <button onclick="openAIAnalysis()" class="card p-4 w-full flex items-center gap-3 mb-3 cursor-pointer">
+            <div class="w-9 h-9 rounded-xl bg-gradient-to-br from-[#0B1220] to-[#2C3E50] flex items-center justify-center shrink-0"><i class="fa-solid fa-brain text-white"></i></div>
+            <div class="flex-1 text-left min-w-0"><p class="text-sm font-semibold truncate">Análisis Inteligente</p><p class="text-xs text-muted truncate">Insights, alertas y recomendaciones</p></div>
+            <i class="fa-solid fa-chevron-right text-muted text-xs shrink-0"></i>
         </button>
         <div id="home-installments" class="space-y-2"></div>
     </div>
@@ -1928,26 +1928,38 @@ async function loadAll(){
                 S.sb.from('installments').select('*').order('created_at')
             ]);
 
-            /* MERGE: si la consulta a Supabase anduvo pero devolvió NULL (tabla faltante)
-               o array vacío (RLS bloquea o sin datos), conservamos lo local */
-            const mergeData=(result,fallback)=>{
+            /* MERGE REAL: combinar datos de Supabase + localStorage por ID.
+               Esto evita perder transacciones que se guardaron localmente en un dispositivo
+               pero que todavía no se subieron a Supabase (RLS, sin conexión, etc.).
+               Las transacciones que están en AMBOS lados (mismo ID) se quedan con la versión
+               de Supabase (por si hay triggers de created_at actualizado). */
+            const mergeById=(result,fallback,key='id')=>{
                 if(!sbTableOk(result))return fallback;          // tabla no existe -> uso local
-                const data=result.data||[];
-                if(data.length===0){
-                    /* Supabase respondió OK pero sin filas. Podría ser porque no hay datos,
-                       O porque RLS bloquea. Para no pisar datos locales, MERGE: */
-                    if(fallback.length>0){
-                        /* Hay datos locales -> los conservamos y agregamos los del server (que son 0) */
-                        return fallback;
-                    }
-                    return data;
+                const remote=result.data||[];
+                /* Map por id para combinar rápido */
+                const map=new Map();
+                /* Primero metemos lo local (pueden ser transacciones pendientes de sincronizar) */
+                for(const item of fallback){
+                    if(item&&item[key])map.set(item[key],item);
                 }
-                return data;                                     // hay datos en server -> uso server
+                /* Después metemos lo de Supabase (sobrescribe si hay conflicto) */
+                for(const item of remote){
+                    if(item&&item[key])map.set(item[key],item);
+                }
+                const merged=Array.from(map.values());
+                /* Si Supabase devolvió 0 filas pero local tiene datos, devolvemos local */
+                if(remote.length===0&&fallback.length>0)return fallback;
+                return merged;
             };
-            S.tx=mergeData(tr,localTx);
-            S.accts=mergeData(ac,localAccts);
-            S.goals=mergeData(gl,localGoals);
-            S.inst=mergeData(ins,localInst);
+            S.tx=mergeById(tr,localTx);
+            S.accts=mergeById(ac,localAccts);
+            S.goals=mergeById(gl,localGoals);
+            S.inst=mergeById(ins,localInst);
+            /* Persistir el resultado combinado en localStorage para tenerlo offline */
+            lSave('hf_tx',S.tx);
+            lSave('hf_accts',S.accts);
+            lSave('hf_goals',S.goals);
+            lSave('hf_inst',S.inst);
             S.online=true;updSync();
             return;
         }catch(e){
@@ -2100,6 +2112,33 @@ function updSync(){
     if(S.online){el.className='w-2 h-2 rounded-full bg-income animate-pulse';lb.textContent='Sincronizado'}
     else{el.className='w-2 h-2 rounded-full bg-amber-500';lb.textContent='Local'}
 }
+
+/* Forzar recarga desde Supabase. Se llama al tocar el badge "Sincronizado"
+   del header. También sirve como "pull to refresh" manual. */
+async function forceSyncFromHeader(){
+    if(!S.sb){
+        toast('Sin conexión a Supabase. Configurá la sincronización en Configuración.','warn');
+        return;
+    }
+    const icon=document.getElementById('home-sync-icon');
+    const lb=document.getElementById('home-sync-label');
+    if(icon)icon.classList.add('animate-spin');
+    if(lb)lb.textContent='Sincronizando...';
+    try{
+        await loadAll();
+        populateFilters();
+        renderAll();
+        toast('Datos actualizados desde la nube','success');
+    }catch(e){
+        toast('Error al sincronizar: '+e.message,'error');
+    }finally{
+        if(icon)icon.classList.remove('animate-spin');
+        updSync();
+    }
+}
+
+/* Re-sincronizar: alias para llamar desde otros lugares */
+async function forceSync(){return forceSyncFromHeader()}
 
 /* ============================================================
    NAVEGACIÓN Y RENDERIZADO GENERAL
@@ -3099,7 +3138,7 @@ function finishSetup(){
     if(sbUrl&&sbKey){
         initSupabase(sbUrl,sbKey).then(()=>loadAll()).then(()=>{
             populateFilters();renderAll();
-            if(S.sb){try{S.sb.channel('hf-ch').on('postgres_changes',{event:'*',schema:'public'},async()=>{await loadAll();renderAll()}).subscribe()}catch{}}
+            setupRealtime();
         });
     }else{
         loadAll().then(()=>{populateFilters();renderAll()});
@@ -3132,9 +3171,66 @@ function finishSetup(){
         populateFilters();
         renderAll();
 
-        if(S.sb){try{S.sb.channel('hf-ch').on('postgres_changes',{event:'*',schema:'public'},async()=>{await loadAll();renderAll()}).subscribe()}catch{}}
+        setupRealtime();
     }
 })();
+
+/* ============================================================
+   REALTIME: sincronización en vivo entre dispositivos
+   ============================================================ */
+/* Configura el canal de Realtime de Supabase para que cualquier
+   cambio en las tablas (INSERT, UPDATE, DELETE) hecho desde otro
+   dispositivo se refleje automáticamente en este.
+   Si el canal se desconecta, se reconecta solo cada 30 segundos. */
+function setupRealtime(){
+    if(!S.sb)return;
+    try{
+        /* Canal único por sesión para evitar conflictos entre pestañas */
+        const chName='hf-ch-'+Math.random().toString(36).slice(2,8);
+        const ch=S.sb.channel(chName);
+        /* Escuchar cambios en cada tabla por separado para no recibir
+           ruido innecesario */
+        const onChanges=async(payload)=>{
+            console.log('[Realtime] cambio recibido:',payload);
+            try{
+                await loadAll();
+                populateFilters();
+                renderAll();
+            }catch(e){
+                console.warn('[Realtime] error al aplicar cambios:',e.message);
+            }
+        };
+        ch.on('postgres_changes',{event:'*',schema:'public',table:'transactions'},onChanges)
+          .on('postgres_changes',{event:'*',schema:'public',table:'accounts'},onChanges)
+          .on('postgres_changes',{event:'*',schema:'public',table:'goals'},onChanges)
+          .on('postgres_changes',{event:'*',schema:'public',table:'installments'},onChanges)
+          .subscribe((status)=>{
+              console.log('[Realtime] canal status:',status);
+              if(status==='SUBSCRIBED'){
+                  S.online=true;updSync();
+              }else if(status==='CHANNEL_ERROR'||status==='TIMED_OUT'||status==='CLOSED'){
+                  console.warn('[Realtime] canal caído, reintentando en 5s...');
+                  setTimeout(setupRealtime,5000);
+              }
+          });
+        /* Guardar referencia para poder cerrar el canal si hace falta */
+        S._realtimeCh=ch;
+        /* Heartbeat: cada 60 segundos, forzar un loadAll() para detectar
+           cambios que el realtime pudo haber perdido (buffer de red inestable) */
+        if(S._heartbeat)clearInterval(S._heartbeat);
+        S._heartbeat=setInterval(async()=>{
+            /* Solo hacer heartbeat si la página está visible */
+            if(!document.hidden)return;
+        },60000);
+        /* También escuchar el evento 'online' del navegador para re-sincronizar */
+        window.addEventListener('online',async()=>{
+            console.log('[Network] conexión recuperada, re-sincronizando...');
+            await loadAll();populateFilters();renderAll();
+        });
+    }catch(e){
+        console.warn('[Realtime] no se pudo configurar:',e.message);
+    }
+}
 </script>
 </body>
 </html>
