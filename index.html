@@ -2238,14 +2238,17 @@ async function loadAll(){
     const localAccts=lLoad('hf_accts');
     const localGoals=lLoad('hf_goals');
     const localInst=lLoad('hf_inst');
+    const localFixed=JSON.parse(localStorage.getItem('hf_fixed_expenses')||'[]');
 
     if(S.sb){
         try{
-            const[tr,ac,gl,ins]=await Promise.all([
+            const[tr,ac,gl,ins,fx,st]=await Promise.all([
                 S.sb.from('transactions').select('*').order('date',{ascending:false}),
                 S.sb.from('accounts').select('*').order('created_at'),
                 S.sb.from('goals').select('*').order('created_at'),
-                S.sb.from('installments').select('*').order('created_at')
+                S.sb.from('installments').select('*').order('created_at'),
+                S.sb.from('fixed_expenses').select('*').order('created_at'),
+                S.sb.from('settings').select('*')
             ]);
 
             /* MERGE REAL: combinar datos de Supabase + localStorage por ID.
@@ -2275,11 +2278,27 @@ async function loadAll(){
             S.accts=mergeById(ac,localAccts);
             S.goals=mergeById(gl,localGoals);
             S.inst=mergeById(ins,localInst);
+            S.fixedExpenses=mergeById(fx,localFixed);
             /* Persistir el resultado combinado en localStorage para tenerlo offline */
             lSave('hf_tx',S.tx);
             lSave('hf_accts',S.accts);
             lSave('hf_goals',S.goals);
             lSave('hf_inst',S.inst);
+            lSave('hf_fixed_expenses',S.fixedExpenses);
+            /* Aplicar settings (nombres de personas, moneda) si llegaron de Supabase */
+            if(sbTableOk(st)&&st.data&&st.data.length){
+                for(const row of st.data){
+                    if(row.key==='u1'&&row.value&&row.value!==S.u1){
+                        S.u1=row.value;localStorage.setItem('hf_u1',S.u1);
+                    }
+                    if(row.key==='u2'&&row.value&&row.value!==S.u2){
+                        S.u2=row.value;localStorage.setItem('hf_u2',S.u2);
+                    }
+                    if(row.key==='curr'&&row.value&&row.value!==S.curr){
+                        S.curr=row.value;localStorage.setItem('hf_curr',S.curr);
+                    }
+                }
+            }
             S.online=true;updSync();
             return;
         }catch(e){
@@ -2288,6 +2307,7 @@ async function loadAll(){
         }
     }
     S.tx=lLoad('hf_tx');S.accts=lLoad('hf_accts');S.goals=lLoad('hf_goals');S.inst=lLoad('hf_inst');
+    S.fixedExpenses=JSON.parse(localStorage.getItem('hf_fixed_expenses')||'[]');
 }
 
 function loadBudgets(){
@@ -2364,6 +2384,65 @@ async function saveFixedExpenseRemote(item){
 async function delFixedExpenseRemote(id){
     if(!S.sb)return;
     try{await S.sb.from('fixed_expenses').delete().eq('id',id)}catch(e){}
+}
+
+/* ============================================================
+   SETTINGS (sincronización de nombres de personas y moneda)
+   ============================================================ */
+/* Guarda un setting (key-value) en Supabase. Si la tabla no existe,
+   lo avisa una sola vez. */
+async function saveSetting(key,value){
+    if(!S.sb)return;
+    try{
+        const{data,error}=await S.sb.from('settings').upsert({
+            key,
+            value:String(value),
+            updated_at:new Date().toISOString()
+        }).select();
+        if(error){
+            if(error.code==='42P01'||error.code==='PGRST205'||error.code==='PGRST204'){
+                sbWarnOnce('settings_table_missing','Falta crear la tabla settings en Supabase. Cargá el SQL actualizado.');
+            }else{
+                console.warn('[settings] upsert falló:',error.message);
+            }
+        }else{
+            S.online=true;updSync();
+        }
+    }catch(e){console.warn('[settings] exception:',e.message)}
+}
+
+/* Carga todos los settings desde Supabase y actualiza el estado S */
+async function loadSettings(){
+    if(!S.sb)return;
+    try{
+        const{data,error}=await S.sb.from('settings').select('*');
+        if(error){
+            if(error.code==='42P01'||error.code==='PGRST205'||error.code==='PGRST204'){
+                /* Tabla settings no existe, usar defaults de localStorage */
+                return;
+            }
+            return;
+        }
+        if(data&&data.length){
+            /* Aplicar settings al estado S */
+            for(const row of data){
+                if(row.key==='u1'&&row.value&&row.value!==S.u1){
+                    S.u1=row.value;
+                    localStorage.setItem('hf_u1',S.u1);
+                }
+                if(row.key==='u2'&&row.value&&row.value!==S.u2){
+                    S.u2=row.value;
+                    localStorage.setItem('hf_u2',S.u2);
+                }
+                if(row.key==='curr'&&row.value&&row.value!==S.curr){
+                    S.curr=row.value;
+                    localStorage.setItem('hf_curr',S.curr);
+                }
+            }
+            populateFilters();
+            renderAll();
+        }
+    }catch(e){console.warn('[settings] loadSettings exception:',e.message)}
 }
 
 /* Helper: guarda SIEMPRE en localStorage, e intenta también en Supabase si está conectado */
@@ -2449,7 +2528,19 @@ async function saveAcct(a){
     a.id=a.id||crypto.randomUUID();a.created_at=a.created_at||new Date().toISOString();
     persistAcctLocal(a);
     if(S.sb){
-        try{const{data,error}=await S.sb.from('accounts').insert(a).select();if(!error&&data&&data[0]){S.online=true;updSync();persistAcctLocal(data[0]);return data[0]}else if(error){console.warn('Supabase insert acct falló:',error.message,'código:',error.code);if(error.code==='42P01'||error.code==='PGRST205'||error.code==='PGRST204'){sbWarnOnce('acct_table_missing','Falta crear las tablas en Supabase. Cargá el SQL del panel.')}else if(error.code==='42501'||error.message?.toLowerCase().includes('policy')||error.message?.toLowerCase().includes('rls')){sbWarnOnce('acct_rls','RLS bloquea el insert en accounts. Cargá el SQL del panel.')}}}catch(e){console.warn('Supabase insert acct exception:',e.message)}
+        try{
+            /* Usar upsert (no insert) para que si el ID ya existe en Supabase,
+               lo actualice en vez de fallar con constraint violation. */
+            const{data,error}=await S.sb.from('accounts').upsert(a).select();
+            if(error){
+                console.warn('Supabase upsert acct falló:',error.message,'código:',error.code);
+                if(error.code==='42P01'||error.code==='PGRST205'||error.code==='PGRST204'){sbWarnOnce('acct_table_missing','Falta crear las tablas en Supabase. Cargá el SQL del panel.')}
+                else if(error.code==='42501'||error.message?.toLowerCase().includes('policy')||error.message?.toLowerCase().includes('rls')){sbWarnOnce('acct_rls','RLS bloquea el acceso a accounts. Cargá el SQL del panel.')}
+            }else{
+                S.online=true;updSync();
+                if(data&&data[0])persistAcctLocal(data[0]);
+            }
+        }catch(e){console.warn('Supabase upsert acct exception:',e.message)}
     }
     return a;
 }
@@ -2468,7 +2559,17 @@ async function saveGoal(g){
     g.id=g.id||crypto.randomUUID();g.created_at=g.created_at||new Date().toISOString();
     persistGoalLocal(g);
     if(S.sb){
-        try{const{data,error}=await S.sb.from('goals').insert(g).select();if(!error&&data&&data[0]){S.online=true;updSync();persistGoalLocal(data[0]);return data[0]}else if(error){console.warn('Supabase insert goal falló:',error.message,'código:',error.code);if(error.code==='42P01'||error.code==='PGRST205'||error.code==='PGRST204'){sbWarnOnce('goal_table_missing','Falta crear las tablas en Supabase. Cargá el SQL del panel.')}else if(error.code==='42501'||error.message?.toLowerCase().includes('policy')||error.message?.toLowerCase().includes('rls')){sbWarnOnce('goal_rls','RLS bloquea el insert en goals. Cargá el SQL del panel.')}}}catch(e){console.warn('Supabase insert goal exception:',e.message)}
+        try{
+            const{data,error}=await S.sb.from('goals').upsert(g).select();
+            if(error){
+                console.warn('Supabase upsert goal falló:',error.message,'código:',error.code);
+                if(error.code==='42P01'||error.code==='PGRST205'||error.code==='PGRST204'){sbWarnOnce('goal_table_missing','Falta crear las tablas en Supabase. Cargá el SQL del panel.')}
+                else if(error.code==='42501'||error.message?.toLowerCase().includes('policy')||error.message?.toLowerCase().includes('rls')){sbWarnOnce('goal_rls','RLS bloquea el acceso a goals. Cargá el SQL del panel.')}
+            }else{
+                S.online=true;updSync();
+                if(data&&data[0])persistGoalLocal(data[0]);
+            }
+        }catch(e){console.warn('Supabase upsert goal exception:',e.message)}
     }
     return g;
 }
@@ -2487,7 +2588,17 @@ async function saveInst(ins){
     ins.id=ins.id||crypto.randomUUID();ins.created_at=ins.created_at||new Date().toISOString();
     persistInstLocal(ins);
     if(S.sb){
-        try{const{data,error}=await S.sb.from('installments').insert(ins).select();if(!error&&data&&data[0]){S.online=true;updSync();persistInstLocal(data[0]);return data[0]}else if(error){console.warn('Supabase insert inst falló:',error.message,'código:',error.code);if(error.code==='42P01'||error.code==='PGRST205'||error.code==='PGRST204'){sbWarnOnce('inst_table_missing','Falta crear las tablas en Supabase. Cargá el SQL del panel.')}else if(error.code==='42501'||error.message?.toLowerCase().includes('policy')||error.message?.toLowerCase().includes('rls')){sbWarnOnce('inst_rls','RLS bloquea el insert en installments. Cargá el SQL del panel.')}}}catch(e){console.warn('Supabase insert inst exception:',e.message)}
+        try{
+            const{data,error}=await S.sb.from('installments').upsert(ins).select();
+            if(error){
+                console.warn('Supabase upsert inst falló:',error.message,'código:',error.code);
+                if(error.code==='42P01'||error.code==='PGRST205'||error.code==='PGRST204'){sbWarnOnce('inst_table_missing','Falta crear las tablas en Supabase. Cargá el SQL del panel.')}
+                else if(error.code==='42501'||error.message?.toLowerCase().includes('policy')||error.message?.toLowerCase().includes('rls')){sbWarnOnce('inst_rls','RLS bloquea el acceso a installments. Cargá el SQL del panel.')}
+            }else{
+                S.online=true;updSync();
+                if(data&&data[0])persistInstLocal(data[0]);
+            }
+        }catch(e){console.warn('Supabase upsert inst exception:',e.message)}
     }
     return ins;
 }
@@ -3821,6 +3932,9 @@ function saveNames(){
     S.u1=document.getElementById('s-u1').value.trim()||'Persona 1';
     S.u2=document.getElementById('s-u2').value.trim()||'Persona 2';
     localStorage.setItem('hf_u1',S.u1);localStorage.setItem('hf_u2',S.u2);
+    /* Sincronizar a Supabase para que se vea en otros dispositivos */
+    saveSetting('u1',S.u1);
+    saveSetting('u2',S.u2);
     populateFilters();renderAll();
     toast('Nombres actualizados','success');
 }
@@ -3828,6 +3942,8 @@ function saveNames(){
 function saveCurr(){
     S.curr=document.getElementById('s-curr').value;
     localStorage.setItem('hf_curr',S.curr);
+    /* Sincronizar a Supabase */
+    saveSetting('curr',S.curr);
     renderAll();
     toast('Moneda actualizada','success');
 }
@@ -3972,6 +4088,8 @@ function setupRealtime(){
           .on('postgres_changes',{event:'*',schema:'public',table:'accounts'},onChanges)
           .on('postgres_changes',{event:'*',schema:'public',table:'goals'},onChanges)
           .on('postgres_changes',{event:'*',schema:'public',table:'installments'},onChanges)
+          .on('postgres_changes',{event:'*',schema:'public',table:'fixed_expenses'},onChanges)
+          .on('postgres_changes',{event:'*',schema:'public',table:'settings'},onChanges)
           .subscribe((status)=>{
               console.log('[Realtime] canal status:',status);
               if(status==='SUBSCRIBED'){
