@@ -394,7 +394,7 @@
                 <button onclick="setMType('expense')" id="mt-exp" class="flex-1 py-2.5 rounded-xl text-sm font-semibold bg-white text-expense shadow-sm"><i class="fa-solid fa-minus mr-1"></i>Gasto</button>
                 <button onclick="setMType('income')" id="mt-inc" class="flex-1 py-2.5 rounded-xl text-sm font-semibold text-muted"><i class="fa-solid fa-plus mr-1"></i>Ingreso</button>
             </div>
-            <div class="mb-4"><label class="text-xs text-muted block mb-1.5">Monto</label><input id="m-amt" type="text" inputmode="decimal" placeholder="0,00" class="input-elegant w-full px-4 py-3.5 amount-input"></div>
+            <div class="mb-4"><label class="text-xs text-muted block mb-1.5">Monto</label><input id="m-amt" type="text" inputmode="decimal" placeholder="0,00" oninput="formatAmountOnInput(event)" class="input-elegant w-full px-4 py-3.5 amount-input"></div>
             <div class="mb-4"><label class="text-xs text-muted block mb-2">Categoría</label><div id="m-cats" class="grid grid-cols-4 gap-2"></div></div>
             <div class="mb-4"><label class="text-xs text-muted block mb-2">Persona</label><div id="m-users" class="grid grid-cols-2 gap-2"></div></div>
             <div class="mb-4"><label class="text-xs text-muted block mb-1.5">Descripción</label><input id="m-desc" type="text" placeholder="Ej: Supermercado" class="input-elegant w-full px-4 py-2.5 text-sm"></div>
@@ -419,7 +419,7 @@
                 <button onclick="setEditType('expense')" id="et-exp" class="flex-1 py-2.5 rounded-xl text-xs font-semibold bg-white text-expense shadow-sm">Gasto</button>
                 <button onclick="setEditType('income')" id="et-inc" class="flex-1 py-2.5 rounded-xl text-xs font-semibold text-muted">Ingreso</button>
             </div>
-            <div class="mb-3"><label class="text-xs text-muted block mb-1.5">Monto</label><input id="et-amt" type="text" inputmode="decimal" placeholder="0,00" class="input-elegant w-full px-4 py-3 text-lg font-display font-bold text-center"></div>
+            <div class="mb-3"><label class="text-xs text-muted block mb-1.5">Monto</label><input id="et-amt" type="text" inputmode="decimal" placeholder="0,00" oninput="formatAmountOnInput(event)" class="input-elegant w-full px-4 py-3 text-lg font-display font-bold text-center"></div>
             <div class="mb-3"><label class="text-xs text-muted block mb-2">Categoría</label><div id="et-cats" class="grid grid-cols-4 gap-2"></div></div>
             <div class="mb-3"><label class="text-xs text-muted block mb-2">Persona</label><div id="et-users" class="grid grid-cols-2 gap-2"></div></div>
             <div class="mb-3"><label class="text-xs text-muted block mb-1.5">Descripción</label><input id="et-desc" type="text" class="input-elegant w-full px-4 py-2.5 text-sm"></div>
@@ -621,7 +621,10 @@
                 <h3 class="font-display font-semibold text-sm mb-2 flex items-center gap-2"><i class="fa-solid fa-list text-accent"></i> Consumos del resumen</h3>
                 <div id="statement-detail-list" class="space-y-2 max-h-[50vh] overflow-y-auto"></div>
             </div>
-            <button onclick="closeStatementDetail()" class="btn-ghost w-full py-3 text-sm">Cerrar</button>
+            <div class="grid grid-cols-2 gap-3">
+                <button onclick="closeStatementDetail()" class="btn-ghost py-3 text-sm">Cerrar</button>
+                <button onclick="doDeleteStatementFromDetail()" class="btn-danger py-3 text-sm flex items-center justify-center gap-2"><i class="fa-solid fa-trash"></i>Borrar resumen</button>
+            </div>
         </div>
     </div>
 </div>
@@ -861,6 +864,9 @@ const S={
 
 let parsedResult=null;
 let chartInstances={};
+/* Set para trackear qué errores de Supabase ya avisamos en esta sesión.
+   Evita que se acumulen 17 toasts naranjas cuando fallan muchos inserts seguidos. */
+const _sbWarned=new Set();
 
 /* ============================================================
    UTILIDADES
@@ -897,6 +903,65 @@ function fmtEditable(n){
     if(isInt)return num.toLocaleString('es-AR',{maximumFractionDigits:0,useGrouping:false});
     return num.toLocaleString('es-AR',{minimumFractionDigits:2,maximumFractionDigits:2,useGrouping:false});
 }
+
+/* Formatea el monto mientras el usuario escribe en el input.
+   - Permite escribir solo dígitos, coma decimal y (solo para limpiar) backspace
+   - Agrega automáticamente los separadores de miles: 10000 → "10.000"
+   - Cuando el usuario escribe una coma decimal, permite los decimales: 10000,5 → "10.000,5"
+   - Mantiene el cursor al final del texto */
+function formatAmountOnInput(e){
+    const input=e.target;
+    /* Guardar posición del cursor */
+    let cursorPos=input.selectionStart;
+    /* Tomar el valor actual y limpiarlo: solo dígitos y una coma decimal */
+    let raw=input.value;
+    /* Quitar todo lo que no sea dígito o coma */
+    raw=raw.replace(/[^\d,]/g,'');
+    /* Si tiene más de una coma, dejar solo la primera */
+    const firstComma=raw.indexOf(',');
+    if(firstComma>=0){
+        const before=raw.slice(0,firstComma+1);
+        const after=raw.slice(firstComma+1).replace(/,/g,'');
+        raw=before+after;
+    }
+    /* Separar parte entera y decimal */
+    let[intPart,decPart]='';
+    if(raw.includes(',')){
+        const parts=raw.split(',');
+        intPart=parts[0]||'';
+        decPart=parts[1]||'';
+    }else{
+        intPart=raw;
+    }
+    /* Quitar ceros a la izquierda de la parte entera (pero dejar al menos 1 dígito) */
+    intPart=intPart.replace(/^0+(\d)/,'$1');
+    if(intPart==='')intPart='0';
+    /* Formatear parte entera con separadores de miles (puntos) */
+    /* Solo formatear si tiene 4+ dígitos para no agregar puntos a "1", "10", "100" */
+    let intFormatted=intPart;
+    if(intPart.length>3){
+        /* Agrupar de a 3 de derecha a izquierda */
+        intFormatted=intPart.replace(/\B(?=(\d{3})+(?!\d))/g,'.');
+    }
+    /* Construir resultado final */
+    let result=intFormatted;
+    if(raw.includes(',')){
+        result+=','+decPart;
+    }
+    /* Solo actualizar si cambió para no romper el cursor */
+    if(input.value!==result){
+        input.value=result;
+        /* Mover el cursor al final (más simple que calcular la nueva posición) */
+        /* La mayoría de los usuarios escribe al final, así que esto es OK */
+        input.setSelectionRange(result.length,result.length);
+    }
+}
+
+/* Convierte el texto formateado del input (ej: "10.000,50") a número (10000.50).
+   Esto se llama antes de guardar la transacción. */
+function parseAmountFromInput(value){
+    return parseAmtStr(value);
+}
 function today(){return new Date().toISOString().slice(0,10)}
 function catById(id){return CATS.find(c=>c.id===id)||CATS[CATS.length-1]}
 function mRange(){
@@ -915,6 +980,19 @@ function toast(m,t='info'){
     document.getElementById('toasts').appendChild(el);
     setTimeout(()=>{el.classList.add('out');setTimeout(()=>el.remove(),250)},3000);
 }
+
+/* Muestra un toast de warning de Supabase solo 1 vez por clave en toda la sesión.
+   Evita la avalancha de toasts naranjas cuando fallan muchos inserts seguidos
+   (ej: al cargar un resumen con 17 consumos y la tabla no existe). */
+function sbWarnOnce(key,message){
+    if(_sbWarned.has(key))return;
+    _sbWarned.add(key);
+    toast(message,'warn');
+    /* Después de 30 segundos, permitir mostrar el warning otra vez
+       (por si el usuario cargó el SQL y necesita ver nuevos errores) */
+    setTimeout(()=>{_sbWarned.delete(key)},30000);
+}
+
 
 function showModal(id){document.getElementById(id).classList.remove('hidden');document.body.style.overflow='hidden'}
 function hideModal(id){document.getElementById(id).classList.add('hidden');document.body.style.overflow=''}
@@ -1952,6 +2030,10 @@ function openStatementDetail(txId){
     if(!t){toast('No se encontró el resumen','error');return}
     if(!t.statement_details){toast('Esta transacción no tiene desglose','warn');return}
 
+    /* Guardar el ID de la transacción abierta para que el botón
+       "Borrar resumen" pueda acceder a él */
+    _currentStatementTxId=txId;
+
     /* Parsear el JSON con los consumos detallados */
     let items=[];
     try{
@@ -2002,6 +2084,72 @@ function openStatementDetail(txId){
     showModal('modal-statement-detail');
 }
 function closeStatementDetail(){hideModal('modal-statement-detail')}
+
+/* ID de la transacción resumen actualmente abierta en el modal de desglose.
+   Se setea en openStatementDetail() y se usa en doDeleteStatementFromDetail(). */
+let _currentStatementTxId=null;
+
+/* Borra la transacción resumen que está abierta en el modal de desglose.
+   Si el resumen tiene 2 transacciones (ARS + USD) con el mismo statement_id,
+   pregunta al usuario si quiere borrar AMBAS o solo esta. */
+async function doDeleteStatementFromDetail(){
+    const txId=_currentStatementTxId;
+    if(!txId){
+        toast('No hay resumen seleccionado','warn');
+        return;
+    }
+    const t=S.tx.find(x=>x.id===txId);
+    if(!t){
+        toast('No se encontró el resumen','error');
+        return;
+    }
+
+    /* Buscar otras transacciones con el mismo statement_id (ej: ARS + USD del mismo resumen) */
+    const siblingTx=t.statement_id
+        ?S.tx.filter(x=>x.statement_id===t.statement_id)
+        :[t];
+
+    /* Construir el mensaje de confirmación */
+    let confirmMsg='';
+    if(siblingTx.length>1){
+        const arsTx=siblingTx.find(x=>x.currency!=='USD');
+        const usdTx=siblingTx.find(x=>x.currency==='USD');
+        const arsStr=arsTx?fmt(arsTx.amount):'';
+        const usdStr=usdTx?fmtUSD(usdTx.amount):'';
+        confirmMsg=`¿Borrar todo el resumen?\n\nEsto eliminará ${siblingTx.length} movimientos:\n`;
+        if(arsTx)confirmMsg+=`• ARS: ${arsStr} (${arsTx.statement_count} consumos)\n`;
+        if(usdTx)confirmMsg+=`• USD: ${usdStr} (${usdTx.statement_count} consumos)\n`;
+        confirmMsg+='\nLos consumos detallados también se borrarán.';
+    }else{
+        const amtStr=t.currency==='USD'?fmtUSD(t.amount):fmt(t.amount);
+        confirmMsg=`¿Borrar este resumen?\n\n• ${t.currency}: ${amtStr} (${t.statement_count} consumos)\n\nLos consumos detallados también se borrarán.`;
+    }
+
+    if(!confirm(confirmMsg))return;
+
+    /* Confirmación doble para evitar borrados accidentales */
+    if(!confirm('Última confirmación: ¿Seguro que querés borrar? Esta acción no se puede deshacer.'))return;
+
+    /* Borrar cada transacción del resumen */
+    let deleted=0;
+    for(const tx of siblingTx){
+        await delTx(tx.id);
+        deleted++;
+    }
+
+    /* Si había planes de cuotas asociados al resumen, también borrarlos */
+    if(t.statement_card){
+        const siblingInst=S.inst.filter(i=>i.card_name===t.statement_card && i.start_date===t.statement_close);
+        for(const inst of siblingInst){
+            await delInst(inst.id);
+        }
+    }
+
+    await loadAll();
+    renderAll();
+    closeStatementDetail();
+    toast(`Resumen borrado: ${deleted} ${deleted===1?'movimiento eliminado':'movimientos eliminados'}`,'success');
+}
 
 /* ============================================================
    ALMACENAMIENTO: LOCAL STORAGE + SUPABASE
@@ -2143,9 +2291,9 @@ async function saveTx(t){
                 console.warn('Supabase insert tx falló (guardado localmente):',error.message,'código:',error.code);
                 /* Avisar al usuario qué pasó para que pueda arreglarlo */
                 if(error.code==='42P01'||error.code==='PGRST205'||error.code==='PGRST204'){
-                    toast('La tabla "transactions" no existe en Supabase. Creala con el SQL del panel. Se guardó localmente.','warn');
+                    sbWarnOnce('tx_table_missing','Falta crear las tablas en Supabase. Cargá el SQL del panel (ver Configuración). Los datos se guardaron localmente.');
                 }else if(error.code==='42501'||error.message?.toLowerCase().includes('policy')||error.message?.toLowerCase().includes('rls')){
-                    toast('RLS bloquea el insert en "transactions". Activá las políticas con el SQL. Se guardó localmente.','warn');
+                    sbWarnOnce('tx_rls','RLS bloquea el insert en transactions. Cargá el SQL del panel. Se guardó localmente.');
                 }else{
                     toast('Supabase insert falló: '+error.message+'. Se guardó localmente.','warn');
                 }
@@ -2180,7 +2328,7 @@ async function saveAcct(a){
     a.id=a.id||crypto.randomUUID();a.created_at=a.created_at||new Date().toISOString();
     persistAcctLocal(a);
     if(S.sb){
-        try{const{data,error}=await S.sb.from('accounts').insert(a).select();if(!error&&data&&data[0]){S.online=true;updSync();persistAcctLocal(data[0]);return data[0]}else if(error){console.warn('Supabase insert acct falló:',error.message,'código:',error.code);if(error.code==='42P01'||error.code==='PGRST205'||error.code==='PGRST204'){toast('La tabla "accounts" no existe. Creala con el SQL del panel. Se guardó localmente.','warn')}else if(error.code==='42501'||error.message?.toLowerCase().includes('policy')||error.message?.toLowerCase().includes('rls')){toast('RLS bloquea el insert en "accounts". Activá las políticas. Se guardó localmente.','warn')}}}catch(e){console.warn('Supabase insert acct exception:',e.message)}
+        try{const{data,error}=await S.sb.from('accounts').insert(a).select();if(!error&&data&&data[0]){S.online=true;updSync();persistAcctLocal(data[0]);return data[0]}else if(error){console.warn('Supabase insert acct falló:',error.message,'código:',error.code);if(error.code==='42P01'||error.code==='PGRST205'||error.code==='PGRST204'){sbWarnOnce('acct_table_missing','Falta crear las tablas en Supabase. Cargá el SQL del panel.')}else if(error.code==='42501'||error.message?.toLowerCase().includes('policy')||error.message?.toLowerCase().includes('rls')){sbWarnOnce('acct_rls','RLS bloquea el insert en accounts. Cargá el SQL del panel.')}}}catch(e){console.warn('Supabase insert acct exception:',e.message)}
     }
     return a;
 }
@@ -2199,7 +2347,7 @@ async function saveGoal(g){
     g.id=g.id||crypto.randomUUID();g.created_at=g.created_at||new Date().toISOString();
     persistGoalLocal(g);
     if(S.sb){
-        try{const{data,error}=await S.sb.from('goals').insert(g).select();if(!error&&data&&data[0]){S.online=true;updSync();persistGoalLocal(data[0]);return data[0]}else if(error){console.warn('Supabase insert goal falló:',error.message,'código:',error.code);if(error.code==='42P01'||error.code==='PGRST205'||error.code==='PGRST204'){toast('La tabla "goals" no existe. Creala con el SQL del panel. Se guardó localmente.','warn')}else if(error.code==='42501'||error.message?.toLowerCase().includes('policy')||error.message?.toLowerCase().includes('rls')){toast('RLS bloquea el insert en "goals". Activá las políticas. Se guardó localmente.','warn')}}}catch(e){console.warn('Supabase insert goal exception:',e.message)}
+        try{const{data,error}=await S.sb.from('goals').insert(g).select();if(!error&&data&&data[0]){S.online=true;updSync();persistGoalLocal(data[0]);return data[0]}else if(error){console.warn('Supabase insert goal falló:',error.message,'código:',error.code);if(error.code==='42P01'||error.code==='PGRST205'||error.code==='PGRST204'){sbWarnOnce('goal_table_missing','Falta crear las tablas en Supabase. Cargá el SQL del panel.')}else if(error.code==='42501'||error.message?.toLowerCase().includes('policy')||error.message?.toLowerCase().includes('rls')){sbWarnOnce('goal_rls','RLS bloquea el insert en goals. Cargá el SQL del panel.')}}}catch(e){console.warn('Supabase insert goal exception:',e.message)}
     }
     return g;
 }
@@ -2218,7 +2366,7 @@ async function saveInst(ins){
     ins.id=ins.id||crypto.randomUUID();ins.created_at=ins.created_at||new Date().toISOString();
     persistInstLocal(ins);
     if(S.sb){
-        try{const{data,error}=await S.sb.from('installments').insert(ins).select();if(!error&&data&&data[0]){S.online=true;updSync();persistInstLocal(data[0]);return data[0]}else if(error){console.warn('Supabase insert inst falló:',error.message,'código:',error.code);if(error.code==='42P01'||error.code==='PGRST205'||error.code==='PGRST204'){toast('La tabla "installments" no existe. Creala con el SQL del panel. Se guardó localmente.','warn')}else if(error.code==='42501'||error.message?.toLowerCase().includes('policy')||error.message?.toLowerCase().includes('rls')){toast('RLS bloquea el insert en "installments". Activá las políticas. Se guardó localmente.','warn')}}}catch(e){console.warn('Supabase insert inst exception:',e.message)}
+        try{const{data,error}=await S.sb.from('installments').insert(ins).select();if(!error&&data&&data[0]){S.online=true;updSync();persistInstLocal(data[0]);return data[0]}else if(error){console.warn('Supabase insert inst falló:',error.message,'código:',error.code);if(error.code==='42P01'||error.code==='PGRST205'||error.code==='PGRST204'){sbWarnOnce('inst_table_missing','Falta crear las tablas en Supabase. Cargá el SQL del panel.')}else if(error.code==='42501'||error.message?.toLowerCase().includes('policy')||error.message?.toLowerCase().includes('rls')){sbWarnOnce('inst_rls','RLS bloquea el insert en installments. Cargá el SQL del panel.')}}}catch(e){console.warn('Supabase insert inst exception:',e.message)}
     }
     return ins;
 }
