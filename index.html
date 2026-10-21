@@ -354,7 +354,10 @@
         <div id="s-sb-status" class="text-xs mb-3"></div>
         <input id="s-sb-url" type="text" placeholder="URL de Supabase" class="input-elegant w-full px-3 py-2.5 text-xs mb-2 font-mono">
         <input id="s-sb-key" type="text" placeholder="Anon Key" class="input-elegant w-full px-3 py-2.5 text-xs mb-3 font-mono">
-        <button onclick="saveSBConfig()" class="btn-primary text-xs py-2.5 px-4">Conectar</button>
+        <div class="flex gap-2">
+            <button onclick="saveSBConfig()" class="btn-primary text-xs py-2.5 px-4 flex-1">Conectar</button>
+            <button onclick="openSyncDiagnostic()" class="btn-accent text-xs py-2.5 px-4 flex items-center gap-1.5"><i class="fa-solid fa-stethoscope"></i>Diagnosticar</button>
+        </div>
     </div>
     <div class="card p-4">
         <h3 class="font-display font-semibold text-sm mb-3">Datos</h3>
@@ -625,6 +628,28 @@
                 <button onclick="closeStatementDetail()" class="btn-ghost py-3 text-sm">Cerrar</button>
                 <button onclick="doDeleteStatementFromDetail()" class="btn-danger py-3 text-sm flex items-center justify-center gap-2"><i class="fa-solid fa-trash"></i>Borrar resumen</button>
             </div>
+        </div>
+    </div>
+</div>
+
+<!-- MODAL: DIAGNÓSTICO DE SINCRONIZACIÓN -->
+<div id="modal-diagnostic" class="fixed inset-0 z-50 hidden">
+    <div class="modal-bg absolute inset-0" onclick="closeSyncDiagnostic()"></div>
+    <div class="modal-sheet absolute bottom-0 w-full bg-white anim-up max-h-[95vh] overflow-y-auto">
+        <div class="w-10 h-1.5 bg-brdsoft rounded-full mx-auto mt-3 mb-2"></div>
+        <div class="p-5">
+            <div class="flex items-center justify-between mb-4">
+                <div class="flex items-center gap-3 min-w-0">
+                    <div class="w-11 h-11 rounded-xl flex items-center justify-center shrink-0" style="background:rgba(176,125,42,0.12);color:#B07D2A"><i class="fa-solid fa-stethoscope text-white" style="color:#B07D2A"></i></div>
+                    <div class="min-w-0">
+                        <h2 class="font-display font-bold text-lg">Diagnóstico de sincronización</h2>
+                        <p class="text-xs text-muted truncate">Verificá el estado de Supabase y Realtime</p>
+                    </div>
+                </div>
+                <button onclick="closeSyncDiagnostic()" class="w-9 h-9 rounded-full bg-bg flex items-center justify-center hover:bg-brdsoft transition shrink-0"><i class="fa-solid fa-xmark text-sm text-muted"></i></button>
+            </div>
+            <div id="diagnostic-content"></div>
+            <button onclick="closeSyncDiagnostic()" class="btn-ghost w-full py-3 text-sm mt-3">Cerrar</button>
         </div>
     </div>
 </div>
@@ -2374,26 +2399,30 @@ async function saveTx(t){
     if(S.sb){
         try{
             const{data,error}=await S.sb.from('transactions').insert(t).select();
-            if(!error&&data&&data[0]){
-                S.online=true;updSync();
-                /* Reemplazar la versión local con la del server (por si hay triggers) */
-                persistTxLocal(data[0]);
-                return data[0];
-            }else if(error){
+            if(error){
                 console.warn('Supabase insert tx falló (guardado localmente):',error.message,'código:',error.code);
-                /* Avisar al usuario qué pasó para que pueda arreglarlo */
                 if(error.code==='42P01'||error.code==='PGRST205'||error.code==='PGRST204'){
                     sbWarnOnce('tx_table_missing','Falta crear las tablas en Supabase. Cargá el SQL del panel (ver Configuración). Los datos se guardaron localmente.');
                 }else if(error.code==='42501'||error.message?.toLowerCase().includes('policy')||error.message?.toLowerCase().includes('rls')){
                     sbWarnOnce('tx_rls','RLS bloquea el insert en transactions. Cargá el SQL del panel. Se guardó localmente.');
                 }else{
-                    toast('Supabase insert falló: '+error.message+'. Se guardó localmente.','warn');
+                    sbWarnOnce('tx_other_'+error.code,'Supabase insert falló ('+error.code+'): '+error.message+'. Se guardó localmente.');
                 }
-                /* Mantenemos el guardado local que ya hicimos */
+            }else{
+                /* Insert exitoso (aunque data venga vacío en algunos casos) */
+                S.online=true;updSync();
+                console.log('[sync] saveTx OK - insert en Supabase exitoso para id',t.id);
+                if(data&&data[0]){
+                    /* Reemplazar la versión local con la del server (por si hay triggers) */
+                    persistTxLocal(data[0]);
+                    return data[0];
+                }
             }
         }catch(e){
             console.warn('Supabase insert tx exception (guardado localmente):',e.message);
         }
+    }else{
+        console.log('[sync] saveTx: no hay Supabase configurado, solo se guardó local para id',t.id);
     }
     return t;
 }
@@ -2487,6 +2516,8 @@ function updSync(){
 async function forceSyncFromHeader(){
     if(!S.sb){
         toast('Sin conexión a Supabase. Configurá la sincronización en Configuración.','warn');
+        /* Abrir directamente el diagnóstico para que vea qué le falta */
+        setTimeout(()=>openSyncDiagnostic(),500);
         return;
     }
     const icon=document.getElementById('home-sync-icon');
@@ -2508,6 +2539,224 @@ async function forceSyncFromHeader(){
 
 /* Re-sincronizar: alias para llamar desde otros lugares */
 async function forceSync(){return forceSyncFromHeader()}
+
+/* ============================================================
+   DIAGNÓSTICO DE SINCRONIZACIÓN
+   ============================================================ */
+/* Ejecuta un diagnóstico completo del estado de Supabase y muestra
+   el resultado en un modal. Útil para detectar problemas:
+   - Si Supabase está configurado
+   - Si las tablas existen
+   - Si las políticas RLS están bien
+   - Cuántas filas hay en cada tabla (local vs remoto)
+   - Estado del canal de Realtime
+*/
+async function runSyncDiagnostic(){
+    const diag={
+        sbUrl:localStorage.getItem('hf_sb_url')||'',
+        sbKey:localStorage.getItem('hf_sb_key')||'',
+        sbInitialized:!!S.sb,
+        online:S.online,
+        localCounts:{
+            tx:(lLoad('hf_tx')||[]).length,
+            accts:(lLoad('hf_accts')||[]).length,
+            goals:(lLoad('hf_goals')||[]).length,
+            inst:(lLoad('hf_inst')||[]).length,
+            fixed:(JSON.parse(localStorage.getItem('hf_fixed_expenses')||'[]')).length
+        },
+        remoteCounts:{},
+        tableStatus:{},
+        realtimeStatus:S._realtimeCh?'inicializado':'no inicializado',
+        errors:[]
+    };
+
+    if(!S.sb){
+        diag.errors.push('Supabase NO está inicializado. Configurá URL y Anon Key en Configuración.');
+        return diag;
+    }
+
+    /* Probar cada tabla con un SELECT count */
+    const tables=[
+        {name:'transactions',local:diag.localCounts.tx},
+        {name:'accounts',local:diag.localCounts.accts},
+        {name:'goals',local:diag.localCounts.goals},
+        {name:'installments',local:diag.localCounts.inst},
+        {name:'fixed_expenses',local:diag.localCounts.fixed}
+    ];
+
+    for(const tbl of tables){
+        try{
+            const{count,error}=await S.sb.from(tbl.name).select('*',{count:'exact',head:true});
+            if(error){
+                diag.tableStatus[tbl.name]={
+                    status:'ERROR',
+                    code:error.code,
+                    message:error.message,
+                    localCount:tbl.local
+                };
+                if(error.code==='42P01'||error.code==='PGRST205'||error.code==='PGRST204'){
+                    diag.errors.push(`Tabla "${tbl.name}" NO EXISTE. Tenés que cargar el SQL actualizado en Supabase.`);
+                }else if(error.code==='42501'){
+                    diag.errors.push(`RLS bloquea el acceso a "${tbl.name}". Verificá las políticas en el SQL.`);
+                }else{
+                    diag.errors.push(`Error en tabla "${tbl.name}": ${error.message} (código: ${error.code})`);
+                }
+            }else{
+                diag.tableStatus[tbl.name]={
+                    status:'OK',
+                    remoteCount:count||0,
+                    localCount:tbl.local,
+                    diff:(count||0)-tbl.local
+                };
+                diag.remoteCounts[tbl.name]=count||0;
+            }
+        }catch(e){
+            diag.tableStatus[tbl.name]={
+                status:'EXCEPTION',
+                message:e.message,
+                localCount:tbl.local
+            };
+            diag.errors.push(`Exception en tabla "${tbl.name}": ${e.message}`);
+        }
+    }
+
+    /* Test de INSERT (con rollback inmediato) en transactions */
+    if(diag.tableStatus.transactions&&diag.tableStatus.transactions.status==='OK'){
+        try{
+            const testId='00000000-0000-0000-0000-diagtest'+Date.now().toString().slice(-6);
+            const testTx={
+                id:testId,
+                created_at:new Date().toISOString(),
+                user_name:'__diag__',
+                type:'expense',
+                category:'otros',
+                amount:0.01,
+                description:'__DIAG_TEST__',
+                date:new Date().toISOString().slice(0,10),
+                cuota_info:'',
+                currency:'ARS'
+            };
+            const{data:insData,error:insError}=await S.sb.from('transactions').insert(testTx).select();
+            if(insError){
+                diag.tableStatus.transactions.insertStatus='ERROR: '+insError.code+' - '+insError.message;
+                if(insError.code==='42501'){
+                    diag.errors.push('RLS BLOQUEA EL INSERT. Faltan políticas o no están aplicadas. Re-ejecutá el SQL.');
+                }
+            }else{
+                diag.tableStatus.transactions.insertStatus='OK (insert de prueba exitoso)';
+                /* Borrar la fila de prueba */
+                await S.sb.from('transactions').delete().eq('id',testId);
+                diag.tableStatus.transactions.deleteStatus='OK (rollback exitoso)';
+            }
+        }catch(e){
+            diag.tableStatus.transactions.insertStatus='EXCEPTION: '+e.message;
+        }
+    }
+
+    return diag;
+}
+
+/* Llena el modal de diagnóstico con los datos */
+async function openSyncDiagnostic(){
+    showModal('modal-diagnostic');
+    const el=document.getElementById('diagnostic-content');
+    el.innerHTML='<div class="flex items-center gap-3 p-4"><div class="loader"></div><p class="text-sm text-muted">Ejecutando diagnóstico...</p></div>';
+
+    try{
+        const diag=await runSyncDiagnostic();
+
+        let html='';
+
+        /* Configuración */
+        html+=`<div class="card-flat p-3 mb-3">
+            <p class="text-xs font-semibold mb-2 flex items-center gap-2"><i class="fa-solid fa-cog text-accent"></i> Configuración</p>
+            <div class="space-y-1 text-xs">
+                <div class="flex justify-between"><span class="text-muted">URL Supabase</span><span class="font-mono">${diag.sbUrl?(diag.sbUrl.slice(0,30)+'...'):'(no configurada)'}</span></div>
+                <div class="flex justify-between"><span class="text-muted">Anon Key</span><span class="font-mono">${diag.sbKey?(diag.sbKey.slice(0,15)+'...'):'(no configurada)'}</span></div>
+                <div class="flex justify-between"><span class="text-muted">Cliente inicializado</span><span class="font-semibold ${diag.sbInitialized?'text-income':'text-expense'}">${diag.sbInitialized?'✓ Sí':'✗ No'}</span></div>
+                <div class="flex justify-between"><span class="text-muted">Estado online</span><span class="font-semibold ${diag.online?'text-income':'text-expense'}">${diag.online?'✓ Conectado':'✗ Desconectado'}</span></div>
+                <div class="flex justify-between"><span class="text-muted">Realtime</span><span class="font-semibold ${diag.realtimeStatus==='inicializado'?'text-income':'text-amber-500'}">${diag.realtimeStatus}</span></div>
+            </div>
+        </div>`;
+
+        /* Estado por tabla */
+        html+=`<div class="card-flat p-3 mb-3">
+            <p class="text-xs font-semibold mb-2 flex items-center gap-2"><i class="fa-solid fa-database text-accent"></i> Estado de tablas</p>
+            <div class="space-y-2">`;
+
+        for(const[name,info]of Object.entries(diag.tableStatus)){
+            const status=info.status;
+            const statusColor=status==='OK'?'text-income':(status==='ERROR'?'text-expense':'text-amber-500');
+            html+=`<div class="text-xs border-l-2 pl-2 ${status==='OK'?'border-income':status==='ERROR'?'border-expense':'border-amber-500'}">
+                <div class="flex justify-between">
+                    <span class="font-mono font-semibold">${name}</span>
+                    <span class="${statusColor} font-bold">${status}</span>
+                </div>`;
+            if(status==='OK'){
+                html+=`<div class="text-muted mt-0.5">Local: ${info.localCount} · Remoto: ${info.remoteCount} ${info.diff>0?('· +'+info.diff+' remoto'):info.diff<0?('· '+(info.diff)+' remoto'):''}</div>`;
+                if(info.insertStatus){
+                    const insOk=info.insertStatus.startsWith('OK');
+                    html+=`<div class="text-muted mt-0.5">Insert test: <span class="${insOk?'text-income':'text-expense'} font-semibold">${info.insertStatus}</span></div>`;
+                }
+                if(info.deleteStatus){
+                    html+=`<div class="text-muted">Rollback: <span class="text-income">${info.deleteStatus}</span></div>`;
+                }
+            }else{
+                html+=`<div class="text-muted mt-0.5">${info.code||''}: ${info.message||''}</div>`;
+                html+=`<div class="text-muted">Local: ${info.localCount}</div>`;
+            }
+            html+=`</div>`;
+        }
+        html+=`</div></div>`;
+
+        /* Errores encontrados */
+        if(diag.errors.length){
+            html+=`<div class="card-flat p-3 mb-3" style="border-left:3px solid #DC2626">
+                <p class="text-xs font-semibold mb-2 flex items-center gap-2 text-expense"><i class="fa-solid fa-triangle-exclamation"></i> Problemas encontrados (${diag.errors.length})</p>
+                <ol class="text-xs space-y-1 list-decimal pl-4">`;
+            for(const err of diag.errors){
+                html+=`<li class="text-muted">${escapeHtml(err)}</li>`;
+            }
+            html+=`</ol></div>`;
+        }else{
+            html+=`<div class="card-flat p-3 mb-3" style="border-left:3px solid #0E9F6E">
+                <p class="text-xs font-semibold text-income flex items-center gap-2"><i class="fa-solid fa-circle-check"></i> Todo OK</p>
+                <p class="text-xs text-muted mt-1">La sincronización debería funcionar correctamente. Si aún hay problemas, intentá tocar "Refrescar" en el header.</p>
+            </div>`;
+        }
+
+        /* Acciones */
+        html+=`<div class="grid grid-cols-2 gap-2 mt-4">
+            <button onclick="forceSyncFromHeader()" class="btn-primary py-2.5 text-xs flex items-center justify-center gap-2"><i class="fa-solid fa-rotate"></i> Refrescar ahora</button>
+            <button onclick="copyDiagnostic()" class="btn-ghost py-2.5 text-xs flex items-center justify-center gap-2"><i class="fa-solid fa-copy"></i> Copiar reporte</button>
+        </div>`;
+
+        el.innerHTML=html;
+        _lastDiagnostic=diag;
+    }catch(e){
+        el.innerHTML=`<div class="card-flat p-4 text-center"><p class="text-xs text-expense font-semibold mb-2">Error al ejecutar diagnóstico</p><p class="text-xs text-muted">${escapeHtml(e.message)}</p></div>`;
+    }
+}
+
+function closeSyncDiagnostic(){hideModal('modal-diagnostic')}
+
+/* Variable global para guardar el último diagnóstico y poder copiarlo */
+let _lastDiagnostic=null;
+
+function copyDiagnostic(){
+    if(!_lastDiagnostic){toast('Sin diagnóstico para copiar','warn');return}
+    const text=JSON.stringify(_lastDiagnostic,null,2);
+    navigator.clipboard.writeText(text).then(()=>{
+        toast('Reporte copiado al portapapeles','success');
+    }).catch(()=>{
+        /* Fallback: descargar como archivo de texto */
+        const blob=new Blob([text],{type:'text/plain'});
+        const url=URL.createObjectURL(blob);
+        const a=document.createElement('a');a.href=url;a.download='diagnostico_hogarfin.txt';a.click();
+        URL.revokeObjectURL(url);
+        toast('Reporte descargado como archivo','success');
+    });
+}
 
 /* ============================================================
    NAVEGACIÓN Y RENDERIZADO GENERAL
