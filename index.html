@@ -306,28 +306,11 @@
         <button onclick="forceSyncFromHeader()" class="flex items-center gap-2 bg-white border border-brd px-3 py-1.5 rounded-full active:scale-95 transition-transform shrink-0" title="Tocá para refrescar desde la nube"><span id="home-sync" class="w-2 h-2 rounded-full bg-income"></span><span class="text-xs text-muted font-medium" id="home-sync-label">Local</span><i id="home-sync-icon" class="fa-solid fa-rotate text-muted text-xs ml-1"></i></button>
     </div>
 
-    <!-- HERO: Patrimonio -->
-    <div class="hero-card p-6 mb-4">
-        <div class="relative z-10">
-            <p class="text-xs text-white/60 mb-1 flex items-center gap-1.5"><i class="fa-solid fa-landmark"></i> Patrimonio total</p>
-            <p id="home-patrimonio" class="text-4xl font-display font-bold tracking-tight">$0</p>
-            <div class="flex items-center gap-2 mt-2">
-                <span id="home-patrimonio-change" class="chip" style="background:rgba(255,255,255,.1);color:#fff"><i class="fa-solid fa-chart-line text-xs"></i> <span id="home-patrimonio-change-label">—</span></span>
-            </div>
-        </div>
-    </div>
-
     <!-- Resumen mes -->
     <div class="grid grid-cols-3 gap-2.5 mb-5">
         <div class="stat-card"><div class="flex items-center gap-1.5 mb-1"><span class="w-1.5 h-1.5 rounded-full bg-income"></span><p class="text-xs text-muted">Ingresos</p></div><p id="home-income" class="text-sm font-display font-bold text-income truncate whitespace-nowrap overflow-hidden">$0</p></div>
         <div class="stat-card"><div class="flex items-center gap-1.5 mb-1"><span class="w-1.5 h-1.5 rounded-full bg-expense"></span><p class="text-xs text-muted">Gastos</p></div><p id="home-expense" class="text-sm font-display font-bold text-expense truncate whitespace-nowrap overflow-hidden">$0</p></div>
-        <div class="stat-card"><div class="flex items-center gap-1.5 mb-1"><span class="w-1.5 h-1.5 rounded-full bg-accent"></span><p class="text-xs text-muted">Ahorro</p></div><p id="home-savings" class="text-sm font-display font-bold text-accent truncate whitespace-nowrap overflow-hidden">$0</p></div>
-    </div>
-
-    <!-- Cuentas -->
-    <div class="mb-5">
-        <div class="flex items-center justify-between mb-3"><h3 class="font-display font-semibold text-sm">Mis Cuentas</h3><button onclick="openAccountModal()" class="text-xs text-accent font-semibold flex items-center gap-1"><i class="fa-solid fa-plus"></i>Agregar</button></div>
-        <div id="home-accounts" class="scroll-x flex gap-3 pb-1"></div>
+        <div class="stat-card"><div class="flex items-center gap-1.5 mb-1"><span class="w-1.5 h-1.5 rounded-full bg-accent"></span><p id="home-savings-label" class="text-xs text-muted">Ahorro</p></div><p id="home-savings" class="text-sm font-display font-bold text-accent truncate whitespace-nowrap overflow-hidden">$0</p></div>
     </div>
 
     <!-- Tarjetas y cuotas -->
@@ -479,7 +462,6 @@
             <div class="mb-4"><label class="text-xs text-muted block mb-2">Categoría</label><div id="m-cats" class="grid grid-cols-4 gap-2"></div></div>
             <div class="mb-4"><label class="text-xs text-muted block mb-2">Persona</label><div id="m-users" class="grid grid-cols-2 gap-2"></div></div>
             <div class="mb-4"><label class="text-xs text-muted block mb-1.5">Descripción</label><input id="m-desc" type="text" placeholder="Ej: Supermercado" class="input-elegant w-full px-4 py-2.5 text-sm"></div>
-            <div class="mb-4"><label class="text-xs text-muted block mb-1.5">Cuenta</label><select id="m-account" class="input-elegant w-full px-3 py-2.5 text-sm"></select></div>
             <div class="mb-5"><label class="text-xs text-muted block mb-1.5">Fecha</label><input id="m-date" type="date" class="input-elegant w-full px-4 py-2.5 text-sm"></div>
             <button onclick="addTx()" class="btn-primary w-full py-3.5 text-sm">Guardar transacción</button>
         </div>
@@ -1090,6 +1072,7 @@ function mRange(){
     return{s:new Date(d.getFullYear(),d.getMonth(),1).toISOString().slice(0,10),e:new Date(d.getFullYear(),d.getMonth()+1,0).toISOString().slice(0,10)};
 }
 function users(){return[S.u1,S.u2].filter(Boolean)}
+function expenseUsers(){return [...users(),'Compartido']}
 function escapeHtml(s){return String(s||'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
 
 function toast(m,t='info'){
@@ -2933,55 +2916,18 @@ function renderHome(){
     const inc=mTx.filter(t=>t.type==='income').reduce((s,t)=>s+Number(t.amount),0);
     const exp=mTx.filter(t=>t.type==='expense').reduce((s,t)=>s+Number(t.amount),0);
     const sav=inc-exp;
-    const pat=S.accts.reduce((s,a)=>s+Number(a.balance),0);
-
-    /* Patrimonio del mes anterior */
-    const prevD=new Date();prevD.setMonth(prevD.getMonth()-1);
-    const ps=new Date(prevD.getFullYear(),prevD.getMonth(),1).toISOString().slice(0,10);
-    const pe=new Date(prevD.getFullYear(),prevD.getMonth()+1,0).toISOString().slice(0,10);
-    const prevInc=S.tx.filter(t=>t.date>=ps&&t.date<=pe&&t.type==='income').reduce((s,t)=>s+Number(t.amount),0);
-    const prevExp=S.tx.filter(t=>t.date>=ps&&t.date<=pe&&t.type==='expense').reduce((s,t)=>s+Number(t.amount),0);
-    const prevPat=pat-(inc-exp)+(prevInc-prevExp);
 
     const now=new Date();
     const months=['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
     document.getElementById('home-date-label').textContent=`${months[now.getMonth()]} ${now.getFullYear()}`;
     document.getElementById('home-greeting').textContent=`${S.u1} & ${S.u2}`;
-    document.getElementById('home-patrimonio').textContent=fmt(pat);
     /* En las stat-cards usamos fmtShort para mostrar montos compactos (1,4M en vez de 1.380.992,01)
        y que entren bien en pantallas chicas sin desbordarse */
     document.getElementById('home-income').textContent=fmtShort(inc);
     document.getElementById('home-expense').textContent=fmtShort(exp);
     document.getElementById('home-savings').textContent=fmtShort(sav);
+    document.getElementById('home-savings-label').textContent=sav<0?'Déficit del mes':(sav===0?'Balance del mes':'Ahorro del mes');
     document.getElementById('home-savings').className=`text-sm font-display font-bold ${sav>=0?'text-income':'text-expense'}`;
-
-    /* Cambio patrimonio */
-    const patChangeLabel=document.getElementById('home-patrimonio-change-label');
-    if(prevPat>0){
-        const change=Math.round(((pat-prevPat)/Math.abs(prevPat))*100);
-        if(change!==0){
-            patChangeLabel.textContent=(change>0?'+':'')+change+'% vs mes anterior';
-            document.getElementById('home-patrimonio-change').style.background=change>0?'rgba(14,159,110,.18)':'rgba(220,38,38,.18)';
-        }else{
-            patChangeLabel.textContent='Sin cambios vs mes anterior';
-        }
-    }else{
-        patChangeLabel.textContent='Sin historial previo';
-    }
-
-    /* Cuentas */
-    const acEl=document.getElementById('home-accounts');
-    if(!S.accts.length){
-        acEl.innerHTML='<div class="account-card flex flex-col items-center justify-center text-center cursor-pointer" style="min-width:140px;height:90px" onclick="openAccountModal()"><i class="fa-solid fa-plus mb-1.5 text-accent text-lg"></i><span class="text-xs text-muted font-medium">Agregá una cuenta</span></div>';
-    }else{
-        acEl.innerHTML=S.accts.map(a=>`<div class="account-card cursor-pointer" style="--accent-color:${a.color||ACCT_COLORS[a.type]||'#B07D2A'}" onclick="openEditAcct('${a.id}')">
-            <div class="flex items-center justify-between mb-2">
-                <div class="flex items-center gap-2 min-w-0 flex-1"><i class="fa-solid ${a.icon||ACCT_ICONS[a.type]||'fa-wallet'} text-xs shrink-0" style="color:${a.color||ACCT_COLORS[a.type]||'#B07D2A'}"></i><span class="text-xs font-semibold truncate">${escapeHtml(a.name)}</span></div>
-                <span class="text-xs text-muted account-type-badge shrink-0 ml-2">${ACCT_LABELS[a.type]||''}</span>
-            </div>
-            <p class="text-sm font-display font-bold tracking-tight">${fmt(Number(a.balance))}</p>
-        </div>`).join('');
-    }
 
     /* Cuotas */
     const activeInst=S.inst.filter(i=>Number(i.paid_cuotas)<Number(i.total_cuotas));
@@ -3359,7 +3305,7 @@ function renderModalCats(){
 }
 
 function renderModalUsers(){
-    const us=users();
+    const us=S.mType==='expense'?expenseUsers():users();
     document.getElementById('m-users').innerHTML=us.map(u=>{
         const sel=u===S.mUser;
         return`<button onclick="S.mUser='${u}';renderModalUsers()" class="user-pill py-2.5 rounded-xl text-xs font-semibold ${sel?'selected text-txt':'text-muted'}">${escapeHtml(u)}</button>`;
@@ -3377,7 +3323,6 @@ async function addTx(){
     if(!amt||amt<=0){toast('Ingresá un monto válido','warn');return}
     const desc=document.getElementById('m-desc').value||catById(S.mCat).name;
     const date=document.getElementById('m-date').value||today();
-    const acctId=document.getElementById('m-account').value;
     const t={
         user_name:S.mUser||S.u1,
         type:S.mType,
@@ -3385,18 +3330,11 @@ async function addTx(){
         amount:amt,
         description:desc,
         date,
-        account_id:acctId==='none'?null:acctId,
+        account_id:null,
         cuota_info:''
     };
     await saveTx(t);
 
-    if(acctId&&acctId!=='none'){
-        const acct=S.accts.find(a=>a.id===acctId);
-        if(acct){
-            const newBal=Number(acct.balance)+(S.mType==='income'?amt:-amt);
-            await updAcct(acctId,{balance:newBal});
-        }
-    }
 
     await loadAll();renderAll();closeAddModal();
     toast(`${S.mType==='income'?'Ingreso':'Gasto'} registrado`,'success');
@@ -3440,7 +3378,7 @@ function renderEditCats(){
 }
 
 function renderEditUsers(){
-    const us=users();
+    const us=S.editType==='expense'?expenseUsers():users();
     document.getElementById('et-users').innerHTML=us.map(u=>{
         const sel=u===S.editUser;
         return`<button onclick="S.editUser='${u}';renderEditUsers()" class="user-pill py-2.5 rounded-xl text-xs font-semibold ${sel?'selected text-txt':'text-muted'}">${escapeHtml(u)}</button>`;
@@ -3593,7 +3531,7 @@ function renderBudgetList(){
             <input type="text" data-fx-id="${fx.id}" data-field="name" value="${escapeHtml(fx.name)}" placeholder="Nombre" class="input-elegant flex-1 min-w-0 px-2 py-1.5 text-xs">
             <input type="text" inputmode="decimal" data-fx-id="${fx.id}" data-field="amount" value="${amt}" placeholder="0,00" oninput="formatAmountOnInput(event)" onblur="saveFixedExpenseField('${fx.id}','amount',this.value)" class="input-elegant w-28 px-2 py-1.5 text-xs text-right">
             <select data-fx-id="${fx.id}" data-field="user_name" onchange="saveFixedExpenseField('${fx.id}','user_name',this.value)" class="input-elegant px-2 py-1.5 text-xs">
-                ${users().map(u=>`<option value="${u}" ${fx.user_name===u?'selected':''}>${escapeHtml(u)}</option>`).join('')}
+                ${expenseUsers().map(u=>`<option value="${u}" ${fx.user_name===u?'selected':''}>${escapeHtml(u)}</option>`).join('')}
             </select>
         </div>`;
     }).join('');
@@ -4023,7 +3961,6 @@ function populateFilters(){
     fc.innerHTML='<option value="all">Categorías</option>'+CATS.map(c=>`<option value="${c.id}">${c.name}</option>`).join('');
     fc.value=fcv;
 
-    if(document.getElementById('m-account'))renderModalAccounts();
 }
 
 /* ============================================================
