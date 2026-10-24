@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>HogarFin · Finanzas del hogar</title>
+    <title>Mi Hogar · Finanzas del hogar</title>
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="theme-color" content="#F7F8FA">
     <script src="https://cdn.tailwindcss.com"></script>
@@ -158,6 +158,84 @@
         }
         .swipe-indicator{position:absolute;top:50%;transform:translateY(-50%);font-size:24px;opacity:.2;pointer-events:none}
         @keyframes ripple{to{transform:scale(2.5);opacity:0}}
+    
+        /* ===== HOGARFIN PREMIUM UI REFRESH ===== */
+        :root{--hf-ink:#101828;--hf-gold:#b78a3b;--hf-gold-dark:#946b25;--hf-line:#e7e9ee;--hf-canvas:#f5f6f8;--hf-shadow:0 8px 28px rgba(16,24,40,.045)}
+        html{font-size:16px;scroll-behavior:smooth}
+        body{background:radial-gradient(ellipse at 50% -15%,rgba(183,138,59,.075),transparent 36%),var(--hf-canvas);color:var(--hf-ink);letter-spacing:-.01em}
+        button,a,[role=button]{-webkit-tap-highlight-color:transparent}
+        button{transition:transform .18s cubic-bezier(.2,.8,.2,1),box-shadow .2s ease,background-color .2s ease,border-color .2s ease}
+        button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible{outline:3px solid rgba(183,138,59,.28);outline-offset:2px}
+        .view{max-width:1180px!important;margin-inline:auto;padding:clamp(16px,2.5vw,30px)!important}
+        #content-area{padding-bottom:112px}
+        h1,h2,h3,h4{letter-spacing:-.035em;color:#121926}
+        .card,.card-flat,.account-card,.stat-card,.hero-card{border-radius:22px;transition:transform .22s ease,box-shadow .22s ease,border-color .22s ease}
+        .card,.card-flat,.account-card,.stat-card{border:1px solid rgba(226,229,235,.9);box-shadow:var(--hf-shadow);background:rgba(255,255,255,.96)}
+        .card:hover,.card-flat:hover,.account-card:hover,.stat-card:hover{box-shadow:0 12px 32px rgba(16,24,40,.075);border-color:#ded6c7}
+        .hero-card{background:linear-gradient(125deg,#101722 0%,#202b3a 62%,#3c3324 100%)!important;position:relative;overflow:hidden;box-shadow:0 18px 42px rgba(17,24,39,.18);border:1px solid rgba(255,255,255,.08)}
+        .hero-card:before{content:"";position:absolute;width:280px;height:280px;right:-80px;top:-145px;border-radius:50%;border:1px solid rgba(226,190,123,.28);box-shadow:0 0 0 28px rgba(226,190,123,.035),0 0 0 58px rgba(226,190,123,.025);pointer-events:none}
+        .hero-card:after{content:"";position:absolute;inset:auto 0 0;height:3px;background:linear-gradient(90deg,transparent,#d7b36b 48%,transparent);opacity:.8}
+        .hero-card p.text-4xl{font-size:clamp(2rem,4vw,2.75rem);letter-spacing:-.055em;font-variant-numeric:tabular-nums}
+        .stat-card{padding:18px!important;min-width:0}
+        .stat-card p[id]{font-size:clamp(1.05rem,2vw,1.4rem);letter-spacing:-.04em;font-variant-numeric:tabular-nums}
+        .btn-primary,.btn-accent,.btn-ghost,.btn-danger{min-height:42px;border-radius:13px;font-weight:650;letter-spacing:-.01em}
+        .btn-primary{background:linear-gradient(135deg,#171d28,#293343);box-shadow:0 5px 13px rgba(16,24,40,.13)}
+        .btn-primary:hover{background:linear-gradient(135deg,#252d3b,#374458);box-shadow:0 8px 18px rgba(16,24,40,.18);transform:translateY(-2px)}
+        .btn-accent{background:linear-gradient(135deg,#c59a4e,#a97b2d);box-shadow:0 5px 14px rgba(183,138,59,.2)}
+        .btn-accent:hover{background:linear-gradient(135deg,#d0a95f,#946b25);box-shadow:0 8px 18px rgba(183,138,59,.27);transform:translateY(-2px)}
+        .btn-ghost{background:#fff;border-color:#e3e6ec;box-shadow:0 2px 4px rgba(16,24,40,.025)}
+        .btn-ghost:hover{background:#faf8f4;border-color:#d7c7a8;transform:translateY(-1px)}
+        .pill-tab{border-color:#e4e7ec;background:#fff;padding:9px 16px;border-radius:12px;font-size:13px}
+        .pill-tab.active{background:#17202d;border-color:#17202d;box-shadow:0 4px 12px rgba(16,24,40,.14)}
+        input,select,textarea,.input-elegant{border-radius:12px!important;border-color:#dfe3e9!important;background:#fff;transition:border-color .18s ease,box-shadow .18s ease}
+        input:focus,select:focus,textarea:focus,.input-elegant:focus{border-color:#bd974f!important;box-shadow:0 0 0 4px rgba(183,138,59,.11)!important;outline:none}
+        .nav-bar{background:rgba(255,255,255,.9)!important;backdrop-filter:blur(22px) saturate(1.6);-webkit-backdrop-filter:blur(22px) saturate(1.6);border-top:1px solid rgba(224,227,233,.85);box-shadow:0 -8px 28px rgba(16,24,40,.055);padding-bottom:env(safe-area-inset-bottom,0)}
+        .nav-bar>div{max-width:760px!important;padding-top:10px!important;padding-bottom:calc(8px + env(safe-area-inset-bottom,0))!important}
+        .tab-item{min-width:68px;padding:7px 12px!important;border-radius:14px;color:#858b96!important}
+        .tab-item i{transition:transform .2s ease,color .2s ease}
+        .tab-item.active{color:#171d28!important;background:linear-gradient(180deg,rgba(183,138,59,.10),rgba(183,138,59,.025))}
+        .tab-item.active i{color:var(--hf-gold)!important;transform:translateY(-1px)}
+        .tab-item span{font-size:11px!important;letter-spacing:.005em}
+        .fab-center{background:linear-gradient(145deg,#c49a50,#9b712b)!important;box-shadow:0 8px 22px rgba(183,138,59,.34),inset 0 1px 0 rgba(255,255,255,.28)!important;border:3px solid rgba(255,255,255,.96);width:58px;height:58px;margin-top:-28px}
+        .fab-center:hover{transform:translateY(-3px) scale(1.03);box-shadow:0 12px 26px rgba(183,138,59,.38)!important}
+        .modal-bg{background:rgba(13,19,29,.52)!important;backdrop-filter:blur(8px)}
+        .modal-sheet{border:1px solid rgba(255,255,255,.7);box-shadow:0 -18px 60px rgba(16,24,40,.2);border-top-left-radius:28px!important;border-top-right-radius:28px!important}
+        .modal-sheet h2{letter-spacing:-.035em}
+        .toast{border-radius:14px!important;box-shadow:0 12px 35px rgba(16,24,40,.18)!important;backdrop-filter:blur(12px)}
+        .chip{letter-spacing:0}
+        .account-card:before{width:3px;opacity:.9}
+        table{border-collapse:separate;border-spacing:0}
+        th{font-size:11px!important;text-transform:uppercase;letter-spacing:.07em;color:#777f8d!important;font-weight:700!important}
+        tr{transition:background-color .15s ease}
+        tbody tr:hover{background:#faf8f4}
+        ::-webkit-scrollbar{width:7px;height:7px}::-webkit-scrollbar-thumb{background:#d1d5dc;border-radius:99px}::-webkit-scrollbar-thumb:hover{background:#b7bdc7}
+        .view.active{animation:premiumEnter .28s cubic-bezier(.2,.7,.25,1)}
+        @keyframes premiumEnter{from{opacity:0;transform:translateY(7px)}to{opacity:1;transform:translateY(0)}}
+        @media(min-width:768px){
+          #content-area{padding-bottom:40px}
+          .nav-bar{position:sticky!important;top:0;bottom:auto!important;left:auto;right:auto;border-top:0;border-bottom:1px solid #e5e7eb;box-shadow:0 4px 20px rgba(16,24,40,.035)}
+          .nav-bar>div{max-width:1180px!important;justify-content:flex-start!important;gap:12px;padding:12px 28px!important}
+          .nav-bar .tab-item{flex-direction:row!important;gap:9px!important;padding:10px 15px!important;min-width:unset}
+          .nav-bar .tab-item span{font-size:13px!important}
+          .nav-bar .fab-center{order:5;margin:0 0 0 auto;width:44px;height:44px;border-width:2px}
+          .view{padding-top:28px!important}
+          .modal-sheet{max-width:650px;left:50%;bottom:50%;transform:translate(-50%,50%);border-radius:26px!important;max-height:88vh}
+          .modal-sheet.anim-up{animation:modalPremium .24s ease-out}
+          @keyframes modalPremium{from{opacity:0;transform:translate(-50%,calc(50% + 12px))}to{opacity:1;transform:translate(-50%,50%)}}
+        }
+        @media(max-width:480px){
+          .view{padding:16px!important}
+          .hero-card{padding:21px!important;border-radius:22px!important}
+          .stat-card{padding:13px!important;border-radius:17px!important}
+          .stat-card p.text-xs{font-size:11px!important}
+          .card,.card-flat{border-radius:18px}
+          .nav-bar>div{padding-left:4px!important;padding-right:4px!important}
+          .tab-item{min-width:59px;padding-left:7px!important;padding-right:7px!important}
+          .tab-item i{font-size:17px!important}
+          .fab-center{width:54px;height:54px}
+        }
+        @media(prefers-reduced-motion:reduce){*,*:before,*:after{scroll-behavior:auto!important;animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}}
+
     </style>
 </head>
 <body class="bg-bg min-h-screen">
