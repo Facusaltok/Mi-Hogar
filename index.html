@@ -2331,8 +2331,10 @@ function sbTableOk(result){
 }
 
 async function loadAll(){
-    /* Guardamos lo que ya hay en memoria/localStorage antes de pisar
-       para poder hacer MERGE si Supabase devuelve vacío (RLS o tablas faltantes) */
+    /* Copias locales para operar sin conexión. Los registros locales SOLO se vuelven
+       a subir si fueron marcados explícitamente como pendientes por un fallo de INSERT.
+       No re-subir automáticamente cualquier fila ausente en Supabase: podría haber sido
+       borrada deliberadamente desde el panel de Supabase. */
     const localTx=lLoad('hf_tx');
     const localAccts=lLoad('hf_accts');
     const localGoals=lLoad('hf_goals');
@@ -2347,56 +2349,68 @@ async function loadAll(){
                 S.sb.from('installments').select('*').order('created_at')
             ]);
 
-            /* Reintentar subir registros locales que nunca llegaron a la nube.
-               Solo sube IDs ausentes en la respuesta remota; nunca sobrescribe
-               registros remotos existentes con una copia local potencialmente vieja. */
+            /* Solo sincronizar transacciones que la app sabe que no logró subir.
+               El marcador _pending_sync nunca se envía como columna a Supabase. */
+            if(sbTableOk(tr)){
+                const remoteIds=new Set((tr.data||[]).map(row=>String(row.id)));
+                const pendingTx=localTx.filter(row=>row&&row.id&&row._pending_sync===true&&!remoteIds.has(String(row.id)));
+                for(const row of pendingTx){
+                    const payload={...row}; delete payload._pending_sync;
+                    const{data,error}=await S.sb.from('transactions').insert(payload).select();
+                    if(error){
+                        console.error('[sync] No se pudo subir transacción pendiente:',row.id,error.code,error.message);
+                    }else if(data&&data[0]){
+                        remoteIds.add(String(data[0].id));
+                        if(Array.isArray(tr.data))tr.data.push(data[0]);
+                        const ix=localTx.findIndex(x=>String(x.id)===String(row.id));
+                        if(ix>=0)localTx[ix]=data[0];
+                    }
+                }
+            }
+
+            /* Transacciones: una consulta exitosa de Supabase es la fuente de verdad.
+               Solo se conservan localmente las transacciones explícitamente pendientes
+               que todavía no estén en la nube. Así un borrado remoto no se revierte. */
+            if(sbTableOk(tr)){
+                const remoteTx=tr.data||[];
+                const remoteIds=new Set(remoteTx.map(row=>String(row.id)));
+                const pendingStillLocal=localTx.filter(row=>row&&row.id&&row._pending_sync===true&&!remoteIds.has(String(row.id)));
+                S.tx=[...pendingStillLocal,...remoteTx];
+                /* Mantener el marcador solo en los registros cuyo INSERT aún falló,
+                   para poder reintentar sin resucitar filas borradas en Supabase. */
+                lSave('hf_tx',S.tx);
+            }else{
+                S.tx=localTx;
+            }
+
+            /* Mantener la estrategia previa para cuentas/metas/cuotas, que no son el
+               problema reportado; no modificar su comportamiento en esta corrección. */
             const pendingSync=[
-                {table:'transactions',result:tr,local:localTx},
                 {table:'accounts',result:ac,local:localAccts},
                 {table:'goals',result:gl,local:localGoals},
                 {table:'installments',result:ins,local:localInst}
             ];
             for(const item of pendingSync){
                 if(item.result?.error)continue;
-                const remoteIds=new Set((item.result?.data||[]).map(row=>row.id));
-                const pending=item.local.filter(row=>row&&row.id&&!remoteIds.has(row.id));
+                const remoteIds=new Set((item.result?.data||[]).map(row=>String(row.id)));
+                const pending=item.local.filter(row=>row&&row.id&&!remoteIds.has(String(row.id)));
                 if(!pending.length)continue;
                 const{error:syncError}=await S.sb.from(item.table).upsert(pending,{onConflict:'id'});
-                if(syncError){
-                    console.error('[sync] No se pudieron subir registros pendientes de '+item.table+':',syncError.code,syncError.message);
-                    S.online=false;updSync();
-                }
+                if(syncError)console.error('[sync] No se pudieron subir registros locales de '+item.table+':',syncError.code,syncError.message);
             }
 
-            /* MERGE REAL: combinar datos de Supabase + localStorage por ID.
-               Esto evita perder transacciones que se guardaron localmente en un dispositivo
-               pero que todavía no se subieron a Supabase (RLS, sin conexión, etc.).
-               Las transacciones que están en AMBOS lados (mismo ID) se quedan con la versión
-               de Supabase (por si hay triggers de created_at actualizado). */
             const mergeById=(result,fallback,key='id')=>{
-                if(!sbTableOk(result))return fallback;          // tabla no existe -> uso local
+                if(!sbTableOk(result))return fallback;
                 const remote=result.data||[];
-                /* Map por id para combinar rápido */
                 const map=new Map();
-                /* Primero metemos lo local (pueden ser transacciones pendientes de sincronizar) */
-                for(const item of fallback){
-                    if(item&&item[key])map.set(item[key],item);
-                }
-                /* Después metemos lo de Supabase (sobrescribe si hay conflicto) */
-                for(const item of remote){
-                    if(item&&item[key])map.set(item[key],item);
-                }
-                const merged=Array.from(map.values());
-                /* Si Supabase devolvió 0 filas pero local tiene datos, devolvemos local */
+                for(const item of fallback){if(item&&item[key])map.set(String(item[key]),item)}
+                for(const item of remote){if(item&&item[key])map.set(String(item[key]),item)}
                 if(remote.length===0&&fallback.length>0)return fallback;
-                return merged;
+                return Array.from(map.values());
             };
-            S.tx=mergeById(tr,localTx);
             S.accts=mergeById(ac,localAccts);
             S.goals=mergeById(gl,localGoals);
             S.inst=mergeById(ins,localInst);
-            /* Persistir el resultado combinado en localStorage para tenerlo offline */
-            lSave('hf_tx',S.tx);
             lSave('hf_accts',S.accts);
             lSave('hf_goals',S.goals);
             lSave('hf_inst',S.inst);
@@ -2555,12 +2569,14 @@ async function saveTx(t){
     /* Asegurar id y timestamp antes de todo */
     t.id=t.id||crypto.randomUUID();
     t.created_at=t.created_at||new Date().toISOString();
-    /* 1) SIEMPRE guardar localmente primero (fuente de verdad inmediata) */
+    /* Marcar como pendiente hasta confirmar que Supabase recibió la transacción. */
+    t._pending_sync=true;
     persistTxLocal(t);
-    /* 2) Intentar también en Supabase si está configurado */
+    /* 2) Intentar también en Supabase si está configurado; el marcador es solo local. */
     if(S.sb){
         try{
-            const{data,error}=await S.sb.from('transactions').insert(t).select();
+            const payload={...t}; delete payload._pending_sync;
+            const{data,error}=await S.sb.from('transactions').insert(payload).select();
             if(error){
                 S.online=false;updSync();
                 console.error('Supabase insert tx falló (guardado localmente):',error.message,'código:',error.code);
@@ -2581,6 +2597,8 @@ async function saveTx(t){
                     persistTxLocal(data[0]);
                     return data[0];
                 }
+                delete t._pending_sync;
+                persistTxLocal(t);
             }
         }catch(e){
             console.warn('Supabase insert tx exception (guardado localmente):',e.message);
