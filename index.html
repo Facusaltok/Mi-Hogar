@@ -2508,35 +2508,50 @@ async function loadAll(){
                 S.tx=localTx;
             }
 
-            /* Mantener la estrategia previa para cuentas/metas/cuotas, que no son el
-               problema reportado; no modificar su comportamiento en esta corrección. */
-            const pendingSync=[
-                {table:'accounts',result:ac,local:localAccts},
-                {table:'goals',result:gl,local:localGoals},
-                {table:'installments',result:ins,local:localInst}
-            ];
-            for(const item of pendingSync){
+            /* Cuentas: jamás resucitar registros ausentes en la nube solo porque
+               siguen guardados en otro dispositivo. Solo subir cuentas marcadas
+               explícitamente como pendientes de una inserción que falló. */
+            if(sbTableOk(ac)){
+                const remoteAccounts=ac.data||[];
+                const remoteIds=new Set(remoteAccounts.map(row=>String(row.id)));
+                const pendingAccounts=localAccts.filter(row=>row&&row.id&&row._pending_sync===true&&!remoteIds.has(String(row.id)));
+                for(const row of pendingAccounts){
+                    const payload={...row}; delete payload._pending_sync;
+                    const{data,error}=await S.sb.from('accounts').insert(payload).select();
+                    if(error){
+                        console.error('[sync] No se pudo subir cuenta pendiente:',row.id,error.code,error.message);
+                    }else if(data&&data[0]){
+                        remoteIds.add(String(data[0].id));
+                        remoteAccounts.push(data[0]);
+                    }
+                }
+                const pendingStillLocal=localAccts.filter(row=>row&&row.id&&row._pending_sync===true&&!remoteIds.has(String(row.id)));
+                S.accts=[...pendingStillLocal,...remoteAccounts];
+                lSave('hf_accts',S.accts);
+            }else{
+                S.accts=localAccts;
+            }
+
+            /* Mantener sin cambios la sincronización existente de metas y cuotas. */
+            for(const item of [{table:'goals',result:gl,local:localGoals},{table:'installments',result:ins,local:localInst}]){
                 if(item.result?.error)continue;
                 const remoteIds=new Set((item.result?.data||[]).map(row=>String(row.id)));
                 const pending=item.local.filter(row=>row&&row.id&&!remoteIds.has(String(row.id)));
-                if(!pending.length)continue;
-                const{error:syncError}=await S.sb.from(item.table).upsert(pending,{onConflict:'id'});
-                if(syncError)console.error('[sync] No se pudieron subir registros locales de '+item.table+':',syncError.code,syncError.message);
+                if(pending.length){
+                    const{error:syncError}=await S.sb.from(item.table).upsert(pending,{onConflict:'id'});
+                    if(syncError)console.error('[sync] No se pudieron subir registros locales de '+item.table+':',syncError.code,syncError.message);
+                }
             }
-
             const mergeById=(result,fallback,key='id')=>{
                 if(!sbTableOk(result))return fallback;
-                const remote=result.data||[];
-                const map=new Map();
+                const remote=result.data||[];const map=new Map();
                 for(const item of fallback){if(item&&item[key])map.set(String(item[key]),item)}
                 for(const item of remote){if(item&&item[key])map.set(String(item[key]),item)}
                 if(remote.length===0&&fallback.length>0)return fallback;
                 return Array.from(map.values());
             };
-            S.accts=mergeById(ac,localAccts);
             S.goals=mergeById(gl,localGoals);
             S.inst=mergeById(ins,localInst);
-            lSave('hf_accts',S.accts);
             lSave('hf_goals',S.goals);
             lSave('hf_inst',S.inst);
             S.online=true;updSync();
@@ -2772,9 +2787,23 @@ async function delTx(id){
 }
 async function saveAcct(a){
     a.id=a.id||crypto.randomUUID();a.created_at=a.created_at||new Date().toISOString();
+    /* Si no hay nube o falla el insert, dejar marca explícita para reintentar. */
+    a._pending_sync=true;
     persistAcctLocal(a);
     if(S.sb){
-        try{const{data,error}=await S.sb.from('accounts').insert(a).select();if(!error&&data&&data[0]){S.online=true;updSync();persistAcctLocal(data[0]);return data[0]}else if(error){console.warn('Supabase insert acct falló:',error.message,'código:',error.code);if(error.code==='42P01'||error.code==='PGRST205'||error.code==='PGRST204'){sbWarnOnce('acct_table_missing','Falta crear las tablas en Supabase. Cargá el SQL del panel.')}else if(error.code==='42501'||error.message?.toLowerCase().includes('policy')||error.message?.toLowerCase().includes('rls')){sbWarnOnce('acct_rls','RLS bloquea el insert en accounts. Cargá el SQL del panel.')}}}catch(e){console.warn('Supabase insert acct exception:',e.message)}
+        try{
+            const payload={...a};delete payload._pending_sync;
+            const{data,error}=await S.sb.from('accounts').insert(payload).select();
+            if(!error&&data&&data[0]){
+                S.online=true;updSync();
+                const saved=data[0];persistAcctLocal(saved);return saved;
+            }
+            if(error){
+                console.warn('Supabase insert acct falló:',error.message,'código:',error.code);
+                if(error.code==='42P01'||error.code==='PGRST205'||error.code==='PGRST204')sbWarnOnce('acct_table_missing','Falta crear las tablas en Supabase. Cargá el SQL del panel.');
+                else if(error.code==='42501'||error.message?.toLowerCase().includes('policy')||error.message?.toLowerCase().includes('rls'))sbWarnOnce('acct_rls','RLS bloquea el insert en accounts. Cargá el SQL del panel.');
+            }
+        }catch(e){console.warn('Supabase insert acct exception:',e.message)}
     }
     return a;
 }
@@ -2786,8 +2815,35 @@ async function updAcct(id,d){
     return S.accts[i];
 }
 async function delAcct(id){
-    S.accts=S.accts.filter(a=>a.id!==id);lSave('hf_accts',S.accts);
-    if(S.sb){try{await S.sb.from('accounts').delete().eq('id',id);S.online=true;updSync();}catch(e){}}
+    const target=S.accts.find(a=>String(a.id)===String(id));
+    if(!target)return true;
+    if(S.sb){
+        try{
+            const{data,error}=await S.sb.from('accounts').delete().eq('id',id).select('id');
+            if(error){
+                console.error('Supabase delete account falló:',error.code,error.message);
+                toast('No se pudo borrar la cuenta en la nube. Revisá los permisos RLS de DELETE en accounts.','error');
+                return false;
+            }
+            if(!data||!data.some(row=>String(row.id)===String(id))){
+                /* Puede que ya no exista en la nube; consultar antes de permitir
+                   que un refresh la recupere desde una copia local antigua. */
+                const{data:check,error:checkError}=await S.sb.from('accounts').select('id').eq('id',id).limit(1);
+                if(checkError||check?.length){
+                    toast('Supabase no confirmó la eliminación de la cuenta. Revisá la política RLS DELETE de accounts.','error');
+                    return false;
+                }
+            }
+            S.online=true;updSync();
+        }catch(e){
+            console.error('Supabase delete account excepción:',e.message);
+            toast('Error de conexión: no se confirmó la eliminación de la cuenta.','error');
+            return false;
+        }
+    }
+    S.accts=S.accts.filter(a=>String(a.id)!==String(id));
+    lSave('hf_accts',S.accts);
+    return true;
 }
 async function saveGoal(g){
     g.id=g.id||crypto.randomUUID();g.created_at=g.created_at||new Date().toISOString();
@@ -3773,7 +3829,8 @@ async function doEditAcct(){
 async function doDeleteAcct(){
     const id=document.getElementById('ea-id').value;
     if(!confirm('¿Eliminar esta cuenta?'))return;
-    await delAcct(id);await loadAll();renderAll();closeEditAcct();
+    const deleted=await delAcct(id);if(!deleted)return;
+    await loadAll();renderAll();closeEditAcct();
     toast('Cuenta eliminada','success');
 }
 
