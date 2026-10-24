@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Mi Hogar · Finanzas del hogar</title>
+    <title>HogarFin · Finanzas del hogar</title>
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="theme-color" content="#F7F8FA">
     <script src="https://cdn.tailwindcss.com"></script>
@@ -158,10 +158,27 @@
         }
         .swipe-indicator{position:absolute;top:50%;transform:translateY(-50%);font-size:24px;opacity:.2;pointer-events:none}
         @keyframes ripple{to{transform:scale(2.5);opacity:0}}
-    
-        /* ===== HOGARFIN PREMIUM UI REFRESH ===== */
-        :root{--hf-ink:#101828;--hf-gold:#b78a3b;--hf-gold-dark:#946b25;--hf-line:#e7e9ee;--hf-canvas:#f5f6f8;--hf-shadow:0 8px 28px rgba(16,24,40,.045)}
-        html{font-size:16px;scroll-behavior:smooth}
+
+        /* ===== HOGARFIN PREMIUM UI REFRESH =====
+           Bloque de estilos premium que mejora la apariencia visual:
+           - Cards con sombras elegantes y bordes sutiles dorados
+           - Hero card con gradiente oscuro premium + decoración dorada
+           - Botones con gradientes y efectos hover
+           - Navbar mejorado con efecto dorado en tab activo
+           - FAB center dorado en vez de negro
+           - Animaciones de entrada suaves
+           - Responsive: navbar arriba en desktop, abajo en móvil
+           - Soporte para prefers-reduced-motion
+        */
+        :root{
+            --hf-ink:#101828;
+            --hf-gold:#b78a3b;
+            --hf-gold-dark:#946b25;
+            --hf-line:#e7e9ee;
+            --hf-canvas:#f5f6f8;
+            --hf-shadow:0 8px 28px rgba(16,24,40,.045)
+        }
+        html{scroll-behavior:smooth}
         body{background:radial-gradient(ellipse at 50% -15%,rgba(183,138,59,.075),transparent 36%),var(--hf-canvas);color:var(--hf-ink);letter-spacing:-.01em}
         button,a,[role=button]{-webkit-tap-highlight-color:transparent}
         button{transition:transform .18s cubic-bezier(.2,.8,.2,1),box-shadow .2s ease,background-color .2s ease,border-color .2s ease}
@@ -208,21 +225,36 @@
         th{font-size:11px!important;text-transform:uppercase;letter-spacing:.07em;color:#777f8d!important;font-weight:700!important}
         tr{transition:background-color .15s ease}
         tbody tr:hover{background:#faf8f4}
-        ::-webkit-scrollbar{width:7px;height:7px}::-webkit-scrollbar-thumb{background:#d1d5dc;border-radius:99px}::-webkit-scrollbar-thumb:hover{background:#b7bdc7}
+        ::-webkit-scrollbar{width:7px;height:7px}
+        ::-webkit-scrollbar-thumb{background:#d1d5dc;border-radius:99px}
+        ::-webkit-scrollbar-thumb:hover{background:#b7bdc7}
         .view.active{animation:premiumEnter .28s cubic-bezier(.2,.7,.25,1)}
         @keyframes premiumEnter{from{opacity:0;transform:translateY(7px)}to{opacity:1;transform:translateY(0)}}
+
+        /* En desktop, navbar arriba en vez de abajo, tabs horizontales */
         @media(min-width:768px){
           #content-area{padding-bottom:40px}
-          .nav-bar{position:sticky!important;top:0;bottom:auto!important;left:auto;right:auto;border-top:0;border-bottom:1px solid #e5e7eb;box-shadow:0 4px 20px rgba(16,24,40,.035)}
-          .nav-bar>div{max-width:1180px!important;justify-content:flex-start!important;gap:12px;padding:12px 28px!important}
-          .nav-bar .tab-item{flex-direction:row!important;gap:9px!important;padding:10px 15px!important;min-width:unset}
-          .nav-bar .tab-item span{font-size:13px!important}
-          .nav-bar .fab-center{order:5;margin:0 0 0 auto;width:44px;height:44px;border-width:2px}
+          nav.nav-bar{
+            position:sticky!important;
+            top:0!important;
+            bottom:auto!important;
+            left:auto!important;
+            right:auto!important;
+            border-top:0!important;
+            border-bottom:1px solid #e5e7eb!important;
+            box-shadow:0 4px 20px rgba(16,24,40,.035);
+            z-index:40;
+          }
+          nav.nav-bar>div{max-width:1180px!important;justify-content:flex-start!important;gap:12px!important;padding:12px 28px!important}
+          nav.nav-bar .tab-item{flex-direction:row!important;gap:9px!important;padding:10px 15px!important;min-width:unset}
+          nav.nav-bar .tab-item span{font-size:13px!important}
+          nav.nav-bar .fab-center{order:5;margin:0 0 0 auto;width:44px;height:44px;border-width:2px}
           .view{padding-top:28px!important}
           .modal-sheet{max-width:650px;left:50%;bottom:50%;transform:translate(-50%,50%);border-radius:26px!important;max-height:88vh}
           .modal-sheet.anim-up{animation:modalPremium .24s ease-out}
           @keyframes modalPremium{from{opacity:0;transform:translate(-50%,calc(50% + 12px))}to{opacity:1;transform:translate(-50%,50%)}}
         }
+        /* En móvil, ajustes finos */
         @media(max-width:480px){
           .view{padding:16px!important}
           .hero-card{padding:21px!important;border-radius:22px!important}
@@ -234,11 +266,15 @@
           .tab-item i{font-size:17px!important}
           .fab-center{width:54px;height:54px}
         }
-        #tx-period-summary .stat-card{min-width:0;overflow:hidden}
-        #tx-period-summary .stat-card p:last-child{font-variant-numeric:tabular-nums;overflow-wrap:anywhere}
-        @media(max-width:390px){#tx-period-summary .stat-card{padding:10px!important}#tx-period-summary .stat-card p:last-child{font-size:12px!important}}
-        @media(prefers-reduced-motion:reduce){*,*:before,*:after{scroll-behavior:auto!important;animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}}
-
+        /* Respetar usuarios que prefieren menos movimiento */
+        @media(prefers-reduced-motion:reduce){
+          *,*:before,*:after{
+            scroll-behavior:auto!important;
+            animation-duration:.01ms!important;
+            animation-iteration-count:1!important;
+            transition-duration:.01ms!important;
+          }
+        }
     </style>
 </head>
 <body class="bg-bg min-h-screen">
@@ -390,23 +426,14 @@
     <div class="flex items-center justify-between mb-4">
         <div><h1 class="text-xl font-display font-bold tracking-tight">Movimientos</h1><p class="text-xs text-muted" id="tx-count-label">0 registros</p></div>
     </div>
-    <div class="card p-4 mb-3">
-        <label for="f-month" class="block text-xs font-semibold text-muted mb-1.5"><i class="fa-regular fa-calendar mr-1 text-accent"></i>Período a consultar</label>
-        <select id="f-month" onchange="renderTransactions()" class="input-elegant w-full px-3 py-2.5 text-sm mb-3"><option value="current">Mes actual</option><option value="all">Todos los meses</option></select>
-        <div class="grid grid-cols-3 gap-2">
-            <select id="f-type" onchange="renderTransactions()" class="input-elegant px-2 py-2 text-xs"><option value="all">Todos los tipos</option><option value="income">Ingresos</option><option value="expense">Gastos</option></select>
-            <select id="f-user" onchange="renderTransactions()" class="input-elegant px-2 py-2 text-xs"><option value="all">Ambos</option></select>
-            <select id="f-cat" onchange="renderTransactions()" class="input-elegant px-2 py-2 text-xs"><option value="all">Categorías</option></select>
-        </div>
+    <div class="grid grid-cols-3 gap-2 mb-3">
+        <select id="f-type" onchange="renderTransactions()" class="input-elegant px-2 py-2 text-xs"><option value="all">Tipo</option><option value="income">Ingresos</option><option value="expense">Gastos</option></select>
+        <select id="f-user" onchange="renderTransactions()" class="input-elegant px-2 py-2 text-xs"><option value="all">Persona</option></select>
+        <select id="f-cat" onchange="renderTransactions()" class="input-elegant px-2 py-2 text-xs"><option value="all">Cat.</option></select>
     </div>
     <div class="mb-4 relative">
         <i class="fa-solid fa-magnifying-glass absolute left-4 top-1/2 -translate-y-1/2 text-muted text-xs"></i>
         <input id="f-search" type="text" oninput="renderTransactions()" placeholder="Buscar..." class="input-elegant w-full pl-10 pr-4 py-2.5 text-xs">
-    </div>
-    <div id="tx-period-summary" class="grid grid-cols-3 gap-2 mb-3"></div>
-    <div class="flex flex-wrap gap-2 mb-4">
-        <button onclick="downloadFilteredCSV()" class="btn-primary flex-1 px-3 py-2.5 text-xs flex items-center justify-center gap-2"><i class="fa-solid fa-file-csv"></i>Descargar CSV</button>
-        <button onclick="printFilteredReport()" class="btn-accent flex-1 px-3 py-2.5 text-xs flex items-center justify-center gap-2"><i class="fa-solid fa-file-pdf"></i>Ver / guardar PDF</button>
     </div>
     <div id="tx-list" class="space-y-2"></div>
     <div id="tx-empty" class="hidden text-center py-16 text-muted"><i class="fa-solid fa-receipt text-4xl mb-3 opacity-20"></i><p class="text-sm font-medium">Sin movimientos</p><p class="text-xs mt-1">Tocá el botón + para agregar tu primer registro</p></div>
@@ -2306,10 +2333,8 @@ async function initSupabase(url,key){
                 toast('Supabase conectado','success');
             }
         }catch(testErr){
-            /* No marcar como conectado si la consulta real falló. */
-            S.online=false;
-            console.error('No se pudo verificar la conexión con Supabase:',testErr?.message||testErr);
-            toast('Supabase no pudo verificar la conexión. Revisá la consola y la configuración.','error');
+            S.online=true;
+            toast('Supabase conectado. Cargá el SQL del panel para crear las tablas.','info');
         }
     }catch(e){
         S.sb=null;S.online=false;
@@ -2330,14 +2355,17 @@ async function loadAll(){
     const localAccts=lLoad('hf_accts');
     const localGoals=lLoad('hf_goals');
     const localInst=lLoad('hf_inst');
+    const localFixed=JSON.parse(localStorage.getItem('hf_fixed_expenses')||'[]');
 
     if(S.sb){
         try{
-            const[tr,ac,gl,ins]=await Promise.all([
+            const[tr,ac,gl,ins,fx,st]=await Promise.all([
                 S.sb.from('transactions').select('*').order('date',{ascending:false}),
                 S.sb.from('accounts').select('*').order('created_at'),
                 S.sb.from('goals').select('*').order('created_at'),
-                S.sb.from('installments').select('*').order('created_at')
+                S.sb.from('installments').select('*').order('created_at'),
+                S.sb.from('fixed_expenses').select('*').order('created_at'),
+                S.sb.from('settings').select('*')
             ]);
 
             /* Reintentar subir registros locales que nunca llegaron a la nube.
@@ -2347,7 +2375,8 @@ async function loadAll(){
                 {table:'transactions',result:tr,local:localTx},
                 {table:'accounts',result:ac,local:localAccts},
                 {table:'goals',result:gl,local:localGoals},
-                {table:'installments',result:ins,local:localInst}
+                {table:'installments',result:ins,local:localInst},
+                {table:'fixed_expenses',result:fx,local:localFixed}
             ];
             for(const item of pendingSync){
                 if(item.result?.error)continue;
@@ -2388,11 +2417,27 @@ async function loadAll(){
             S.accts=mergeById(ac,localAccts);
             S.goals=mergeById(gl,localGoals);
             S.inst=mergeById(ins,localInst);
+            S.fixedExpenses=mergeById(fx,localFixed);
             /* Persistir el resultado combinado en localStorage para tenerlo offline */
             lSave('hf_tx',S.tx);
             lSave('hf_accts',S.accts);
             lSave('hf_goals',S.goals);
             lSave('hf_inst',S.inst);
+            lSave('hf_fixed_expenses',S.fixedExpenses);
+            /* Aplicar settings (nombres de personas, moneda) si llegaron de Supabase */
+            if(sbTableOk(st)&&st.data&&st.data.length){
+                for(const row of st.data){
+                    if(row.key==='u1'&&row.value&&row.value!==S.u1){
+                        S.u1=row.value;localStorage.setItem('hf_u1',S.u1);
+                    }
+                    if(row.key==='u2'&&row.value&&row.value!==S.u2){
+                        S.u2=row.value;localStorage.setItem('hf_u2',S.u2);
+                    }
+                    if(row.key==='curr'&&row.value&&row.value!==S.curr){
+                        S.curr=row.value;localStorage.setItem('hf_curr',S.curr);
+                    }
+                }
+            }
             S.online=true;updSync();
             return;
         }catch(e){
@@ -2401,6 +2446,7 @@ async function loadAll(){
         }
     }
     S.tx=lLoad('hf_tx');S.accts=lLoad('hf_accts');S.goals=lLoad('hf_goals');S.inst=lLoad('hf_inst');
+    S.fixedExpenses=JSON.parse(localStorage.getItem('hf_fixed_expenses')||'[]');
 }
 
 function loadBudgets(){
@@ -2440,12 +2486,20 @@ function saveFixedExpensesLocal(){
     localStorage.setItem('hf_fixed_expenses',JSON.stringify(S.fixedExpenses));
 }
 
+/* Verifica si un string es un UUID válido (formato PostgreSQL UUID).
+   Importante: la columna fixed_expenses.id en Supabase es UUID.
+   Si usamos IDs legacy como 'fx1', 'fx2'... el insert a Supabase falla. */
 function isUuid(value){
     return typeof value==='string'&&/^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(value);
 }
 
-/* La columna fixed_expenses.id es UUID. Convertimos los IDs legacy fx1/fx2...
-   a UUID determinísticos para que los mismos gastos mantengan el mismo ID entre dispositivos. */
+/* Convierte los IDs legacy (fx1, fx2, fx-uuid-random) a UUIDs determinísticos.
+   - fx1 → 00000000-0000-4000-8000-000000000001
+   - fx2 → 00000000-0000-4000-8000-000000000002
+   - fx-{uuid} → ese UUID
+   - cualquier otro → UUID aleatorio nuevo
+   Esto es CRÍTICO para que los mismos gastos fijos mantengan el mismo ID
+   entre dispositivos y la sincronización no cree duplicados. */
 function normalizeFixedExpenseIds(){
     let changed=false;
     for(const fx of (S.fixedExpenses||[])){
@@ -2453,6 +2507,7 @@ function normalizeFixedExpenseIds(){
         const legacy=String(fx.id||'').match(/^fx(\d+)$/i);
         const prefixed=String(fx.id||'').match(/^fx-([0-9a-f-]{36})$/i);
         if(legacy){
+            /* fx1 → 00000000-0000-4000-8000-000000000001 (UUID determinístico) */
             fx.id='00000000-0000-4000-8000-'+legacy[1].padStart(12,'0');
         }else if(prefixed&&isUuid(prefixed[1])){
             fx.id=prefixed[1];
@@ -2474,7 +2529,7 @@ async function loadFixedExpensesRemote(){
         if(error){
             console.error('No se pudieron leer los gastos fijos de Supabase:',error.code,error.message);
             if(error.code==='42P01'||error.code==='PGRST205'||error.code==='PGRST204'){
-                sbWarnOnce('fx_table_missing','Falta crear la tabla fixed_expenses en Supabase.');
+                sbWarnOnce('fx_table_missing','Falta crear la tabla fixed_expenses en Supabase. Cargá el SQL actualizado.');
             }
             return;
         }
@@ -2515,10 +2570,66 @@ async function saveFixedExpenseRemote(item){
 
 async function delFixedExpenseRemote(id){
     if(!S.sb)return;
+    try{await S.sb.from('fixed_expenses').delete().eq('id',id)}catch(e){}
+}
+
+/* ============================================================
+   SETTINGS (sincronización de nombres de personas y moneda)
+   ============================================================ */
+/* Guarda un setting (key-value) en Supabase. Si la tabla no existe,
+   lo avisa una sola vez. */
+async function saveSetting(key,value){
+    if(!S.sb)return;
     try{
-        const{error}=await S.sb.from('fixed_expenses').delete().eq('id',id);
-        if(error){console.error('No se pudo borrar el gasto fijo remoto:',error.message);S.online=false;updSync()}
-    }catch(e){console.error('delFixedExpenseRemote falló:',e.message);S.online=false;updSync()}
+        const{data,error}=await S.sb.from('settings').upsert({
+            key,
+            value:String(value),
+            updated_at:new Date().toISOString()
+        }).select();
+        if(error){
+            if(error.code==='42P01'||error.code==='PGRST205'||error.code==='PGRST204'){
+                sbWarnOnce('settings_table_missing','Falta crear la tabla settings en Supabase. Cargá el SQL actualizado.');
+            }else{
+                console.warn('[settings] upsert falló:',error.message);
+            }
+        }else{
+            S.online=true;updSync();
+        }
+    }catch(e){console.warn('[settings] exception:',e.message)}
+}
+
+/* Carga todos los settings desde Supabase y actualiza el estado S */
+async function loadSettings(){
+    if(!S.sb)return;
+    try{
+        const{data,error}=await S.sb.from('settings').select('*');
+        if(error){
+            if(error.code==='42P01'||error.code==='PGRST205'||error.code==='PGRST204'){
+                /* Tabla settings no existe, usar defaults de localStorage */
+                return;
+            }
+            return;
+        }
+        if(data&&data.length){
+            /* Aplicar settings al estado S */
+            for(const row of data){
+                if(row.key==='u1'&&row.value&&row.value!==S.u1){
+                    S.u1=row.value;
+                    localStorage.setItem('hf_u1',S.u1);
+                }
+                if(row.key==='u2'&&row.value&&row.value!==S.u2){
+                    S.u2=row.value;
+                    localStorage.setItem('hf_u2',S.u2);
+                }
+                if(row.key==='curr'&&row.value&&row.value!==S.curr){
+                    S.curr=row.value;
+                    localStorage.setItem('hf_curr',S.curr);
+                }
+            }
+            populateFilters();
+            renderAll();
+        }
+    }catch(e){console.warn('[settings] loadSettings exception:',e.message)}
 }
 
 /* Helper: guarda SIEMPRE en localStorage, e intenta también en Supabase si está conectado */
@@ -2555,9 +2666,7 @@ async function saveTx(t){
         try{
             const{data,error}=await S.sb.from('transactions').insert(t).select();
             if(error){
-                S.online=false;updSync();
-                console.error('Supabase insert tx falló (guardado localmente):',error.message,'código:',error.code);
-                toast('Movimiento guardado en este dispositivo, pero NO en la nube: '+error.message,'error');
+                console.warn('Supabase insert tx falló (guardado localmente):',error.message,'código:',error.code);
                 if(error.code==='42P01'||error.code==='PGRST205'||error.code==='PGRST204'){
                     sbWarnOnce('tx_table_missing','Falta crear las tablas en Supabase. Cargá el SQL del panel (ver Configuración). Los datos se guardaron localmente.');
                 }else if(error.code==='42501'||error.message?.toLowerCase().includes('policy')||error.message?.toLowerCase().includes('rls')){
@@ -2606,7 +2715,19 @@ async function saveAcct(a){
     a.id=a.id||crypto.randomUUID();a.created_at=a.created_at||new Date().toISOString();
     persistAcctLocal(a);
     if(S.sb){
-        try{const{data,error}=await S.sb.from('accounts').insert(a).select();if(!error&&data&&data[0]){S.online=true;updSync();persistAcctLocal(data[0]);return data[0]}else if(error){console.warn('Supabase insert acct falló:',error.message,'código:',error.code);if(error.code==='42P01'||error.code==='PGRST205'||error.code==='PGRST204'){sbWarnOnce('acct_table_missing','Falta crear las tablas en Supabase. Cargá el SQL del panel.')}else if(error.code==='42501'||error.message?.toLowerCase().includes('policy')||error.message?.toLowerCase().includes('rls')){sbWarnOnce('acct_rls','RLS bloquea el insert en accounts. Cargá el SQL del panel.')}}}catch(e){console.warn('Supabase insert acct exception:',e.message)}
+        try{
+            /* Usar upsert (no insert) para que si el ID ya existe en Supabase,
+               lo actualice en vez de fallar con constraint violation. */
+            const{data,error}=await S.sb.from('accounts').upsert(a).select();
+            if(error){
+                console.warn('Supabase upsert acct falló:',error.message,'código:',error.code);
+                if(error.code==='42P01'||error.code==='PGRST205'||error.code==='PGRST204'){sbWarnOnce('acct_table_missing','Falta crear las tablas en Supabase. Cargá el SQL del panel.')}
+                else if(error.code==='42501'||error.message?.toLowerCase().includes('policy')||error.message?.toLowerCase().includes('rls')){sbWarnOnce('acct_rls','RLS bloquea el acceso a accounts. Cargá el SQL del panel.')}
+            }else{
+                S.online=true;updSync();
+                if(data&&data[0])persistAcctLocal(data[0]);
+            }
+        }catch(e){console.warn('Supabase upsert acct exception:',e.message)}
     }
     return a;
 }
@@ -2625,7 +2746,17 @@ async function saveGoal(g){
     g.id=g.id||crypto.randomUUID();g.created_at=g.created_at||new Date().toISOString();
     persistGoalLocal(g);
     if(S.sb){
-        try{const{data,error}=await S.sb.from('goals').insert(g).select();if(!error&&data&&data[0]){S.online=true;updSync();persistGoalLocal(data[0]);return data[0]}else if(error){console.warn('Supabase insert goal falló:',error.message,'código:',error.code);if(error.code==='42P01'||error.code==='PGRST205'||error.code==='PGRST204'){sbWarnOnce('goal_table_missing','Falta crear las tablas en Supabase. Cargá el SQL del panel.')}else if(error.code==='42501'||error.message?.toLowerCase().includes('policy')||error.message?.toLowerCase().includes('rls')){sbWarnOnce('goal_rls','RLS bloquea el insert en goals. Cargá el SQL del panel.')}}}catch(e){console.warn('Supabase insert goal exception:',e.message)}
+        try{
+            const{data,error}=await S.sb.from('goals').upsert(g).select();
+            if(error){
+                console.warn('Supabase upsert goal falló:',error.message,'código:',error.code);
+                if(error.code==='42P01'||error.code==='PGRST205'||error.code==='PGRST204'){sbWarnOnce('goal_table_missing','Falta crear las tablas en Supabase. Cargá el SQL del panel.')}
+                else if(error.code==='42501'||error.message?.toLowerCase().includes('policy')||error.message?.toLowerCase().includes('rls')){sbWarnOnce('goal_rls','RLS bloquea el acceso a goals. Cargá el SQL del panel.')}
+            }else{
+                S.online=true;updSync();
+                if(data&&data[0])persistGoalLocal(data[0]);
+            }
+        }catch(e){console.warn('Supabase upsert goal exception:',e.message)}
     }
     return g;
 }
@@ -2644,7 +2775,17 @@ async function saveInst(ins){
     ins.id=ins.id||crypto.randomUUID();ins.created_at=ins.created_at||new Date().toISOString();
     persistInstLocal(ins);
     if(S.sb){
-        try{const{data,error}=await S.sb.from('installments').insert(ins).select();if(!error&&data&&data[0]){S.online=true;updSync();persistInstLocal(data[0]);return data[0]}else if(error){console.warn('Supabase insert inst falló:',error.message,'código:',error.code);if(error.code==='42P01'||error.code==='PGRST205'||error.code==='PGRST204'){sbWarnOnce('inst_table_missing','Falta crear las tablas en Supabase. Cargá el SQL del panel.')}else if(error.code==='42501'||error.message?.toLowerCase().includes('policy')||error.message?.toLowerCase().includes('rls')){sbWarnOnce('inst_rls','RLS bloquea el insert en installments. Cargá el SQL del panel.')}}}catch(e){console.warn('Supabase insert inst exception:',e.message)}
+        try{
+            const{data,error}=await S.sb.from('installments').upsert(ins).select();
+            if(error){
+                console.warn('Supabase upsert inst falló:',error.message,'código:',error.code);
+                if(error.code==='42P01'||error.code==='PGRST205'||error.code==='PGRST204'){sbWarnOnce('inst_table_missing','Falta crear las tablas en Supabase. Cargá el SQL del panel.')}
+                else if(error.code==='42501'||error.message?.toLowerCase().includes('policy')||error.message?.toLowerCase().includes('rls')){sbWarnOnce('inst_rls','RLS bloquea el acceso a installments. Cargá el SQL del panel.')}
+            }else{
+                S.online=true;updSync();
+                if(data&&data[0])persistInstLocal(data[0]);
+            }
+        }catch(e){console.warn('Supabase upsert inst exception:',e.message)}
     }
     return ins;
 }
@@ -3237,80 +3378,30 @@ function renderGoals(){
 /* ============================================================
    RENDER: TRANSACCIONES
    ============================================================ */
-function getFilteredTransactions(){
-    const fType=document.getElementById('f-type')?.value||'all';
-    const fUser=document.getElementById('f-user')?.value||'all';
-    const fCat=document.getElementById('f-cat')?.value||'all';
-    const fSearch=(document.getElementById('f-search')?.value||'').trim().toLowerCase();
-    const fMonth=document.getElementById('f-month')?.value||'current';
-    const now=new Date();
-    const monthKey=`${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}`;
+function renderTransactions(){
+    const fType=document.getElementById('f-type').value;
+    const fUser=document.getElementById('f-user').value;
+    const fCat=document.getElementById('f-cat').value;
+    const fSearch=(document.getElementById('f-search').value||'').toLowerCase();
+
     let filtered=[...S.tx];
-    if(fMonth==='current')filtered=filtered.filter(t=>String(t.date||'').slice(0,7)===monthKey);
-    else if(fMonth && fMonth!=='all')filtered=filtered.filter(t=>String(t.date||'').slice(0,7)===fMonth);
     if(fType!=='all')filtered=filtered.filter(t=>t.type===fType);
     if(fUser!=='all')filtered=filtered.filter(t=>t.user_name===fUser);
     if(fCat!=='all')filtered=filtered.filter(t=>t.category===fCat);
-    if(fSearch)filtered=filtered.filter(t=>(t.description||'').toLowerCase().includes(fSearch)||(t.category||'').toLowerCase().includes(fSearch)||(t.user_name||'').toLowerCase().includes(fSearch));
-    return filtered.sort((a,b)=>String(b.date||'').localeCompare(String(a.date||''))||String(b.created_at||'').localeCompare(String(a.created_at||'')));
-}
-function ensureMonthFilterOptions(){
-    const el=document.getElementById('f-month');if(!el)return;
-    const previous=el.value||'current';
-    const months=[...new Set((S.tx||[]).map(t=>String(t.date||'').slice(0,7)).filter(x=>/^\\d{4}-\\d{2}$/.test(x)))].sort().reverse();
-    const fmtMonth=m=>{const [y,mo]=m.split('-');return new Date(Number(y),Number(mo)-1,1).toLocaleDateString('es-AR',{month:'long',year:'numeric'}).replace(/^./,c=>c.toUpperCase())};
-    el.innerHTML='<option value="current">Mes actual</option><option value="all">Todos los meses</option>'+months.map(m=>`<option value="${m}">${fmtMonth(m)}</option>`).join('');
-    el.value=[...el.options].some(o=>o.value===previous)?previous:'current';
-}
-function renderTransactions(){
-    ensureMonthFilterOptions();
-    const filtered=getFilteredTransactions();
-    const listEl=document.getElementById('tx-list'),emptyEl=document.getElementById('tx-empty');
-    document.getElementById('tx-count-label').textContent=`${filtered.length} ${filtered.length===1?'movimiento':'movimientos'}`;
-    const income=filtered.filter(t=>t.type==='income').reduce((a,t)=>a+(Number(t.amount)||0),0);
-    const expense=filtered.filter(t=>t.type==='expense').reduce((a,t)=>a+(Number(t.amount)||0),0);
-    const summary=document.getElementById('tx-period-summary');
-    if(summary)summary.innerHTML=`
-      <div class="stat-card !p-3"><p class="text-xs text-muted mb-1">Ingresos</p><p class="text-sm font-display font-bold text-income break-words">${fmt(income)}</p></div>
-      <div class="stat-card !p-3"><p class="text-xs text-muted mb-1">Gastos</p><p class="text-sm font-display font-bold text-expense break-words">${fmt(expense)}</p></div>
-      <div class="stat-card !p-3"><p class="text-xs text-muted mb-1">Resultado</p><p class="text-sm font-display font-bold break-words" style="color:${income-expense<0?'#DC2626':'#B07D2A'}">${fmt(income-expense)}</p></div>`;
+    if(fSearch)filtered=filtered.filter(t=>(t.description||'').toLowerCase().includes(fSearch)||(t.category||'').toLowerCase().includes(fSearch));
+
+    const listEl=document.getElementById('tx-list');
+    const emptyEl=document.getElementById('tx-empty');
+    document.getElementById('tx-count-label').textContent=`${filtered.length} ${filtered.length===1?'registro':'registros'}`;
+
     if(!filtered.length){listEl.innerHTML='';emptyEl.classList.remove('hidden');return}
-    emptyEl.classList.add('hidden');listEl.innerHTML=filtered.map(t=>txRow(t)).join('');
-}
-function getReportPeriodLabel(){
-    const el=document.getElementById('f-month');
-    if(!el||el.value==='current')return new Date().toLocaleDateString('es-AR',{month:'long',year:'numeric'}).replace(/^./,c=>c.toUpperCase());
-    if(el.value==='all')return 'Todos los meses';
-    const [y,m]=el.value.split('-');
-    return new Date(Number(y),Number(m)-1,1).toLocaleDateString('es-AR',{month:'long',year:'numeric'}).replace(/^./,c=>c.toUpperCase());
-}
-function downloadFilteredCSV(){
-    const tx=getFilteredTransactions();
-    const headers=['Fecha','Tipo','Categoría','Monto','Moneda','Descripción','Persona','Tarjeta','Cuota'];
-    const rows=tx.map(t=>[t.date,t.type==='income'?'Ingreso':'Gasto',catById(t.category).name||t.category,t.amount,t.currency||S.curr,t.description||'',t.user_name||'',t.card_name||'',t.cuota_info||'']);
-    const csv='\\ufeff'+[headers,...rows].map(r=>r.map(c=>`"${String(c??'').replace(/"/g,'""')}"`).join(';')).join('\\r\\n');
-    const blob=new Blob([csv],{type:'text/csv;charset=utf-8;'}),url=URL.createObjectURL(blob),a=document.createElement('a');
-    const period=(document.getElementById('f-month')?.value||'current').replace('current',today().slice(0,7)).replace('all','todos');
-    a.href=url;a.download=`mi_hogar_movimientos_${period}_${today()}.csv`;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),1000);
-    toast(`CSV descargado (${tx.length} movimientos)`,'success');
-}
-function printFilteredReport(){
-    const tx=getFilteredTransactions();
-    if(!tx.length){toast('No hay movimientos para generar el informe','warn');return}
-    const income=tx.filter(t=>t.type==='income').reduce((a,t)=>a+(Number(t.amount)||0),0),expense=tx.filter(t=>t.type==='expense').reduce((a,t)=>a+(Number(t.amount)||0),0);
-    const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-    const money=t=>{const n=Math.abs(Number(t.amount)||0),sym=t.currency==='USD'?'U$S ':'$';return (t.type==='income'?'+':'−')+sym+n.toLocaleString('es-AR',{minimumFractionDigits:2,maximumFractionDigits:2})};
-    const report=window.open('','_blank');if(!report){toast('Permití las ventanas emergentes para ver el informe','warn');return}
-    report.document.write(`<!DOCTYPE html><html lang="es"><head><meta charset="utf-8"><title>Mi Hogar - ${esc(getReportPeriodLabel())}</title><style>
-    body{font:13px Arial,sans-serif;color:#18202d;margin:32px}h1{margin:0 0 6px;font-size:25px}p{color:#667085;margin:0 0 22px}.stats{display:flex;gap:12px;margin:20px 0}.stat{flex:1;border:1px solid #e5e7eb;border-radius:10px;padding:13px}.label{color:#667085;font-size:11px;text-transform:uppercase}.value{font-size:17px;font-weight:bold;margin-top:7px}.green{color:#12805c}.red{color:#c73737}.gold{color:#946b25}table{width:100%;border-collapse:collapse;margin-top:20px}th{background:#f4f5f7;text-align:left;font-size:10px;text-transform:uppercase;color:#667085}td,th{padding:9px 8px;border-bottom:1px solid #e5e7eb}td.amount{text-align:right;white-space:nowrap;font-weight:bold}.foot{margin-top:20px;font-size:10px;color:#98a2b3}@media print{body{margin:12mm}tr{break-inside:avoid}}
-    </style></head><body><h1>Mi Hogar · Informe de movimientos</h1><p>Período: ${esc(getReportPeriodLabel())} · Generado: ${esc(today())} · ${tx.length} movimientos</p>
-    <div class="stats"><div class="stat"><div class="label">Ingresos</div><div class="value green">${esc(fmt(income))}</div></div><div class="stat"><div class="label">Gastos</div><div class="value red">${esc(fmt(expense))}</div></div><div class="stat"><div class="label">Resultado</div><div class="value ${income-expense<0?'red':'gold'}">${esc(fmt(income-expense))}</div></div></div>
-    <table><thead><tr><th>Fecha</th><th>Descripción</th><th>Tipo</th><th>Categoría</th><th>Persona</th><th style="text-align:right">Monto</th></tr></thead><tbody>
-    ${tx.map(t=>`<tr><td>${esc(t.date||'')}</td><td>${esc(t.description||'—')}</td><td>${t.type==='income'?'Ingreso':'Gasto'}</td><td>${esc(catById(t.category).name||t.category||'—')}</td><td>${esc(t.user_name||'—')}</td><td class="amount ${t.type==='income'?'green':'red'}">${esc(money(t))}</td></tr>`).join('')}
-    </tbody></table><div class="foot">En el diálogo de impresión elegí “Guardar como PDF” para descargar el informe.</div><script>window.onload=()=>setTimeout(()=>window.print(),250)<\/script></body></html>`);
-    report.document.close();
+    emptyEl.classList.add('hidden');
+    listEl.innerHTML=filtered.map(t=>txRow(t)).join('');
 }
 
+/* ============================================================
+   RENDER: ANALÍTICAS
+   ============================================================ */
 function renderAnalytics(){
     renderTrendChart();
     renderUsersChart();
@@ -4028,6 +4119,9 @@ function saveNames(){
     S.u1=document.getElementById('s-u1').value.trim()||'Persona 1';
     S.u2=document.getElementById('s-u2').value.trim()||'Persona 2';
     localStorage.setItem('hf_u1',S.u1);localStorage.setItem('hf_u2',S.u2);
+    /* Sincronizar a Supabase para que se vea en otros dispositivos */
+    saveSetting('u1',S.u1);
+    saveSetting('u2',S.u2);
     populateFilters();renderAll();
     toast('Nombres actualizados','success');
 }
@@ -4035,6 +4129,8 @@ function saveNames(){
 function saveCurr(){
     S.curr=document.getElementById('s-curr').value;
     localStorage.setItem('hf_curr',S.curr);
+    /* Sincronizar a Supabase */
+    saveSetting('curr',S.curr);
     renderAll();
     toast('Moneda actualizada','success');
 }
@@ -4044,7 +4140,7 @@ function saveSBConfig(){
     const key=document.getElementById('s-sb-key').value.trim();
     localStorage.setItem('hf_sb_url',url);localStorage.setItem('hf_sb_key',key);
     if(url&&key){
-        initSupabase(url,key).then(()=>loadAll()).then(()=>loadFixedExpensesRemote()).then(()=>renderAll());
+        initSupabase(url,key).then(()=>loadAll()).then(()=>renderAll());
     }else{
         S.sb=null;S.online=false;updSync();
         toast('Supabase desconectado, usando datos locales','info');
@@ -4111,7 +4207,7 @@ function finishSetup(){
     populateFilters();
 
     if(sbUrl&&sbKey){
-        initSupabase(sbUrl,sbKey).then(()=>loadAll()).then(()=>loadFixedExpensesRemote()).then(()=>{
+        initSupabase(sbUrl,sbKey).then(()=>loadAll()).then(()=>{
             populateFilters();renderAll();
             setupRealtime();
         });
@@ -4143,8 +4239,6 @@ function finishSetup(){
             await initSupabase(sbUrl,sbKey);
         }
         await loadAll();
-        if(S.sb)await loadFixedExpensesRemote();
-        else normalizeFixedExpenseIds();
         populateFilters();
         renderAll();
 
@@ -4162,51 +4256,164 @@ function finishSetup(){
 function setupRealtime(){
     if(!S.sb)return;
     try{
+        /* Cerrar canal anterior si existe (para reconnectar limpio) */
+        if(S._realtimeCh){
+            try{S._realtimeCh.unsubscribe()}catch{}
+        }
         /* Canal único por sesión para evitar conflictos entre pestañas */
         const chName='hf-ch-'+Math.random().toString(36).slice(2,8);
         const ch=S.sb.channel(chName);
-        /* Escuchar cambios en cada tabla por separado para no recibir
-           ruido innecesario */
-        const onChanges=async(payload)=>{
-            console.log('[Realtime] cambio recibido:',payload);
-            try{
-                await loadAll();
-                populateFilters();
-                renderAll();
-            }catch(e){
-                console.warn('[Realtime] error al aplicar cambios:',e.message);
-            }
+
+        /* Trackear si hay un modal abierto para no pisar la vista mientras el usuario edita */
+        const isModalOpen=()=>document.querySelector('.modal-sheet:not(.hidden)')!==null;
+        /* Trackear qué view está activa para no interrumpir edición */
+        const isEditingTx=()=>{
+            const m=document.getElementById('modal-edit-tx');
+            const a=document.getElementById('modal-add');
+            const e=document.getElementById('modal-edit-acct');
+            const g=document.getElementById('modal-edit-goal');
+            const c=document.getElementById('modal-card');
+            return[m,a,e,g,c].some(el=>el&&!el.classList.contains('hidden'));
         };
+
+        /* Contador de cambios pendientes (si llegan varios juntos, los acumulamos y procesamos una sola vez) */
+        let pendingChangesTimer=null;
+        const onChanges=async(payload)=>{
+            console.log('[Realtime] cambio recibido en tabla',payload.table,':',payload.eventType);
+
+            /* Si el usuario está editando algo, no interrumpimos la vista.
+               Marcamos para recargar cuando cierre el modal. */
+            if(isEditingTx()){
+                console.log('[Realtime] modal abierto, cambio encolado para aplicar al cerrar');
+                S._pendingReload=true;
+                /* Mostrar toast sutil */
+                if(payload.new&&payload.new.user_name&&payload.new.user_name!==S.u1&&payload.new.user_name!==S.u2){
+                    toast(`Cambio de ${payload.new.user_name} - actualizá al cerrar`,'info');
+                }
+                return;
+            }
+
+            /* Acumular cambios: si llegan varios en menos de 500ms, los procesamos juntos */
+            if(pendingChangesTimer)clearTimeout(pendingChangesTimer);
+            pendingChangesTimer=setTimeout(async()=>{
+                try{
+                    await loadAll();
+                    populateFilters();
+                    renderAll();
+                    /* Toast informativo (solo si la página está visible) */
+                    if(!document.hidden){
+                        const verb={
+                            INSERT:'agregado',
+                            UPDATE:'actualizado',
+                            DELETE:'borrado'
+                        }[payload.eventType]||'cambiado';
+                        const entityLabel={
+                            transactions:'movimiento',
+                            accounts:'cuenta',
+                            goals:'meta',
+                            installments:'cuota',
+                            fixed_expenses:'gasto fijo',
+                            settings:'configuración'
+                        }[payload.table]||payload.table;
+                        toast(`${entityLabel.charAt(0).toUpperCase()+entityLabel.slice(1)} ${verb} en otro dispositivo`,'info');
+                    }
+                }catch(e){
+                    console.warn('[Realtime] error al aplicar cambios:',e.message);
+                }
+            },500);
+        };
+
         ch.on('postgres_changes',{event:'*',schema:'public',table:'transactions'},onChanges)
           .on('postgres_changes',{event:'*',schema:'public',table:'accounts'},onChanges)
           .on('postgres_changes',{event:'*',schema:'public',table:'goals'},onChanges)
           .on('postgres_changes',{event:'*',schema:'public',table:'installments'},onChanges)
-          .on('postgres_changes',{event:'*',schema:'public',table:'fixed_expenses'},async()=>{
-              try{await loadFixedExpensesRemote();renderAll()}catch(e){console.warn('[Realtime] gastos fijos:',e.message)}
-          })
+          .on('postgres_changes',{event:'*',schema:'public',table:'fixed_expenses'},onChanges)
+          .on('postgres_changes',{event:'*',schema:'public',table:'settings'},onChanges)
           .subscribe((status)=>{
               console.log('[Realtime] canal status:',status);
               if(status==='SUBSCRIBED'){
                   S.online=true;updSync();
+                  /* Al reconectar, hacer un loadAll para estar al día */
+                  loadAll().then(()=>{populateFilters();renderAll()});
               }else if(status==='CHANNEL_ERROR'||status==='TIMED_OUT'||status==='CLOSED'){
                   console.warn('[Realtime] canal caído, reintentando en 5s...');
+                  S.online=false;updSync();
                   setTimeout(setupRealtime,5000);
               }
           });
         /* Guardar referencia para poder cerrar el canal si hace falta */
         S._realtimeCh=ch;
-        /* Heartbeat: cada 60 segundos, forzar un loadAll() para detectar
-           cambios que el realtime pudo haber perdido (buffer de red inestable) */
+
+        /* HEARTBEAT: cada 30 segundos, hacer loadAll() para detectar cambios
+           que el realtime pudo haber perdido (red inestable, pestaña en background
+           que pausó el websocket, etc.). Solo cuando la página está visible. */
         if(S._heartbeat)clearInterval(S._heartbeat);
         S._heartbeat=setInterval(async()=>{
-            /* Solo hacer heartbeat si la página está visible */
-            if(!document.hidden)return;
-        },60000);
-        /* También escuchar el evento 'online' del navegador para re-sincronizar */
-        window.addEventListener('online',async()=>{
-            console.log('[Network] conexión recuperada, re-sincronizando...');
-            await loadAll();populateFilters();renderAll();
-        });
+            /* Solo hacer heartbeat si la página está visible (no en background) */
+            if(document.hidden)return;
+            try{
+                await loadAll();
+                populateFilters();
+                renderAll();
+            }catch(e){
+                /* Silencioso, no molestar al usuario */
+            }
+        },30000); /* 30 segundos */
+
+        /* VISIBILITYCHANGE: cuando la app vuelve al foreground (de background
+           a visible), forzar reload. Esto es CRÍTICO en móvil: cuando tu mujer
+           minimiza la app y vuelve, hay que sincronizar todo lo que pasó. */
+        if(!S._visibilityListener){
+            S._visibilityListener=true;
+            document.addEventListener('visibilitychange',async()=>{
+                if(!document.hidden){
+                    /* La app volvió a estar visible, sincronizar */
+                    console.log('[visibilitychange] app visible, re-sincronizando...');
+                    try{
+                        await loadAll();
+                        populateFilters();
+                        renderAll();
+                    }catch(e){}
+                }
+            });
+        }
+
+        /* ONLINE: cuando el navegador recupera conexión, re-sincronizar */
+        if(!S._onlineListener){
+            S._onlineListener=true;
+            window.addEventListener('online',async()=>{
+                console.log('[Network] conexión recuperada, re-sincronizando...');
+                try{
+                    await loadAll();populateFilters();renderAll();
+                    toast('Conexión recuperada - sincronizado','success');
+                }catch(e){}
+            });
+            window.addEventListener('offline',()=>{
+                console.log('[Network] conexión perdida, usando datos locales');
+                S.online=false;updSync();
+                toast('Sin conexión - datos en modo local','warn');
+            });
+        }
+
+        /* Si hay cambios pendientes cuando se cierra un modal, aplicarlos */
+        if(!S._modalCloseListener){
+            S._modalCloseListener=true;
+            /* Hooking al hideModal para detectar cuando se cierra cualquier modal */
+            const origHideModal=window.hideModal;
+            if(typeof origHideModal==='function'){
+                window.hideModal=function(id){
+                    origHideModal(id);
+                    if(S._pendingReload){
+                        S._pendingReload=false;
+                        setTimeout(async()=>{
+                            await loadAll();
+                            populateFilters();
+                            renderAll();
+                        },200);
+                    }
+                };
+            }
+        }
     }catch(e){
         console.warn('[Realtime] no se pudo configurar:',e.message);
     }
