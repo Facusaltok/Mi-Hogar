@@ -2817,34 +2817,37 @@ async function updAcct(id,d){
 async function delAcct(id){
     const target=S.accts.find(a=>String(a.id)===String(id));
     if(!target)return true;
+    /* Si hay Supabase configurado, solo considerar el borrado exitoso cuando
+       el servidor devuelve explícitamente la fila eliminada. PostgREST puede
+       devolver cero filas sin error cuando RLS bloquea DELETE; no fingir éxito. */
     if(S.sb){
         try{
             const{data,error}=await S.sb.from('accounts').delete().eq('id',id).select('id');
             if(error){
                 console.error('Supabase delete account falló:',error.code,error.message);
-                toast('No se pudo borrar la cuenta en la nube. Revisá los permisos RLS de DELETE en accounts.','error');
+                toast('La cuenta NO se borró de la nube. Error Supabase: '+error.message,'error');
                 return false;
             }
-            if(!data||!data.some(row=>String(row.id)===String(id))){
-                /* Puede que ya no exista en la nube; consultar antes de permitir
-                   que un refresh la recupere desde una copia local antigua. */
-                const{data:check,error:checkError}=await S.sb.from('accounts').select('id').eq('id',id).limit(1);
-                if(checkError||check?.length){
-                    toast('Supabase no confirmó la eliminación de la cuenta. Revisá la política RLS DELETE de accounts.','error');
-                    return false;
-                }
+            if(!Array.isArray(data)||!data.some(row=>String(row.id)===String(id))){
+                console.error('Supabase no devolvió la cuenta eliminada. Posible RLS, ID distinto o proyecto Supabase diferente. ID:',id);
+                toast('Supabase no confirmó el borrado. No se quitó de este dispositivo. Revisá permisos RLS DELETE y que PC/celular usen la misma URL de Supabase.','error');
+                return false;
             }
             S.online=true;updSync();
         }catch(e){
             console.error('Supabase delete account excepción:',e.message);
-            toast('Error de conexión: no se confirmó la eliminación de la cuenta.','error');
+            toast('No se confirmó el borrado por un error de conexión. La cuenta se mantiene.','error');
             return false;
         }
+    }else{
+        toast('Esta app no está conectada a Supabase: el borrado sería solo local. Configurá la nube antes de borrar cuentas.','error');
+        return false;
     }
     S.accts=S.accts.filter(a=>String(a.id)!==String(id));
     lSave('hf_accts',S.accts);
     return true;
 }
+
 async function saveGoal(g){
     g.id=g.id||crypto.randomUUID();g.created_at=g.created_at||new Date().toISOString();
     persistGoalLocal(g);
