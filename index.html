@@ -628,7 +628,7 @@
             </div>
             <div class="mb-4"><label class="text-xs text-muted block mb-1.5">Monto</label><input id="m-amt" type="text" inputmode="decimal" placeholder="0,00" oninput="formatAmountOnInput(event)" class="input-elegant w-full px-4 py-3.5 amount-input"></div>
             <div class="mb-4"><label class="text-xs text-muted block mb-2">Categoría</label><div id="m-cats" class="grid grid-cols-4 gap-2"></div></div>
-            <div class="mb-4"><label class="text-xs text-muted block mb-2">Persona</label><div id="m-users" class="grid grid-cols-2 gap-2"></div></div>
+            <div class="mb-4"><label class="text-xs text-muted block mb-2">Persona</label><div id="m-users" class="grid grid-cols-3 gap-2"></div></div>
             <div class="mb-4"><label class="text-xs text-muted block mb-1.5">Descripción</label><input id="m-desc" type="text" placeholder="Ej: Supermercado" class="input-elegant w-full px-4 py-2.5 text-sm"></div>
             <div class="mb-4"><label class="text-xs text-muted block mb-1.5">Cuenta</label><select id="m-account" class="input-elegant w-full px-3 py-2.5 text-sm"></select></div>
             <div class="mb-5"><label class="text-xs text-muted block mb-1.5">Fecha</label><input id="m-date" type="date" class="input-elegant w-full px-4 py-2.5 text-sm"></div>
@@ -653,7 +653,7 @@
             </div>
             <div class="mb-3"><label class="text-xs text-muted block mb-1.5">Monto</label><input id="et-amt" type="text" inputmode="decimal" placeholder="0,00" oninput="formatAmountOnInput(event)" class="input-elegant w-full px-4 py-3 text-lg font-display font-bold text-center"></div>
             <div class="mb-3"><label class="text-xs text-muted block mb-2">Categoría</label><div id="et-cats" class="grid grid-cols-4 gap-2"></div></div>
-            <div class="mb-3"><label class="text-xs text-muted block mb-2">Persona</label><div id="et-users" class="grid grid-cols-2 gap-2"></div></div>
+            <div class="mb-3"><label class="text-xs text-muted block mb-2">Persona</label><div id="et-users" class="grid grid-cols-3 gap-2"></div></div>
             <div class="mb-3"><label class="text-xs text-muted block mb-1.5">Descripción</label><input id="et-desc" type="text" class="input-elegant w-full px-4 py-2.5 text-sm"></div>
             <div class="mb-4"><label class="text-xs text-muted block mb-1.5">Fecha</label><input id="et-date" type="date" class="input-elegant w-full px-4 py-2.5 text-sm"></div>
             <input type="hidden" id="et-id">
@@ -1240,7 +1240,7 @@ function mRange(){
     const d=new Date();
     return{s:new Date(d.getFullYear(),d.getMonth(),1).toISOString().slice(0,10),e:new Date(d.getFullYear(),d.getMonth()+1,0).toISOString().slice(0,10)};
 }
-function users(){return[S.u1,S.u2].filter(Boolean)}
+function users(){return [...new Set([S.u1||'Facu',S.u2||'Marie','Compartido'].filter(Boolean))]}
 function escapeHtml(s){return String(s||'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
 
 function toast(m,t='info'){
@@ -3675,11 +3675,19 @@ function renderModalCats(){
     }).join('');
 }
 
+function selectModalUser(index){
+    const options=users();
+    if(index<0||index>=options.length)return;
+    S.mUser=options[index];
+    renderModalUsers();
+}
 function renderModalUsers(){
     const us=users();
-    document.getElementById('m-users').innerHTML=us.map(u=>{
+    const el=document.getElementById('m-users');
+    if(!el)return;
+    el.innerHTML=us.map((u,i)=>{
         const sel=u===S.mUser;
-        return`<button onclick="S.mUser='${u}';renderModalUsers()" class="user-pill py-2.5 rounded-xl text-xs font-semibold ${sel?'selected text-txt':'text-muted'}">${escapeHtml(u)}</button>`;
+        return`<button type="button" data-user-index="${i}" onclick="selectModalUser(${i})" class="user-pill py-2.5 px-2 rounded-xl text-xs font-semibold ${sel?'selected text-txt':'text-muted'}" aria-pressed="${sel?'true':'false'}">${escapeHtml(u)}</button>`;
     }).join('');
 }
 
@@ -3695,8 +3703,9 @@ async function addTx(){
     const desc=document.getElementById('m-desc').value||catById(S.mCat).name;
     const date=document.getElementById('m-date').value||today();
     const acctId=document.getElementById('m-account').value;
+    const selectedUser=users().includes(S.mUser)?S.mUser:(S.u1||'Facu');
     const t={
-        user_name:S.mUser||S.u1,
+        user_name:selectedUser,
         type:S.mType,
         category:S.mCat,
         amount:amt,
@@ -4367,7 +4376,7 @@ function populateFilters(){
     const us=users();
     const fu=document.getElementById('f-user');
     const fv=fu.value;
-    fu.innerHTML='<option value="all">Ambos</option>'+us.map(u=>`<option value="${u}">${escapeHtml(u)}</option>`).join('');
+    fu.innerHTML='<option value="all">Todos</option>'+us.map(u=>`<option value="${u}">${escapeHtml(u)}</option>`).join('');
     fu.value=fv;
 
     const fc=document.getElementById('f-cat');
