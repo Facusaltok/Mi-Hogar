@@ -744,7 +744,8 @@
             </div>
             <div class="mb-3"><input id="gl-name" type="text" placeholder="Nombre (ej: Viaje)" class="input-elegant w-full px-4 py-2.5 text-sm"></div>
             <div class="mb-3"><input id="gl-target" type="text" inputmode="decimal" placeholder="Objetivo ($)" class="input-elegant w-full px-4 py-2.5 text-sm"></div>
-            <div class="mb-3"><input id="gl-current" type="text" inputmode="decimal" placeholder="Ahorrado hasta ahora" class="input-elegant w-full px-4 py-2.5 text-sm"></div>
+            <div class="mb-3"><label class="text-xs text-muted block mb-1.5">Aporte inicial (opcional)</label><input id="gl-current" type="text" inputmode="decimal" placeholder="Ej: 100.000" class="input-elegant w-full px-4 py-2.5 text-sm"><p class="text-xs text-muted mt-1">Si ingresás un monto, se descontará de la cuenta que elijas.</p></div>
+            <div class="mb-3"><label class="text-xs text-muted block mb-1.5">Cuenta de origen del aporte</label><select id="gl-account" class="input-elegant w-full px-3 py-2.5 text-sm"><option value="">Seleccioná efectivo o cuenta bancaria</option></select></div>
             <div class="mb-4"><label class="text-xs text-muted block mb-1.5">Fecha objetivo</label><input id="gl-deadline" type="date" class="input-elegant w-full px-4 py-2.5 text-sm"></div>
             <button onclick="addGoal()" class="btn-primary w-full py-3.5 text-sm">Crear meta</button>
         </div>
@@ -763,8 +764,16 @@
             </div>
             <div class="mb-3"><input id="eg-name" type="text" placeholder="Nombre" class="input-elegant w-full px-4 py-2.5 text-sm"></div>
             <div class="mb-3"><input id="eg-target" type="text" inputmode="decimal" placeholder="Objetivo ($)" class="input-elegant w-full px-4 py-2.5 text-sm"></div>
-            <div class="mb-3"><input id="eg-current" type="text" inputmode="decimal" placeholder="Ahorrado" class="input-elegant w-full px-4 py-2.5 text-sm"></div>
-            <div class="mb-4"><input id="eg-deadline" type="date" class="input-elegant w-full px-4 py-2.5 text-sm"></div>
+            <div class="mb-3"><label class="text-xs text-muted block mb-1.5">Ahorro acumulado (se actualiza con aportes y retiros)</label><input id="eg-current" type="text" readonly class="input-elegant w-full px-4 py-2.5 text-sm bg-bg"><p class="text-xs text-muted mt-1">No se edita manualmente para mantener el saldo respaldado por movimientos reales.</p></div>
+            <div class="mb-4"><label class="text-xs text-muted block mb-1.5">Fecha objetivo</label><input id="eg-deadline" type="date" class="input-elegant w-full px-4 py-2.5 text-sm"></div>
+            <div class="card-flat p-3 mb-4">
+                <h3 class="text-sm font-semibold mb-2">Mover dinero de esta meta</h3>
+                <input id="eg-move-amount" type="text" inputmode="decimal" placeholder="Importe del movimiento" class="input-elegant w-full px-3 py-2.5 text-sm mb-2">
+                <select id="eg-move-account" class="input-elegant w-full px-3 py-2.5 text-sm mb-2"><option value="">Cuenta o efectivo</option></select>
+                <div class="grid grid-cols-2 gap-2"><button onclick="moveGoalFromEditor('deposit')" class="btn-primary py-2.5 text-sm">Aportar ahorro</button><button onclick="moveGoalFromEditor('withdraw')" class="btn-ghost py-2.5 text-sm">Retirar ahorro</button></div>
+                <button onclick="backGoalExistingFromEditor()" class="btn-ghost w-full py-2.5 text-sm mt-2">Respaldar ahorro anterior</button>
+                <p class="text-xs text-muted mt-1">Usá esta opción para conciliar ahorros cargados antes de que existieran los aportes reales.</p>
+            </div>
             <input type="hidden" id="eg-id">
             <div class="grid grid-cols-2 gap-3">
                 <button onclick="doDeleteGoal()" class="btn-danger py-3 text-sm flex items-center justify-center gap-2"><i class="fa-solid fa-trash"></i>Eliminar</button>
@@ -2912,8 +2921,14 @@ async function updGoal(id,d){
     return S.goals[i];
 }
 async function delGoal(id){
-    S.goals=S.goals.filter(g=>g.id!==id);lSave('hf_goals',S.goals);
-    if(S.sb){try{await S.sb.from('goals').delete().eq('id',id);S.online=true;updSync();}catch(e){}}
+    const goal=S.goals.find(g=>String(g.id)===String(id));
+    if(Number(goal?.current||0)>0){toast('No se puede eliminar una meta con ahorro asignado','warn');return false}
+    if(!S.sb){toast('Conectá Supabase antes de eliminar metas compartidas','error');return false}
+    try{
+        const{data,error}=await S.sb.from('goals').delete().eq('id',id).select('id');
+        if(error||!Array.isArray(data)||!data.some(row=>String(row.id)===String(id))){toast('Supabase no confirmó la eliminación de la meta. Revisá permisos RLS.','error');return false}
+        S.goals=S.goals.filter(g=>String(g.id)!==String(id));lSave('hf_goals',S.goals);S.online=true;updSync();return true;
+    }catch(e){toast('Error de conexión: no se eliminó la meta','error');return false}
 }
 async function saveInst(ins){
     ins.id=ins.id||crypto.randomUUID();ins.created_at=ins.created_at||new Date().toISOString();
@@ -3226,13 +3241,27 @@ function renderAll(){
 /* ============================================================
    RENDER: INICIO
    ============================================================ */
+function getGoalBackedBalance(goalId){
+    const depPrefix=`META_APORTE::${goalId}::`,retPrefix=`META_RETIRO::${goalId}::`;
+    return S.tx.reduce((sum,t)=>{
+        if(t.type!=='transfer')return sum;
+        const d=String(t.description||'');
+        if(d.startsWith(depPrefix))return sum+(Number(t.amount)||0);
+        if(d.startsWith(retPrefix))return sum-(Number(t.amount)||0);
+        return sum;
+    },0);
+}
+
 function renderHome(){
     const r=mRange();
     const mTx=S.tx.filter(t=>t.date>=r.s&&t.date<=r.e);
     const inc=mTx.filter(t=>t.type==='income').reduce((s,t)=>s+Number(t.amount),0);
     const exp=mTx.filter(t=>t.type==='expense').reduce((s,t)=>s+Number(t.amount),0);
     const sav=inc-exp;
-    const pat=S.accts.reduce((s,a)=>s+Number(a.balance),0);
+    /* Los aportes a metas salen de las cuentas, pero siguen siendo patrimonio del hogar.
+       Solo sumamos a patrimonio el saldo respaldado para no duplicar metas antiguas virtuales. */
+    const backedGoals=S.goals.reduce((sum,g)=>sum+Math.max(0,getGoalBackedBalance(g.id)),0);
+    const pat=S.accts.reduce((sum,a)=>sum+Number(a.balance||0),0)+backedGoals;
 
     /* Patrimonio del mes anterior */
     const prevD=new Date();prevD.setMonth(prevD.getMonth()-1);
@@ -3556,6 +3585,8 @@ function renderGoals(){
    RENDER: TRANSACCIONES
    ============================================================ */
 function getFilteredTransactions(){
+    /* Las transferencias internas a metas se guardan como movimientos auditables,
+       pero no son ingresos ni gastos de consumo y no deben aparecer en el listado habitual. */
     const fType=document.getElementById('f-type')?.value||'all';
     const fUser=document.getElementById('f-user')?.value||'all';
     const fCat=document.getElementById('f-cat')?.value||'all';
@@ -3563,7 +3594,7 @@ function getFilteredTransactions(){
     const fMonth=document.getElementById('f-month')?.value||'current';
     const now=new Date();
     const monthKey=`${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}`;
-    let filtered=[...S.tx];
+    let filtered=S.tx.filter(t=>t.type!=='transfer');
     if(fMonth==='current')filtered=filtered.filter(t=>String(t.date||'').slice(0,7)===monthKey);
     else if(fMonth && fMonth!=='all')filtered=filtered.filter(t=>String(t.date||'').slice(0,7)===fMonth);
     if(fType!=='all')filtered=filtered.filter(t=>t.type===fType);
@@ -3909,28 +3940,54 @@ async function doDeleteAcct(){
 /* ============================================================
    MODALES: METAS
    ============================================================ */
-function openGoalModal(){showModal('modal-goal')}
+function populateGoalAccountSelects(){
+    const options='<option value="">Seleccioná efectivo o cuenta bancaria</option>'+S.accts.filter(a=>a.type!=='card').map(a=>`<option value="${escapeHtml(String(a.id))}">${escapeHtml(a.name)} · ${fmt(Number(a.balance)||0)}</option>`).join('');
+    const create=document.getElementById('gl-account');
+    const edit=document.getElementById('eg-move-account');
+    if(create)create.innerHTML=options;
+    if(edit)edit.innerHTML=options;
+}
+function openGoalModal(){populateGoalAccountSelects();showModal('modal-goal')}
 function closeGoalModal(){hideModal('modal-goal')}
 
 async function addGoal(){
+    if(!S.sb){toast('Conectá Supabase antes de crear metas para mantener los ahorros sincronizados','error');return}
     const name=document.getElementById('gl-name').value.trim();
     const target=parseAmtStr(document.getElementById('gl-target').value);
-    if(!name||!target){toast('Completá nombre y objetivo','warn');return}
-    const current=parseAmtStr(document.getElementById('gl-current').value)||0;
+    const initial=parseAmtStr(document.getElementById('gl-current').value)||0;
+    const accountId=document.getElementById('gl-account').value;
+    if(!name||!target||target<=0){toast('Completá el nombre y un objetivo válido','warn');return}
+    if(initial<0){toast('El aporte inicial no puede ser negativo','warn');return}
+    if(initial>0&&!accountId){toast('Elegí la cuenta o efectivo desde donde saldrá el aporte inicial','warn');return}
+    if(initial>0){
+        const acct=S.accts.find(a=>String(a.id)===String(accountId));
+        if(!acct){toast('No se encontró la cuenta seleccionada','error');return}
+        if(Number(acct.balance)<initial){toast('El saldo de esa cuenta no alcanza para el aporte inicial','error');return}
+    }
     const deadline=document.getElementById('gl-deadline').value||null;
-    await saveGoal({name,target,current,icon:'fa-bullseye',color:'#B07D2A',deadline});
+    const goal=await saveGoal({name,target,current:0,icon:'fa-bullseye',color:'#B07D2A',deadline});
+    try{
+        const{data:remoteGoal,error:verifyError}=await S.sb.from('goals').select('id').eq('id',goal.id).limit(1);
+        if(verifyError||!remoteGoal||!remoteGoal.length){S.goals=S.goals.filter(g=>String(g.id)!==String(goal.id));lSave('hf_goals',S.goals);toast('No se pudo confirmar la creación de la meta en Supabase. No se inició ningún aporte.','error');return}
+    }catch(e){S.goals=S.goals.filter(g=>String(g.id)!==String(goal.id));lSave('hf_goals',S.goals);toast('No se pudo verificar la meta en Supabase. Intentá nuevamente.','error');return}
+    if(initial>0){
+        const moved=await moveGoalFunds(goal.id,initial,'deposit',accountId,{silent:true});
+        if(!moved){toast('La meta se creó, pero el aporte inicial no se completó. Podés intentarlo desde Editar meta.','error');}
+    }
     await loadAll();renderAll();closeGoalModal();
     document.getElementById('gl-name').value='';document.getElementById('gl-target').value='';document.getElementById('gl-current').value='';document.getElementById('gl-deadline').value='';
-    toast('Meta creada','success');
+    toast(initial>0?'Meta creada y aporte registrado':'Meta creada','success');
 }
 
 function openEditGoal(id){
-    const g=S.goals.find(x=>x.id===id);if(!g)return;
+    const g=S.goals.find(x=>String(x.id)===String(id));if(!g)return;
     document.getElementById('eg-name').value=g.name;
     document.getElementById('eg-target').value=fmtEditable(g.target);
     document.getElementById('eg-current').value=fmtEditable(g.current);
     document.getElementById('eg-deadline').value=g.deadline||'';
+    document.getElementById('eg-move-amount').value='';
     document.getElementById('eg-id').value=g.id;
+    populateGoalAccountSelects();
     showModal('modal-edit-goal');
 }
 function closeEditGoal(){hideModal('modal-edit-goal')}
@@ -3939,18 +3996,88 @@ async function doEditGoal(){
     const id=document.getElementById('eg-id').value;
     const name=document.getElementById('eg-name').value.trim();
     const target=parseAmtStr(document.getElementById('eg-target').value);
-    if(!name||!target){toast('Completá nombre y objetivo','warn');return}
-    const current=parseAmtStr(document.getElementById('eg-current').value)||0;
+    if(!name||!target||target<=0){toast('Completá el nombre y un objetivo válido','warn');return}
     const deadline=document.getElementById('eg-deadline').value||null;
-    await updGoal(id,{name,target,current,deadline});
+    /* current nunca se acepta desde el formulario: solo cambia mediante movimientos respaldados. */
+    await updGoal(id,{name,target,deadline});
     await loadAll();renderAll();closeEditGoal();
     toast('Meta actualizada','success');
 }
 
+async function moveGoalFunds(goalId,amount,direction,accountId,opts={}){
+    amount=Number(amount);
+    const goal=S.goals.find(g=>String(g.id)===String(goalId));
+    const acct=S.accts.find(a=>String(a.id)===String(accountId));
+    if(!goal||!acct){if(!opts.silent)toast('Seleccioná una meta y una cuenta válida','warn');return false}
+    if(!Number.isFinite(amount)||amount<=0){if(!opts.silent)toast('Ingresá un importe válido','warn');return false}
+    const current=Number(goal.current)||0;
+    const balance=Number(acct.balance)||0;
+    if(direction==='deposit'){
+        if(balance<amount){if(!opts.silent)toast('El saldo de la cuenta no alcanza para este aporte','error');return false}
+        if(opts.backExisting){
+            if(amount>Math.max(0,current-backed)){if(!opts.silent)toast('El importe supera el ahorro anterior que falta respaldar','error');return false}
+        }else if(amount>Math.max(0,Number(goal.target)-current)&&!opts.silent&&!confirm('Este aporte supera el objetivo de la meta. ¿Querés continuar?'))return false;
+    }else if(current<amount){if(!opts.silent)toast('La meta no tiene saldo suficiente para retirar ese importe','error');return false}
+    if(!S.sb){if(!opts.silent)toast('Conectá Supabase antes de mover ahorros para mantenerlos sincronizados entre dispositivos','error');return false}
+    /* Los saldos previos a esta función podían ser virtuales. Solo se retira lo que
+       esté respaldado por aportes registrados en la tabla transactions. */
+    const backed=getGoalBackedBalance(goal.id);
+    if(direction==='withdraw'&&amount>Math.max(0,backed)){
+        if(!opts.silent)toast('Solo podés retirar ahorro respaldado por aportes reales. El saldo anterior a esta función todavía no está conciliado.','error');
+        return false;
+    }
+    const nextBalance=balance+(direction==='deposit'?-amount:amount);
+    const nextCurrent=opts.backExisting?current:current+(direction==='deposit'?amount:-amount);
+    const marker=direction==='deposit'?'META_APORTE':'META_RETIRO';
+    const tx={id:crypto.randomUUID(),created_at:new Date().toISOString(),user_name:goal.user_name||S.u1||'Compartido',type:'transfer',category:'otros',amount,
+        description:`${marker}::${goal.id}::${goal.name}`,date:today(),account_id:acct.id,cuota_info:''};
+    let savedTx=null,accountChanged=false;
+    try{
+        const{data:inserted,error:insertError}=await S.sb.from('transactions').insert(tx).select();
+        if(insertError||!inserted||!inserted[0])throw new Error('No se pudo registrar el movimiento: '+(insertError?.message||'Supabase no confirmó el registro'));
+        savedTx=inserted[0];
+        const{data:acctRows,error:acctError}=await S.sb.from('accounts').update({balance:nextBalance}).eq('id',acct.id).select('id,balance');
+        if(acctError||!acctRows||!acctRows.some(r=>String(r.id)===String(acct.id)))throw new Error('No se pudo actualizar el saldo de la cuenta: '+(acctError?.message||'sin confirmación'));
+        accountChanged=true;
+        const{data:goalRows,error:goalError}=await S.sb.from('goals').update({current:nextCurrent}).eq('id',goal.id).select('id,current');
+        if(goalError||!goalRows||!goalRows.some(r=>String(r.id)===String(goal.id)))throw new Error('No se pudo actualizar la meta: '+(goalError?.message||'sin confirmación'));
+        persistTxLocal(savedTx);
+        const ai=S.accts.findIndex(a=>String(a.id)===String(acct.id));if(ai>=0){S.accts[ai]={...S.accts[ai],balance:nextBalance};lSave('hf_accts',S.accts)}
+        const gi=S.goals.findIndex(g=>String(g.id)===String(goal.id));if(gi>=0){S.goals[gi]={...S.goals[gi],current:nextCurrent};lSave('hf_goals',S.goals)}
+        S.online=true;updSync();
+    }catch(e){
+        console.error('Movimiento de meta no completado:',e.message);
+        if(accountChanged){try{await S.sb.from('accounts').update({balance:balance}).eq('id',acct.id).select('id')}catch(_) {}}
+        if(savedTx){try{await S.sb.from('transactions').delete().eq('id',savedTx.id).select('id')}catch(_) {}}
+        S.online=false;updSync();
+        if(!opts.silent)toast('No se completó el movimiento. Se intentó revertir cualquier cambio parcial. '+e.message,'error');
+        return false;
+    }
+    if(!opts.silent){await loadAll();renderAll();document.getElementById('eg-current').value=fmtEditable(nextCurrent);document.getElementById('eg-move-amount').value='';populateGoalAccountSelects();toast(direction==='deposit'?'Aporte registrado y descontado de la cuenta':'Retiro registrado y devuelto a la cuenta','success');}
+    return true;
+}
+async function moveGoalFromEditor(direction){
+    const goalId=document.getElementById('eg-id').value;
+    const amount=parseAmtStr(document.getElementById('eg-move-amount').value);
+    const accountId=document.getElementById('eg-move-account').value;
+    const ok=await moveGoalFunds(goalId,amount,direction,accountId);
+    if(ok){const g=S.goals.find(x=>String(x.id)===String(goalId));if(g)document.getElementById('eg-current').value=fmtEditable(g.current);}
+}
+async function backGoalExistingFromEditor(){
+    const goalId=document.getElementById('eg-id').value;
+    const amount=parseAmtStr(document.getElementById('eg-move-amount').value);
+    const accountId=document.getElementById('eg-move-account').value;
+    const ok=await moveGoalFunds(goalId,amount,'deposit',accountId,{backExisting:true});
+    if(ok){const g=S.goals.find(x=>String(x.id)===String(goalId));if(g)document.getElementById('eg-current').value=fmtEditable(g.current);}
+}
+
 async function doDeleteGoal(){
     const id=document.getElementById('eg-id').value;
+    const g=S.goals.find(x=>String(x.id)===String(id));
+    if(Number(g?.current||0)>0){toast('Antes de eliminar la meta, retirale todo el ahorro y devolvelo a una cuenta','warn');return}
     if(!confirm('¿Eliminar esta meta?'))return;
-    await delGoal(id);await loadAll();renderAll();closeEditGoal();
+    const deleted=await delGoal(id);if(!deleted)return;
+    await loadAll();renderAll();closeEditGoal();
     toast('Meta eliminada','success');
 }
 
