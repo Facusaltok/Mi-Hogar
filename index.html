@@ -288,6 +288,79 @@
       }
     </style>
 
+
+    <!-- HogarFin Responsive Desktop + Mobile refinement -->
+    <style id="hogarfin-responsive-final">
+      *,*::before,*::after{min-width:0}
+      img,canvas,svg{max-width:100%}
+      body{width:100%;overflow-x:hidden}
+      #app{width:100%;min-width:0}
+      #content-area{width:100%;min-width:0}
+      .view{width:100%;min-width:0}
+      @media (min-width: 900px){
+        #content-area{padding-bottom:48px!important}
+        .view{max-width:1500px!important;width:100%!important;margin:0 auto!important;padding:28px clamp(24px,3vw,48px)!important}
+        #view-home{display:none;}
+        #view-home.active{display:grid!important;grid-template-columns:repeat(12,minmax(0,1fr));column-gap:22px;row-gap:22px;align-items:start}
+        #view-home>*{min-width:0;margin:0!important}
+        #view-home>.flex.items-center.justify-between{grid-column:1/-1;align-self:center}
+        #view-home>.hero-card{grid-column:span 7;min-height:190px;display:flex;align-items:center}
+        #view-home>.grid.grid-cols-3{grid-column:span 5;align-self:stretch;display:grid;grid-template-columns:1fr;gap:10px!important}
+        #view-home>.grid.grid-cols-3 .stat-card{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:14px 18px!important}
+        #view-home>.grid.grid-cols-3 .stat-card>div{margin:0!important}
+        #view-home>.grid.grid-cols-3 .stat-card p[id]{text-align:right;white-space:normal;overflow-wrap:anywhere}
+        #view-home>.mb-5{grid-column:span 6;min-width:0}
+        #view-home>.mb-5:nth-of-type(4),#view-home>.mb-5:nth-of-type(5){grid-column:span 6}
+        #view-home>.card.p-6.mb-5{grid-column:span 6}
+        #view-home>.mb-4{grid-column:1/-1}
+        #view-home #home-accounts{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));overflow:visible;gap:12px}
+        #view-home .account-card{min-width:0;width:100%}
+        #view-home #home-installments{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+        #view-home #home-budgets,#view-home #home-goals{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+        #view-home #home-recent{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+        #view-home .chart-wrap{max-width:100%}
+        #view-transactions .card{padding:22px!important}
+        #view-transactions #tx-list{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}
+        #view-transactions #tx-list>.card{height:100%;margin:0;min-width:0}
+        #view-transactions #tx-period-summary{grid-template-columns:repeat(3,minmax(0,1fr));gap:14px}
+        #view-analytics{display:none}
+        #view-analytics.active{display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr));gap:20px;align-items:start}
+        #view-analytics>h1{grid-column:1/-1;margin:0!important}
+        #view-analytics>.card{margin:0!important;min-width:0}
+        #view-analytics>.card:last-child{grid-column:1/-1}
+        #view-settings{display:none}
+        #view-settings.active{display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr));gap:18px;align-items:start}
+        #view-settings>h1{grid-column:1/-1;margin:0!important}
+        #view-settings>.card{margin:0!important;min-width:0}
+        .nav-bar{position:sticky!important;top:0!important;bottom:auto!important;z-index:45}
+        .nav-bar>div{max-width:1500px!important;width:100%;margin:0 auto;justify-content:flex-start!important;padding:12px clamp(24px,3vw,48px)!important;gap:12px!important}
+        .nav-bar .tab-item{min-width:unset!important;flex-direction:row!important;gap:9px!important;padding:11px 16px!important}
+        .nav-bar .tab-item span{font-size:13px!important}
+        .nav-bar .fab-center{order:5;margin:0 0 0 auto!important;width:44px!important;height:44px!important;border-width:2px!important}
+        .modal-sheet{width:min(760px,calc(100vw - 64px))!important;max-width:760px!important;left:50%!important;bottom:50%!important;transform:translate(-50%,50%)!important;border-radius:24px!important;max-height:88vh!important}
+      }
+      @media (min-width: 1400px){
+        #view-transactions #tx-list{grid-template-columns:repeat(3,minmax(0,1fr))}
+        #view-home #home-recent{grid-template-columns:repeat(3,minmax(0,1fr))}
+      }
+      @media (min-width: 900px) and (max-width: 1100px){
+        #view-home>.hero-card{grid-column:1/-1}
+        #view-home>.grid.grid-cols-3{grid-column:1/-1;grid-template-columns:repeat(3,minmax(0,1fr))}
+        #view-home>.mb-5,#view-home>.card.p-6.mb-5{grid-column:1/-1}
+        #view-home #home-budgets,#view-home #home-goals{grid-template-columns:repeat(2,minmax(0,1fr))}
+      }
+      @media (max-width: 899px){
+        #view-home.active{display:block!important}
+        .nav-bar{position:fixed!important;top:auto!important;bottom:0!important}
+        .view{max-width:760px!important;width:100%!important;margin-inline:auto!important}
+      }
+      @media (max-width: 480px){
+        #view-transactions #tx-list{display:block!important}
+        #view-analytics.active,#view-settings.active{display:block!important}
+        #view-home #home-budgets,#view-home #home-goals,#view-home #home-recent,#view-home #home-installments{display:block}
+      }
+    </style>
+
 </head>
 <body class="bg-bg min-h-screen">
 
