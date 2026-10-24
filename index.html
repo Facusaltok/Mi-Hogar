@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Mi Hogar · Finanzas del hogar</title>
+    <title>HogarFin Premium · Finanzas del hogar</title>
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="theme-color" content="#F7F8FA">
     <script src="https://cdn.tailwindcss.com"></script>
@@ -252,6 +252,18 @@
         }
         @media(min-width:1200px){#tx-list{grid-template-columns:repeat(2,minmax(0,1fr))}}
         @media(prefers-reduced-motion:reduce){*,*:before,*:after{scroll-behavior:auto!important;animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}}
+        /* HogarFin Premium v2: mejor jerarquía visual en escritorio y controles accesibles */
+        @media(min-width:1024px){
+          #view-home,#view-transactions,#view-analytics,#view-settings{max-width:1440px!important;width:calc(100% - 64px)!important;padding:34px 40px!important}
+          #view-home .mb-5{margin-bottom:1.65rem}
+          #view-home .card,#view-transactions .card,#view-analytics .card,#view-settings .card{box-shadow:0 5px 22px rgba(16,24,40,.035)}
+          #view-home .card:hover,#view-transactions .card:hover,#view-analytics .card:hover,#view-settings .card:hover{box-shadow:0 14px 34px rgba(16,24,40,.075)}
+          #tx-list{grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}
+        }
+        @media(min-width:1500px){#tx-list{grid-template-columns:repeat(3,minmax(0,1fr))}}
+        .btn-primary:focus-visible,.btn-accent:focus-visible,.btn-ghost:focus-visible,.btn-danger:focus-visible{outline:3px solid rgba(183,138,59,.35);outline-offset:3px}
+        .stat-card p[id],#home-income,#home-expense,#home-savings{font-variant-numeric:tabular-nums}
+        .card,.card-flat,.stat-card{overflow-wrap:anywhere}
 
     </style>
 </head>
@@ -463,10 +475,17 @@
             <button onclick="openSyncDiagnostic()" class="btn-accent text-xs py-2.5 px-4 flex items-center gap-1.5"><i class="fa-solid fa-stethoscope"></i>Diagnosticar</button>
         </div>
     </div>
+    <div class="card p-4 mb-3">
+        <div class="flex items-start gap-3">
+            <div class="w-10 h-10 rounded-xl flex items-center justify-center shrink-0" style="background:rgba(183,138,59,.12);color:#946b25"><i class="fa-solid fa-shield-halved"></i></div>
+            <div><h3 class="font-display font-semibold text-sm mb-1">Protección de tus datos</h3><p class="text-xs text-muted leading-relaxed">Hacé una copia de seguridad periódica y guardala en un lugar privado. La copia no incluye las credenciales de Supabase. No borres el almacenamiento del navegador si tenés movimientos pendientes de sincronizar.</p></div>
+        </div>
+    </div>
     <div class="card p-4">
         <h3 class="font-display font-semibold text-sm mb-3">Datos</h3>
         <div class="flex flex-wrap gap-2">
-            <button onclick="exportCSV()" class="btn-ghost text-sm py-2.5 px-4 flex items-center gap-2"><i class="fa-solid fa-download"></i>Exportar CSV</button>
+            <button onclick="exportCSV()" class="btn-ghost text-sm py-2.5 px-4 flex items-center gap-2"><i class="fa-solid fa-file-csv"></i>Exportar movimientos CSV</button>
+            <button onclick="exportFullBackup()" class="btn-accent text-sm py-2.5 px-4 flex items-center gap-2"><i class="fa-solid fa-shield-halved"></i>Crear copia de seguridad</button>
             <button onclick="clearAllData()" class="btn-danger text-sm py-2.5 px-4 flex items-center gap-2"><i class="fa-solid fa-trash"></i>Borrar todo</button>
         </div>
     </div>
@@ -4092,6 +4111,39 @@ function saveSBConfig(){
     }else{
         S.sb=null;S.online=false;updSync();
         toast('Supabase desconectado, usando datos locales','info');
+    }
+}
+
+/* Copia de seguridad completa: exporta datos del hogar sin incluir claves de Supabase.
+   No modifica ni elimina los datos existentes. */
+function exportFullBackup(){
+    try{
+        const backup={
+            app:'HogarFin',
+            backup_version:1,
+            created_at:new Date().toISOString(),
+            household:{u1:S.u1,u2:S.u2,currency:S.curr},
+            data:{
+                transactions:S.tx||[],
+                accounts:S.accts||[],
+                goals:S.goals||[],
+                installments:S.inst||[],
+                fixed_expenses:S.fixedExpenses||[],
+                budgets:S.budgets||{}
+            },
+            note:'Copia de seguridad de datos. No contiene la URL ni la clave de Supabase.'
+        };
+        const blob=new Blob([JSON.stringify(backup,null,2)],{type:'application/json;charset=utf-8'});
+        const url=URL.createObjectURL(blob);
+        const a=document.createElement('a');
+        a.href=url;
+        a.download=`hogarfin_backup_${today()}.json`;
+        document.body.appendChild(a);a.click();a.remove();
+        setTimeout(()=>URL.revokeObjectURL(url),1000);
+        toast('Copia de seguridad descargada','success');
+    }catch(e){
+        console.error('Error al crear copia de seguridad:',e);
+        toast('No se pudo crear la copia de seguridad','error');
     }
 }
 
