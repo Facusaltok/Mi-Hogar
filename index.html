@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>HogarFin Premium · Finanzas del hogar</title>
+    <title>HogarFin Premium V4 · Finanzas del hogar</title>
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="theme-color" content="#F7F8FA">
     <script src="https://cdn.tailwindcss.com"></script>
@@ -267,6 +267,7 @@
 
     </style>
 
+    <!-- HogarFin Premium V4: panel de salud financiera y sincronización reforzada -->
     <!-- HogarFin Premium V3: mejoras reales de distribución en escritorio -->
     <style id="hogarfin-v3-desktop-fix">
       html { font-size: 16px; }
@@ -366,6 +367,17 @@
             </div>
         </div>
     </div>
+
+    <!-- NUEVO: indicador de salud financiera mensual -->
+    <section class="card p-5 mb-4" id="hf-health-card" aria-live="polite">
+        <div class="flex items-start justify-between gap-3 mb-3">
+            <div><p class="text-xs text-muted mb-1">Salud financiera del mes</p><h3 id="hf-health-title" class="font-display font-bold text-base">Calculando tu balance…</h3></div>
+            <span id="hf-health-badge" class="badge" style="background:#f3f4f6;color:#374151">En análisis</span>
+        </div>
+        <div class="flex items-center justify-between text-xs text-muted mb-2"><span>Ingresos utilizados en gastos</span><strong id="hf-health-rate">—</strong></div>
+        <div class="progress-bar" style="height:9px"><div id="hf-health-progress" class="progress-fill" style="width:0%;background:#b78a3b"></div></div>
+        <p id="hf-health-tip" class="text-xs text-muted mt-3 leading-relaxed">Se actualizará automáticamente con los movimientos del período.</p>
+    </section>
 
     <!-- Resumen mes -->
     <div class="grid grid-cols-3 gap-2.5 mb-5">
@@ -3050,6 +3062,37 @@ function renderHome(){
     document.getElementById('home-savings').textContent=fmtShort(sav);
     document.getElementById('home-savings').className=`text-sm font-display font-bold ${sav>=0?'text-income':'text-expense'}`;
 
+    /* Salud financiera: calcula el porcentaje de ingresos consumido por gastos.
+       Si no hubo ingresos, evita mostrar un porcentaje engañoso. */
+    const healthTitle=document.getElementById('hf-health-title');
+    const healthBadge=document.getElementById('hf-health-badge');
+    const healthRate=document.getElementById('hf-health-rate');
+    const healthProgress=document.getElementById('hf-health-progress');
+    const healthTip=document.getElementById('hf-health-tip');
+    if(healthTitle&&healthBadge&&healthRate&&healthProgress&&healthTip){
+        const rate=inc>0?(exp/inc)*100:null;
+        const capped=rate===null?0:Math.min(100,Math.max(0,rate));
+        healthProgress.style.width=capped+'%';
+        if(rate===null){
+            healthTitle.textContent=exp>0?'Registrá tus ingresos':'Empezá a registrar tu mes';
+            healthBadge.textContent='Sin datos suficientes';healthBadge.style.background='#f3f4f6';healthBadge.style.color='#4b5563';
+            healthRate.textContent='—';healthProgress.style.background='#9ca3af';
+            healthTip.textContent=exp>0?'Ya registraste gastos, pero todavía no hay ingresos cargados para calcular qué proporción representan.':'Cuando cargues ingresos y gastos, vas a ver qué parte de tus ingresos estás utilizando.';
+        }else if(rate<=50){
+            healthTitle.textContent='Buen margen de ahorro';healthBadge.textContent='Muy bien';healthBadge.style.background='#dcfce7';healthBadge.style.color='#166534';
+            healthRate.textContent=rate.toLocaleString('es-AR',{maximumFractionDigits:1})+'%';healthProgress.style.background='#16a34a';
+            healthTip.textContent=`Tus gastos representan ${rate.toLocaleString('es-AR',{maximumFractionDigits:1})}% de los ingresos registrados. Mantené el hábito y destiná una parte del excedente a tus metas.`;
+        }else if(rate<=80){
+            healthTitle.textContent='Balance para seguir de cerca';healthBadge.textContent='Atención';healthBadge.style.background='#fef3c7';healthBadge.style.color='#92400e';
+            healthRate.textContent=rate.toLocaleString('es-AR',{maximumFractionDigits:1})+'%';healthProgress.style.background='#d97706';
+            healthTip.textContent='Una parte importante de tus ingresos ya está comprometida. Revisá los gastos variables y las cuotas próximas antes de asumir nuevos pagos.';
+        }else{
+            healthTitle.textContent=rate>=100?'Los gastos superan los ingresos':'Poco margen disponible';healthBadge.textContent=rate>=100?'Déficit':'Riesgo alto';healthBadge.style.background='#fee2e2';healthBadge.style.color='#991b1b';
+            healthRate.textContent=rate.toLocaleString('es-AR',{maximumFractionDigits:1})+'%';healthProgress.style.background='#dc2626';
+            healthTip.textContent=rate>=100?'En este período registraste más gastos que ingresos. Revisá movimientos, vencimientos y gastos no esenciales.':'Tus gastos consumen más del 80% de los ingresos. Priorizá vencimientos y evitá sumar compromisos sin revisar tu presupuesto.';
+        }
+    }
+
     /* Cambio patrimonio */
     const patChangeLabel=document.getElementById('home-patrimonio-change-label');
     if(prevPat>0){
@@ -4279,6 +4322,11 @@ function finishSetup(){
 function setupRealtime(){
     if(!S.sb)return;
     try{
+        /* Evitar canales duplicados cuando se reconecta o se vuelve a configurar. */
+        if(S._realtimeCh){
+            try{S.sb.removeChannel(S._realtimeCh)}catch(e){console.warn('[Realtime] no se pudo cerrar el canal anterior:',e.message)}
+            S._realtimeCh=null;
+        }
         /* Canal único por sesión para evitar conflictos entre pestañas */
         const chName='hf-ch-'+Math.random().toString(36).slice(2,8);
         const ch=S.sb.channel(chName);
@@ -4316,14 +4364,24 @@ function setupRealtime(){
            cambios que el realtime pudo haber perdido (buffer de red inestable) */
         if(S._heartbeat)clearInterval(S._heartbeat);
         S._heartbeat=setInterval(async()=>{
-            /* Solo hacer heartbeat si la página está visible */
-            if(!document.hidden)return;
+            /* Verificación de respaldo: solo sincronizar cuando hay conexión y la app está visible. */
+            if(document.hidden||!navigator.onLine||!S.sb)return;
+            try{await loadAll();populateFilters();renderAll();updSync()}
+            catch(e){console.warn('[Realtime] verificación periódica fallida:',e.message)}
         },60000);
-        /* También escuchar el evento 'online' del navegador para re-sincronizar */
-        window.addEventListener('online',async()=>{
-            console.log('[Network] conexión recuperada, re-sincronizando...');
-            await loadAll();populateFilters();renderAll();
-        });
+        /* Registrar los listeners una sola vez para no acumularlos en cada reconexión. */
+        if(!S._networkListenerBound){
+            S._networkListenerBound=true;
+            window.addEventListener('online',async()=>{
+                console.log('[Network] conexión recuperada, re-sincronizando...');
+                try{await loadAll();populateFilters();renderAll();setupRealtime()}catch(e){console.warn('[Network] resincronización fallida:',e.message)}
+            });
+            document.addEventListener('visibilitychange',async()=>{
+                if(!document.hidden&&navigator.onLine&&S.sb){
+                    try{await loadAll();populateFilters();renderAll();updSync()}catch(e){console.warn('[Visibility] resincronización fallida:',e.message)}
+                }
+            });
+        }
     }catch(e){
         console.warn('[Realtime] no se pudo configurar:',e.message);
     }
