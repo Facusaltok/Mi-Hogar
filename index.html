@@ -266,6 +266,27 @@
         .card,.card-flat,.stat-card{overflow-wrap:anywhere}
 
     </style>
+
+    <!-- HogarFin Premium V3: mejoras reales de distribución en escritorio -->
+    <style id="hogarfin-v3-desktop-fix">
+      html { font-size: 16px; }
+      @media (min-width: 1024px) {
+        #app { width: 100%; max-width: 100%; }
+        main, .main-content, #main-content { min-width: 0; width: 100%; }
+        .view { max-width: 1600px; margin-left: auto; margin-right: auto; }
+        .grid { min-width: 0; }
+        .card, .card-flat, .stat-card { min-width: 0; }
+        table { width: 100%; }
+      }
+      @media (min-width: 1440px) {
+        .view { max-width: 1720px; }
+      }
+      @media (max-width: 767px) {
+        html { font-size: 16px; }
+        .overflow-x-auto, .scroll-x { max-width: 100%; }
+      }
+    </style>
+
 </head>
 <body class="bg-bg min-h-screen">
 
