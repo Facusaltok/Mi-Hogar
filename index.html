@@ -653,11 +653,21 @@
                 <button onclick="setMType('expense')" id="mt-exp" class="flex-1 py-2.5 rounded-xl text-sm font-semibold bg-white text-expense shadow-sm"><i class="fa-solid fa-minus mr-1"></i>Gasto</button>
                 <button onclick="setMType('income')" id="mt-inc" class="flex-1 py-2.5 rounded-xl text-sm font-semibold text-muted"><i class="fa-solid fa-plus mr-1"></i>Ingreso</button>
             </div>
-            <div class="mb-4"><label class="text-xs text-muted block mb-1.5">Monto</label><input id="m-amt" type="text" inputmode="decimal" placeholder="0,00" oninput="formatAmountOnInput(event)" class="input-elegant w-full px-4 py-3.5 amount-input"></div>
+            <div class="mb-4"><label class="text-xs text-muted block mb-1.5">Monto</label><input id="m-amt" type="text" inputmode="decimal" placeholder="0,00" oninput="formatAmountOnInput(event);updateSplitTotal()" class="input-elegant w-full px-4 py-3.5 amount-input"></div>
             <div class="mb-4"><label class="text-xs text-muted block mb-2">Categoría</label><div id="m-cats" class="grid grid-cols-4 gap-2"></div></div>
             <div class="mb-4"><label class="text-xs text-muted block mb-2">Persona</label><div id="m-users" class="grid grid-cols-3 gap-2"></div></div>
             <div class="mb-4"><label class="text-xs text-muted block mb-1.5">Descripción</label><input id="m-desc" type="text" placeholder="Ej: Supermercado" class="input-elegant w-full px-4 py-2.5 text-sm"></div>
-            <div class="mb-4"><label class="text-xs text-muted block mb-1.5">Cuenta</label><select id="m-account" class="input-elegant w-full px-3 py-2.5 text-sm"></select></div>
+            <div class="mb-4" id="m-single-account-wrap"><label class="text-xs text-muted block mb-1.5">Cuenta</label><select id="m-account" class="input-elegant w-full px-3 py-2.5 text-sm"></select></div>
+            <div class="mb-4" id="m-split-toggle-wrap">
+                <label class="flex items-center gap-2 text-sm font-semibold cursor-pointer"><input id="m-split-enabled" type="checkbox" onchange="toggleSplitExpense()" class="w-4 h-4"> Dividir este gasto entre varias cuentas</label>
+                <p class="text-xs text-muted mt-1">Un solo gasto en el formulario, con débitos repartidos entre las cuentas que elijas.</p>
+            </div>
+            <div id="m-split-panel" class="hidden mb-4 rounded-xl border border-brdsoft p-3">
+                <div class="flex items-center justify-between gap-2 mb-2"><span class="text-sm font-semibold">Distribución del gasto</span><button type="button" onclick="addSplitRow()" class="btn-ghost px-3 py-1.5 text-xs">+ Agregar cuenta</button></div>
+                <div id="m-split-rows" class="space-y-2"></div>
+                <div class="flex justify-between items-center mt-3 pt-3 border-t border-brdsoft text-sm"><span class="text-muted">Distribuido</span><strong id="m-split-total">$0</strong></div>
+                <p id="m-split-hint" class="text-xs text-muted mt-1">La suma de las partes debe coincidir con el monto total.</p>
+            </div>
             <div class="mb-5"><label class="text-xs text-muted block mb-1.5">Fecha</label><input id="m-date" type="date" class="input-elegant w-full px-4 py-2.5 text-sm"></div>
             <button onclick="addTx()" class="btn-primary w-full py-3.5 text-sm">Guardar transacción</button>
         </div>
@@ -3741,6 +3751,8 @@ function openAddModal(){
     document.getElementById('m-amt').value='';
     document.getElementById('m-desc').value='';
     document.getElementById('m-date').value=today();
+    const splitCheck=document.getElementById('m-split-enabled');if(splitCheck)splitCheck.checked=false;
+    document.getElementById('m-split-panel')?.classList.add('hidden');document.getElementById('m-single-account-wrap')?.classList.remove('hidden');
     renderModalCats();renderModalUsers();renderModalAccounts();
     updateMTypeUI();
     showModal('modal-add');
@@ -3787,39 +3799,90 @@ function renderModalUsers(){
 
 function renderModalAccounts(){
     const el=document.getElementById('m-account');
-    el.innerHTML=`<option value="none">Sin cuenta</option>`+S.accts.map(a=>`<option value="${a.id}">${escapeHtml(a.name)}</option>`).join('');
+    el.innerHTML=`<option value="none">Sin cuenta</option>`+S.accts.map(a=>`<option value="${a.id}">${escapeHtml(a.name)} · ${fmt(Number(a.balance)||0)}</option>`).join('');
     el.value=S.mAcct;
+    renderSplitRows();
 }
-
+function splitAccountOptions(){
+    return `<option value="">Elegir cuenta...</option>`+S.accts.filter(a=>a.type!=='card').map(a=>`<option value="${escapeHtml(String(a.id))}">${escapeHtml(a.name)} · ${fmt(Number(a.balance)||0)}</option>`).join('');
+}
+function renderSplitRows(seed){
+    const host=document.getElementById('m-split-rows');if(!host)return;
+    const rows=seed||Array.from(host.querySelectorAll('[data-split-row]')).map(r=>({account:r.querySelector('select')?.value||'',amount:r.querySelector('input')?.value||''}));
+    const data=rows.length?rows:[{account:'',amount:''},{account:'',amount:''}];
+    host.innerHTML=data.map((r,i)=>`<div data-split-row class="grid grid-cols-[minmax(0,1fr)_100px_32px] gap-2 items-center"><select aria-label="Cuenta ${i+1}" class="input-elegant min-w-0 px-2 py-2 text-xs" onchange="updateSplitTotal()">${splitAccountOptions()}</select><input aria-label="Importe cuenta ${i+1}" type="text" inputmode="decimal" placeholder="Importe" value="${escapeHtml(String(r.amount||''))}" oninput="formatAmountOnInput(event);updateSplitTotal()" class="input-elegant min-w-0 px-2 py-2 text-xs"><button type="button" aria-label="Quitar cuenta" onclick="removeSplitRow(${i})" class="btn-ghost py-2 text-sm" ${data.length<=2?'disabled':''}>×</button></div>`).join('');
+    [...host.querySelectorAll('[data-split-row]')].forEach((el,i)=>{el.querySelector('select').value=String(data[i].account||'')});
+    updateSplitTotal();
+}
+function getSplitRows(){return [...document.querySelectorAll('#m-split-rows [data-split-row]')].map(r=>({account:r.querySelector('select').value,amount:parseAmtStr(r.querySelector('input').value)}));}
+function toggleSplitExpense(){
+    const enabled=document.getElementById('m-split-enabled').checked;
+    document.getElementById('m-split-panel').classList.toggle('hidden',!enabled);
+    document.getElementById('m-single-account-wrap').classList.toggle('hidden',enabled);
+    if(enabled){if(S.mType!=='expense'){document.getElementById('m-split-enabled').checked=false;document.getElementById('m-split-panel').classList.add('hidden');document.getElementById('m-single-account-wrap').classList.remove('hidden');toast('La división entre cuentas está disponible para gastos','warn');return}autofillSplitFromTotal();}
+}
+function autofillSplitFromTotal(){
+    const amount=parseAmtStr(document.getElementById('m-amt').value)||0;
+    const rows=getSplitRows();
+    if(rows.length>=2&&amount>0){const half=Math.floor(amount/2);rows[0].amount=String(half);rows[1].amount=String(amount-half);renderSplitRows(rows)}else updateSplitTotal();
+}
+function addSplitRow(){const rows=getSplitRows();rows.push({account:'',amount:''});renderSplitRows(rows)}
+function removeSplitRow(index){const rows=getSplitRows();if(rows.length<=2)return;rows.splice(index,1);renderSplitRows(rows)}
+function updateSplitTotal(){
+    const total=getSplitRows().reduce((n,r)=>n+(Number(r.amount)||0),0);
+    const expected=parseAmtStr(document.getElementById('m-amt').value)||0;
+    const out=document.getElementById('m-split-total');if(out)out.textContent=fmt(total);
+    const hint=document.getElementById('m-split-hint');if(hint){const ok=expected>0&&Math.abs(total-expected)<0.005;hint.textContent=ok?'La distribución coincide con el gasto total.':`Falta distribuir ${fmt(expected-total)} para llegar al total de ${fmt(expected)}.`;hint.className='text-xs mt-1 '+(ok?'text-green-600':'text-muted')}
+}
 async function addTx(){
     const amt=parseAmtStr(document.getElementById('m-amt').value);
     if(!amt||amt<=0){toast('Ingresá un monto válido','warn');return}
     const desc=document.getElementById('m-desc').value||catById(S.mCat).name;
     const date=document.getElementById('m-date').value||today();
-    const acctId=document.getElementById('m-account').value;
     const selectedUser=users().includes(S.mUser)?S.mUser:(S.u1||'Facu');
-    const t={
-        user_name:selectedUser,
-        type:S.mType,
-        category:S.mCat,
-        amount:amt,
-        description:desc,
-        date,
-        account_id:acctId==='none'?null:acctId,
-        cuota_info:''
-    };
-    await saveTx(t);
-
-    if(acctId&&acctId!=='none'){
-        const acct=S.accts.find(a=>a.id===acctId);
-        if(acct){
-            const newBal=Number(acct.balance)+(S.mType==='income'?amt:-amt);
-            await updAcct(acctId,{balance:newBal});
+    const splitEnabled=document.getElementById('m-split-enabled')?.checked&&S.mType==='expense';
+    if(splitEnabled){
+        const rows=getSplitRows();
+        if(rows.length<2){toast('Elegí al menos dos cuentas','warn');return}
+        if(rows.some(r=>!r.account||!Number.isFinite(r.amount)||r.amount<=0)){toast('Seleccioná cada cuenta e ingresá importes válidos','warn');return}
+        if(new Set(rows.map(r=>String(r.account))).size!==rows.length){toast('Elegí cuentas distintas para cada parte','warn');return}
+        const splitTotal=rows.reduce((n,r)=>n+r.amount,0);
+        if(Math.abs(splitTotal-amt)>0.005){toast(`Las partes suman ${fmt(splitTotal)} y el gasto total es ${fmt(amt)}. Ajustá los importes antes de guardar.`,'error');return}
+        const accounts=rows.map(r=>({row:r,acct:S.accts.find(a=>String(a.id)===String(r.account))}));
+        if(accounts.some(x=>!x.acct)){toast('Una de las cuentas seleccionadas ya no está disponible. Actualizá la pantalla.','error');return}
+        for(const {row,acct} of accounts){if(Number(acct.balance)<row.amount){toast(`Saldo insuficiente en ${acct.name}. Disponible: ${fmt(Number(acct.balance)||0)}.`,'error');return}}
+        if(!confirm(`Se registrará un gasto de ${fmt(amt)} repartido entre ${rows.length} cuentas. ¿Continuar?`))return;
+        const groupId=crypto.randomUUID();
+        const saved=[];const oldBalances=accounts.map(x=>({id:x.acct.id,balance:Number(x.acct.balance)||0}));
+        try{
+            for(let i=0;i<accounts.length;i++){
+                const {row,acct}=accounts[i];
+                const tx={user_name:selectedUser,type:'expense',category:S.mCat,amount:row.amount,description:desc,date,account_id:row.account,cuota_info:`Gasto dividido ${groupId} ${i+1}/${accounts.length}`};
+                const savedTx=await saveTx(tx);saved.push({tx:savedTx,acct,row});
+                if(S.sb&&savedTx?._pending_sync){throw new Error('Supabase no confirmó una de las partes del gasto. No se actualizarán más cuentas; revisá los movimientos antes de reintentar.')}
+                const newBal=(Number(acct.balance)||0)-row.amount;
+                if(S.sb){
+                    const {data,error}=await S.sb.from('accounts').update({balance:newBal}).eq('id',acct.id).select('id,balance');
+                    if(error||!data||!data.some(a=>String(a.id)===String(acct.id)))throw new Error(`No se pudo debitar ${acct.name}: ${error?.message||'sin confirmación de Supabase'}`);
+                }
+                acct.balance=newBal;persistAcctLocal(acct);
+            }
+            await loadAll();renderAll();closeAddModal();toast(`Gasto de ${fmt(amt)} registrado y debitado de ${accounts.length} cuentas`,'success');
+        }catch(e){
+            console.error('Gasto multicuenta incompleto:',e);
+            toast('El gasto multicuenta quedó incompleto: '+e.message+' Revisá los movimientos antes de volver a guardarlo para evitar duplicados.','error');
+            await loadAll();renderAll();
         }
+        return;
     }
-
-    await loadAll();renderAll();closeAddModal();
-    toast(`${S.mType==='income'?'Ingreso':'Gasto'} registrado`,'success');
+    const acctId=document.getElementById('m-account').value;
+    const t={user_name:selectedUser,type:S.mType,category:S.mCat,amount:amt,description:desc,date,account_id:acctId==='none'?null:acctId,cuota_info:''};
+    await saveTx(t);
+    if(acctId&&acctId!=='none'){
+        const acct=S.accts.find(a=>String(a.id)===String(acctId));
+        if(acct){const newBal=(Number(acct.balance)||0)+(S.mType==='income'?amt:-amt);await updAcct(acctId,{balance:newBal});}
+    }
+    await loadAll();renderAll();closeAddModal();toast(`${S.mType==='income'?'Ingreso':'Gasto'} registrado`,'success');
 }
 
 /* ============================================================
