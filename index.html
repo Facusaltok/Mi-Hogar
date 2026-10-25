@@ -4010,50 +4010,62 @@ async function moveGoalFunds(goalId,amount,direction,accountId,opts={}){
     const acct=S.accts.find(a=>String(a.id)===String(accountId));
     if(!goal||!acct){if(!opts.silent)toast('Seleccioná una meta y una cuenta válida','warn');return false}
     if(!Number.isFinite(amount)||amount<=0){if(!opts.silent)toast('Ingresá un importe válido','warn');return false}
+    if(!S.sb){if(!opts.silent)toast('Conectá Supabase antes de mover ahorros para mantenerlos sincronizados entre dispositivos','error');return false}
+
     const current=Number(goal.current)||0;
     const balance=Number(acct.balance)||0;
-    if(direction==='deposit'){
+    const backed=Math.max(0,getGoalBackedBalance(goal.id));
+    const isReconcile=!!opts.backExisting;
+
+    if(isReconcile){
+        /* Conciliar un ahorro previo NO mueve dinero otra vez. Solo registra la
+           evidencia contable del importe que ya está descontado de la cuenta.
+           Así evitamos debitarlo dos veces al respaldar un saldo antiguo. */
+        if(direction!=='deposit'){if(!opts.silent)toast('La conciliación solo se utiliza para respaldar ahorros existentes','warn');return false}
+        const unbacked=Math.max(0,current-backed);
+        if(amount>unbacked){if(!opts.silent)toast('El importe supera el ahorro anterior que falta respaldar','error');return false}
+    }else if(direction==='deposit'){
         if(balance<amount){if(!opts.silent)toast('El saldo de la cuenta no alcanza para este aporte','error');return false}
-        if(opts.backExisting){
-            if(amount>Math.max(0,current-backed)){if(!opts.silent)toast('El importe supera el ahorro anterior que falta respaldar','error');return false}
-        }else if(amount>Math.max(0,Number(goal.target)-current)&&!opts.silent&&!confirm('Este aporte supera el objetivo de la meta. ¿Querés continuar?'))return false;
-    }else if(current<amount){if(!opts.silent)toast('La meta no tiene saldo suficiente para retirar ese importe','error');return false}
-    if(!S.sb){if(!opts.silent)toast('Conectá Supabase antes de mover ahorros para mantenerlos sincronizados entre dispositivos','error');return false}
-    /* Los saldos previos a esta función podían ser virtuales. Solo se retira lo que
-       esté respaldado por aportes registrados en la tabla transactions. */
-    const backed=getGoalBackedBalance(goal.id);
-    if(direction==='withdraw'&&amount>Math.max(0,backed)){
-        if(!opts.silent)toast('Solo podés retirar ahorro respaldado por aportes reales. El saldo anterior a esta función todavía no está conciliado.','error');
-        return false;
+        if(amount>Math.max(0,Number(goal.target)-current)&&!opts.silent&&!confirm('Este aporte supera el objetivo de la meta. ¿Querés continuar?'))return false;
+    }else{
+        if(current<amount){if(!opts.silent)toast('La meta no tiene saldo suficiente para retirar ese importe','error');return false}
+        if(amount>backed){if(!opts.silent)toast('Solo podés retirar ahorro respaldado por aportes reales. Usá “Respaldar ahorro anterior” para conciliar el saldo ya existente, sin volver a descontarlo de la cuenta.','error');return false}
     }
-    const nextBalance=balance+(direction==='deposit'?-amount:amount);
-    const nextCurrent=opts.backExisting?current:current+(direction==='deposit'?amount:-amount);
-    const marker=direction==='deposit'?'META_APORTE':'META_RETIRO';
+
+    const nextBalance=isReconcile?balance:balance+(direction==='deposit'?-amount:amount);
+    const nextCurrent=isReconcile?current:current+(direction==='deposit'?amount:-amount);
+    const marker=(direction==='deposit')?'META_APORTE':'META_RETIRO';
     const tx={id:crypto.randomUUID(),created_at:new Date().toISOString(),user_name:goal.user_name||S.u1||'Compartido',type:'transfer',category:'otros',amount,
-        description:`${marker}::${goal.id}::${goal.name}`,date:today(),account_id:acct.id,cuota_info:''};
-    let savedTx=null,accountChanged=false;
+        description:`${marker}::${goal.id}::${goal.name}${isReconcile?'::CONCILIACION':''}`,date:today(),account_id:acct.id,cuota_info:''};
+    let savedTx=null,accountChanged=false,goalChanged=false;
     try{
         const{data:inserted,error:insertError}=await S.sb.from('transactions').insert(tx).select();
         if(insertError||!inserted||!inserted[0])throw new Error('No se pudo registrar el movimiento: '+(insertError?.message||'Supabase no confirmó el registro'));
         savedTx=inserted[0];
-        const{data:acctRows,error:acctError}=await S.sb.from('accounts').update({balance:nextBalance}).eq('id',acct.id).select('id,balance');
-        if(acctError||!acctRows||!acctRows.some(r=>String(r.id)===String(acct.id)))throw new Error('No se pudo actualizar el saldo de la cuenta: '+(acctError?.message||'sin confirmación'));
-        accountChanged=true;
-        const{data:goalRows,error:goalError}=await S.sb.from('goals').update({current:nextCurrent}).eq('id',goal.id).select('id,current');
-        if(goalError||!goalRows||!goalRows.some(r=>String(r.id)===String(goal.id)))throw new Error('No se pudo actualizar la meta: '+(goalError?.message||'sin confirmación'));
+        if(!isReconcile){
+            const{data:acctRows,error:acctError}=await S.sb.from('accounts').update({balance:nextBalance}).eq('id',acct.id).select('id,balance');
+            if(acctError||!acctRows||!acctRows.some(r=>String(r.id)===String(acct.id)))throw new Error('No se pudo actualizar el saldo de la cuenta: '+(acctError?.message||'sin confirmación'));
+            accountChanged=true;
+            const{data:goalRows,error:goalError}=await S.sb.from('goals').update({current:nextCurrent}).eq('id',goal.id).select('id,current');
+            if(goalError||!goalRows||!goalRows.some(r=>String(r.id)===String(goal.id)))throw new Error('No se pudo actualizar la meta: '+(goalError?.message||'sin confirmación'));
+            goalChanged=true;
+        }
         persistTxLocal(savedTx);
-        const ai=S.accts.findIndex(a=>String(a.id)===String(acct.id));if(ai>=0){S.accts[ai]={...S.accts[ai],balance:nextBalance};lSave('hf_accts',S.accts)}
-        const gi=S.goals.findIndex(g=>String(g.id)===String(goal.id));if(gi>=0){S.goals[gi]={...S.goals[gi],current:nextCurrent};lSave('hf_goals',S.goals)}
+        if(!isReconcile){
+            const ai=S.accts.findIndex(a=>String(a.id)===String(acct.id));if(ai>=0){S.accts[ai]={...S.accts[ai],balance:nextBalance};lSave('hf_accts',S.accts)}
+            const gi=S.goals.findIndex(g=>String(g.id)===String(goal.id));if(gi>=0){S.goals[gi]={...S.goals[gi],current:nextCurrent};lSave('hf_goals',S.goals)}
+        }
         S.online=true;updSync();
     }catch(e){
         console.error('Movimiento de meta no completado:',e.message);
+        if(goalChanged){try{await S.sb.from('goals').update({current:current}).eq('id',goal.id).select('id')}catch(_) {}}
         if(accountChanged){try{await S.sb.from('accounts').update({balance:balance}).eq('id',acct.id).select('id')}catch(_) {}}
         if(savedTx){try{await S.sb.from('transactions').delete().eq('id',savedTx.id).select('id')}catch(_) {}}
         S.online=false;updSync();
         if(!opts.silent)toast('No se completó el movimiento. Se intentó revertir cualquier cambio parcial. '+e.message,'error');
         return false;
     }
-    if(!opts.silent){await loadAll();renderAll();document.getElementById('eg-current').value=fmtEditable(nextCurrent);document.getElementById('eg-move-amount').value='';populateGoalAccountSelects();toast(direction==='deposit'?'Aporte registrado y descontado de la cuenta':'Retiro registrado y devuelto a la cuenta','success');}
+    if(!opts.silent){await loadAll();renderAll();document.getElementById('eg-current').value=fmtEditable(nextCurrent);document.getElementById('eg-move-amount').value='';populateGoalAccountSelects();toast(isReconcile?'Ahorro anterior conciliado sin volver a debitar la cuenta':direction==='deposit'?'Aporte registrado y descontado de la cuenta':'Retiro registrado y devuelto a la cuenta','success');}
     return true;
 }
 async function moveGoalFromEditor(direction){
