@@ -2405,7 +2405,7 @@ function openStatementDetail(txId){
                 <div class="w-8 h-8 rounded-lg flex items-center justify-center shrink-0" style="background:${c.color}12;color:${c.color}"><i class="fa-solid ${c.icon} text-xs"></i></div>
                 <div class="flex-1 min-w-0">
                     <p class="text-xs font-semibold truncate">${escapeHtml(item.merchant||'Gasto')}</p>
-                    <p class="text-xs text-muted truncate">${fmtD(item.date)} · ${c.name}${item.cuota_info?' · '+escapeHtml(item.cuota_info):''}</p>
+                    <p class="text-xs text-muted truncate">${fmtD(item.date)} · ${c.name}${visibleCuotaInfo(item.cuota_info)?' · '+escapeHtml(visibleCuotaInfo(item.cuota_info)):''}</p>
                 </div>
                 <span class="text-xs font-bold text-expense shrink-0 whitespace-nowrap">${itemAmtStr}</span>
             </div>`;
@@ -3462,7 +3462,7 @@ function txRow(t){
         ${iconHtml}
         <div class="flex-1 min-w-0 overflow-hidden">
             <div class="flex items-center gap-1 min-w-0">
-                <p class="text-xs font-semibold leading-snug truncate flex-1 min-w-0">${escapeHtml(t.description||c.name)}${t.cuota_info?' · '+escapeHtml(t.cuota_info):''}</p>
+                <p class="text-xs font-semibold leading-snug truncate flex-1 min-w-0">${escapeHtml(t.description||c.name)}${visibleCuotaInfo(t.cuota_info)?' · '+escapeHtml(visibleCuotaInfo(t.cuota_info)):''}</p>
                 ${statementBadge}
             </div>
             <p class="text-xs text-muted truncate mt-0.5">${fmtD(t.date)} · ${escapeHtml(t.user_name)}${isStatement?` · ${t.statement_count||0} cons.`:''}</p>
@@ -3621,6 +3621,13 @@ function ensureMonthFilterOptions(){
     el.innerHTML='<option value="current">Mes actual</option><option value="all">Todos los meses</option>'+months.map(m=>`<option value="${m}">${fmtMonth(m)}</option>`).join('');
     el.value=[...el.options].some(o=>o.value===previous)?previous:'current';
 }
+function visibleCuotaInfo(value){
+    const text=String(value||'');
+    // Internal grouping key for a mult-account expense: keep it stored, never show its UUID to the user.
+    if(/^Gasto dividido\s+[0-9a-f]{8}-[0-9a-f-]{20,}/i.test(text))return '';
+    return text;
+}
+
 function renderTransactions(){
     ensureMonthFilterOptions();
     const filtered=getFilteredTransactions();
