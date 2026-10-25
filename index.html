@@ -3462,7 +3462,7 @@ function txRow(t){
         ${iconHtml}
         <div class="flex-1 min-w-0 overflow-hidden">
             <div class="flex items-center gap-1 min-w-0">
-                <p class="text-xs font-semibold leading-snug truncate flex-1 min-w-0">${escapeHtml(t.description||c.name)}${visibleCuotaInfo(t.cuota_info)?' · '+escapeHtml(visibleCuotaInfo(t.cuota_info)):''}</p>
+                <p class="text-xs font-semibold leading-snug truncate flex-1 min-w-0">${escapeHtml(visibleTransactionDescription(t.description,c.name))}${visibleCuotaInfo(t.cuota_info)?' · '+escapeHtml(visibleCuotaInfo(t.cuota_info)):''}</p>
                 ${statementBadge}
             </div>
             <p class="text-xs text-muted truncate mt-0.5">${fmtD(t.date)} · ${escapeHtml(t.user_name)}${isStatement?` · ${t.statement_count||0} cons.`:''}</p>
@@ -3626,6 +3626,16 @@ function visibleCuotaInfo(value){
     // Internal grouping key for a mult-account expense: keep it stored, never show its UUID to the user.
     if(/^Gasto dividido\s+[0-9a-f]{8}-[0-9a-f-]{20,}/i.test(text))return '';
     return text;
+}
+function visibleTransactionDescription(value, fallback=''){
+    const text=String(value||'').trim();
+    // Goal movements keep an internal key in the database for accounting; show a readable label only.
+    const goalMatch=text.match(/^(META_APORTE|META_RETIRO)::[^:]+::([^:]+)(?:::CONCILIACION)?$/i);
+    if(goalMatch){
+        const goalName=goalMatch[2].trim();
+        return `${goalMatch[1].toUpperCase()==='META_APORTE'?'Aporte a meta':'Retiro de meta'}: ${goalName}`;
+    }
+    return text||fallback;
 }
 
 function renderTransactions(){
